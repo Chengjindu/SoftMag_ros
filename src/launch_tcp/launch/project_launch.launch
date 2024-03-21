@@ -1,0 +1,17 @@
+<launch>
+  <!-- Include start_diagnostics.launch -->
+  <include file="$(find data_processing)/launch/start_diagnostics.launch"/>
+  
+  <!-- Start data acquisition node -->
+  <node name="data_acquisition_node" pkg="data_acquisition" type="data_acquisition_node.py" output="screen" />
+
+  <!-- Start data processing node -->
+  <node name="data_processing_node" pkg="data_processing" type="data_processing_node.py" output="screen" />
+
+  <!-- Start rqt -->
+  <node name="rqt_gui" pkg="rqt_gui" type="rqt_gui" output="screen" />
+
+  <!-- Start rqt_graph -->
+  <node name="rqt_graph" pkg="rqt_graph" type="rqt_graph" output="screen" />
+</launch>
+
