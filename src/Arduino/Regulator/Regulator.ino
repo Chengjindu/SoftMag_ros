@@ -11,7 +11,7 @@ ros::NodeHandle nh;
 int monitorPin = A0; 
 
 float desiredPressure = 0.0; 
-float maxPressure = 50.0;
+float maxPressure = 45.0;
 bool motorTrigger = false;
 bool forceClosureTrigger = false; // Flag to check if force closure has been achieved
 
