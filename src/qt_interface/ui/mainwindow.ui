@@ -6,31 +6,25 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1558</width>
-    <height>844</height>
+    <width>1338</width>
+    <height>754</height>
    </rect>
-  </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-    <horstretch>20</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QGroupBox" name="automatic_grasping_control_panel">
+   <widget class="QGroupBox" name="control_panel">
     <property name="geometry">
      <rect>
-      <x>370</x>
+      <x>10</x>
       <y>390</y>
       <width>351</width>
-      <height>141</height>
+      <height>301</height>
      </rect>
     </property>
     <property name="title">
-     <string>Automatic Grasping Control Panel</string>
+     <string>Control Panel</string>
     </property>
     <widget class="QWidget" name="verticalLayoutWidget_2">
      <property name="geometry">
@@ -38,10 +32,10 @@
        <x>10</x>
        <y>30</y>
        <width>331</width>
-       <height>101</height>
+       <height>181</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="3,1,3">
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="4,4,1">
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <property name="spacing">
@@ -70,19 +64,40 @@
        </layout>
       </item>
       <item>
-       <widget class="QFrame" name="hline1_6">
-        <property name="frameShape">
-         <enum>QFrame::HLine</enum>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <property name="spacing">
+         <number>9</number>
         </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-       </widget>
+        <item>
+         <widget class="QSlider" name="motor_pos_bar_1">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="motor_position_label">
+          <property name="text">
+           <string>Motor Position</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="motor_pos_bar_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="invertedAppearance">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QPushButton" name="stop_all_button_grasping">
+         <widget class="QPushButton" name="stop_all_button">
           <property name="text">
            <string>STOP ALL</string>
           </property>
@@ -92,18 +107,127 @@
       </item>
      </layout>
     </widget>
+    <widget class="QWidget" name="verticalLayoutWidget_6">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>210</y>
+       <width>331</width>
+       <height>95</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_7">
+      <item>
+       <widget class="QFrame" name="hline3">
+        <property name="frameShape">
+         <enum>QFrame::HLine</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="stable_flag_indicator">
+          <property name="text">
+           <string>Dataprocess stable</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="contact_detect_indicator">
+          <property name="text">
+           <string>Contact detect</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="grasp_stable_flag_indicator">
+          <property name="text">
+           <string>Grasp stable</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="motor_stop_indicator">
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Motor stop</string>
+          </property>
+          <property name="scaledContents">
+           <bool>false</bool>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="margin">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
    </widget>
-   <widget class="QGroupBox" name="other_signal_monitoring_panel">
+   <widget class="QGroupBox" name="sensor_data_panel">
     <property name="geometry">
      <rect>
-      <x>730</x>
+      <x>360</x>
       <y>390</y>
-      <width>821</width>
-      <height>391</height>
+      <width>971</width>
+      <height>301</height>
      </rect>
     </property>
     <property name="title">
-     <string>Other Signal Monitoring Panel</string>
+     <string>Sensor signals</string>
     </property>
     <property name="flat">
      <bool>false</bool>
@@ -111,18 +235,24 @@
     <property name="checkable">
      <bool>false</bool>
     </property>
-    <widget class="QWidget" name="verticalLayoutWidget_5">
+    <widget class="QWidget" name="verticalLayoutWidget">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>30</y>
-       <width>401</width>
-       <height>351</height>
+       <x>9</x>
+       <y>29</y>
+       <width>471</width>
+       <height>271</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0">
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="10">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
       <item>
-       <widget class="QFrame" name="force_val_graph">
+       <widget class="QFrame" name="S1_graph">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -133,18 +263,18 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="verticalLayoutWidget_4">
+    <widget class="QWidget" name="verticalLayoutWidget_3">
      <property name="geometry">
       <rect>
-       <x>410</x>
+       <x>489</x>
        <y>30</y>
-       <width>401</width>
-       <height>351</height>
+       <width>481</width>
+       <height>271</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0">
+     <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0">
       <item>
-       <widget class="QFrame" name="pressure_graph">
+       <widget class="QFrame" name="S2_graph">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -156,33 +286,43 @@
      </layout>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="status_monitoring_panel_1">
+   <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>611</width>
+      <width>601</width>
       <height>371</height>
      </rect>
     </property>
     <property name="title">
-     <string>Status Monitoring Panel 1</string>
+     <string>Gripper status</string>
     </property>
     <widget class="QWidget" name="horizontalLayoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>30</y>
-       <width>591</width>
+       <width>581</width>
        <height>331</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1,4">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,3,1,0,0,3">
+       <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,1,3,0,1,3">
         <property name="spacing">
          <number>6</number>
         </property>
+        <item>
+         <widget class="QFrame" name="hline1">
+          <property name="frameShape">
+           <enum>QFrame::HLine</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+         </widget>
+        </item>
         <item>
          <widget class="QLabel" name="S1_tactile_info_label">
           <property name="text">
@@ -197,93 +337,40 @@
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_11" stretch="0,6,1">
-          <item>
-           <widget class="QWidget" name="widget_11" native="true"/>
-          </item>
-          <item>
-           <widget class="QLCDNumber" name="force_val_1">
-            <property name="font">
-             <font>
-              <family>Ubuntu</family>
-              <italic>false</italic>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="autoFillBackground">
-             <bool>false</bool>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QLCDNumber {
-    background-color: black;
-    color: green;
-    font-weight: bold;
-}
-</string>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::Box</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <property name="lineWidth">
-             <number>1</number>
-            </property>
-            <property name="midLineWidth">
-             <number>0</number>
-            </property>
-            <property name="smallDecimalPoint">
-             <bool>true</bool>
-            </property>
-            <property name="segmentStyle">
-             <enum>QLCDNumber::Filled</enum>
-            </property>
-            <property name="value" stdset="0">
-             <double>0.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="force_unit_1">
-            <property name="text">
-             <string>N</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QLCDNumber" name="force_val_1">
+          <property name="font">
+           <font>
+            <family>Ubuntu</family>
+            <italic>false</italic>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="smallDecimalPoint">
+           <bool>true</bool>
+          </property>
+          <property name="value" stdset="0">
+           <double>0.000000000000000</double>
+          </property>
+         </widget>
         </item>
         <item>
-         <widget class="QWidget" name="quadrant_1" native="true">
+         <widget class="QWidget" name="quadrant_3" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <widget class="QWidget" name="quadrant_1_1" native="true">
+          <widget class="QWidget" name="quadrant_1" native="true">
            <property name="geometry">
             <rect>
              <x>-20</x>
-             <y>-30</y>
+             <y>-25</y>
              <width>151</width>
              <height>151</height>
             </rect>
            </property>
           </widget>
-         </widget>
-        </item>
-        <item>
-         <widget class="QFrame" name="hline1">
-          <property name="frameShape">
-           <enum>QFrame::HLine</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
          </widget>
         </item>
         <item>
@@ -297,59 +384,24 @@
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_13" stretch="0,6,1">
-          <item>
-           <widget class="QWidget" name="widget_10" native="true"/>
-          </item>
-          <item>
-           <widget class="QLCDNumber" name="force_val_2">
-            <property name="font">
-             <font>
-              <family>Ubuntu</family>
-              <italic>false</italic>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QLCDNumber {
-    background-color: black;
-    color: green;
-    font-weight: bold;
-}
-</string>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::Box</enum>
-            </property>
-            <property name="smallDecimalPoint">
-             <bool>true</bool>
-            </property>
-            <property name="value" stdset="0">
-             <double>0.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="force_unit_2">
-            <property name="text">
-             <string>N</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QLCDNumber" name="force_val_2">
+          <property name="font">
+           <font>
+            <bold>true</bold>
+            <strikeout>false</strikeout>
+           </font>
+          </property>
+         </widget>
         </item>
         <item>
-         <widget class="QWidget" name="quadrant_2" native="true">
+         <widget class="QWidget" name="quadrant_4" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <widget class="QWidget" name="quadrant_2_2" native="true">
+          <widget class="QWidget" name="quadrant_2" native="true">
            <property name="geometry">
             <rect>
              <x>-20</x>
@@ -379,36 +431,30 @@
      </layout>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="sensing_signal_monitoring_panel">
+   <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
      <rect>
-      <x>630</x>
-      <y>10</y>
-      <width>921</width>
+      <x>619</x>
+      <y>9</y>
+      <width>711</width>
       <height>371</height>
      </rect>
     </property>
     <property name="title">
-     <string>Sensing Signal Monitoring Panel</string>
+     <string>Monitoring Panel</string>
     </property>
-    <widget class="QWidget" name="verticalLayoutWidget">
+    <widget class="QWidget" name="verticalLayoutWidget_5">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>30</y>
-       <width>451</width>
-       <height>331</height>
+       <width>339</width>
+       <height>329</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="0">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
+     <layout class="QVBoxLayout" name="verticalLayout_6" stretch="10">
       <item>
-       <widget class="QFrame" name="S1_graph">
+       <widget class="QFrame" name="force_val_graph">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -419,18 +465,18 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="verticalLayoutWidget_3">
+    <widget class="QWidget" name="verticalLayoutWidget_4">
      <property name="geometry">
       <rect>
-       <x>460</x>
+       <x>360</x>
        <y>30</y>
-       <width>451</width>
-       <height>331</height>
+       <width>349</width>
+       <height>329</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0">
+     <layout class="QVBoxLayout" name="verticalLayout_5" stretch="10">
       <item>
-       <widget class="QFrame" name="S2_graph">
+       <widget class="QFrame" name="pressure_graph">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -442,510 +488,18 @@
      </layout>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="status_monitoring_panel_2">
-    <property name="geometry">
-     <rect>
-      <x>370</x>
-      <y>540</y>
-      <width>351</width>
-      <height>241</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Status Monitoring Panel 2</string>
-    </property>
-    <widget class="QWidget" name="verticalLayoutWidget_6">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>30</y>
-       <width>331</width>
-       <height>201</height>
-      </rect>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_7" stretch="1,2,1,1,1,1">
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_9" stretch="1,1,5,1">
-        <item>
-         <widget class="QFrame" name="hline1_10">
-          <property name="frameShape">
-           <enum>QFrame::HLine</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_12">
-          <item>
-           <widget class="QWidget" name="widget_3" native="true"/>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_16" stretch="2,1,2">
-          <property name="spacing">
-           <number>9</number>
-          </property>
-          <item>
-           <widget class="QSlider" name="motor_pos_reading_bar_1">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="motor_pos_reading_label">
-            <property name="text">
-             <string>Motor Position</string>
-            </property>
-            <property name="scaledContents">
-             <bool>true</bool>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSlider" name="motor_pos_reading_bar_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="invertedAppearance">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_13">
-          <item>
-           <widget class="QWidget" name="widget_4" native="true"/>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QFrame" name="hline1_5">
-        <property name="frameShape">
-         <enum>QFrame::HLine</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_17" stretch="0,0">
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_17" stretch="0,0">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="stable_flag_indicator">
-            <property name="text">
-             <string>Dataprocess Stable</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="contact_detect_indicator">
-            <property name="text">
-             <string>Contact Detect</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_18">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="grasp_stable_flag_indicator">
-            <property name="text">
-             <string>Grasp Stable</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="motor_stop_indicator">
-            <property name="autoFillBackground">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Motor Stop</string>
-            </property>
-            <property name="scaledContents">
-             <bool>false</bool>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-            <property name="margin">
-             <number>0</number>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QFrame" name="hline1_4">
-        <property name="frameShape">
-         <enum>QFrame::HLine</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="record_data_button">
-        <property name="text">
-         <string>Record Data</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QFrame" name="hline1_7">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>1</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::HLine</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </widget>
-   <widget class="QGroupBox" name="testing_control_panel">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>470</y>
-      <width>351</width>
-      <height>311</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Testing Panel</string>
-    </property>
-    <widget class="QWidget" name="verticalLayoutWidget_9">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>30</y>
-       <width>331</width>
-       <height>271</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <layout class="QVBoxLayout" name="testing_control_panel_layout" stretch="3,1,1,1,1,1,2,1,2">
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_18" stretch="1,1,4,1">
-        <item>
-         <widget class="QFrame" name="hline1_9">
-          <property name="frameShape">
-           <enum>QFrame::HLine</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_10">
-          <item>
-           <widget class="QWidget" name="widget" native="true"/>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_15" stretch="1,1,1">
-          <property name="spacing">
-           <number>9</number>
-          </property>
-          <item>
-           <widget class="QSlider" name="motor_pos_ctrl_bar_1">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>1</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="motor_pos_ctrl_label">
-            <property name="text">
-             <string>Motor Control</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSlider" name="motor_pos_ctrl_bar_2">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>1</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="invertedAppearance">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_11">
-          <item>
-           <widget class="QWidget" name="widget_2" native="true"/>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QFrame" name="hline1_15">
-        <property name="frameShape">
-         <enum>QFrame::HLine</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="3,1,2">
-        <item>
-         <widget class="QLabel" name="pressure_control_label">
-          <property name="text">
-           <string>Pressure Control</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QWidget" name="widget_5" native="true"/>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="force_feedback_ctrl_enable">
-          <property name="text">
-           <string>Force Control</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QScrollBar" name="Pressure_ScrollBar">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>1</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="maximum">
-         <number>35</number>
-        </property>
-        <property name="singleStep">
-         <number>1</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_10" stretch="3,1,3,0">
-        <item>
-         <widget class="QLabel" name="current_pressure_label">
-          <property name="text">
-           <string>Input Pressure</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QWidget" name="widget_9" native="true"/>
-        </item>
-        <item>
-         <widget class="QLCDNumber" name="ctrl_pressure_val"/>
-        </item>
-        <item>
-         <widget class="QLabel" name="pressure_unit">
-          <property name="text">
-           <string>kPa</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QFrame" name="hline1_3">
-        <property name="frameShape">
-         <enum>QFrame::HLine</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_5">
-        <item>
-         <widget class="QCheckBox" name="contact_detect_enable">
-          <property name="text">
-           <string>Contact Detect</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="sofa_simulation_enable">
-          <property name="text">
-           <string>SOFA Simulation</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QFrame" name="hline1_8">
-        <property name="frameShape">
-         <enum>QFrame::HLine</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
-        <item>
-         <widget class="QPushButton" name="stop_all_button_testing">
-          <property name="text">
-           <string>STOP ALL</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
-   </widget>
-   <widget class="QGroupBox" name="operating_mode_selection_panel">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>390</y>
-      <width>351</width>
-      <height>71</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Operating Mode Selection</string>
-    </property>
-    <widget class="QWidget" name="horizontalLayoutWidget_3">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>30</y>
-       <width>331</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_12" stretch="0">
-      <item>
-       <widget class="QComboBox" name="model_selection_comboBox"/>
-      </item>
-     </layout>
-    </widget>
-   </widget>
-   <zorder>sensing_signal_monitoring_panel</zorder>
-   <zorder>status_monitoring_panel_1</zorder>
-   <zorder>other_signal_monitoring_panel</zorder>
-   <zorder>automatic_grasping_control_panel</zorder>
-   <zorder>status_monitoring_panel_2</zorder>
-   <zorder>testing_control_panel</zorder>
-   <zorder>operating_mode_selection_panel</zorder>
+   <zorder>groupBox_2</zorder>
+   <zorder>groupBox</zorder>
+   <zorder>sensor_data_panel</zorder>
+   <zorder>control_panel</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1558</width>
-     <height>23</height>
+     <width>1338</width>
+     <height>22</height>
     </rect>
    </property>
   </widget>

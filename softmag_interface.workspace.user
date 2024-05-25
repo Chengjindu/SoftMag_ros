@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 12.0.2, 2024-05-25T16:46:42. -->
+<!-- Written by QtCreator 12.0.2, 2024-03-21T00:07:52. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -136,7 +136,9 @@
     <value type="bool" key="ProjectExplorer.BuildConfiguration.ParseStandardOutput">false</value>
     <valuelist type="QVariantList" key="ProjectExplorer.BuildConfiguration.UserEnvironmentChanges">
      <value type="QString">PS1</value>
-     <value type="QString">SHLVL=12</value>
+     <value type="QString">PWD=/home/chengjin/Projects/SoftMag/ros_workspace</value>
+     <value type="QString">ROS_PACKAGE_PATH=/home/chengjin/Projects/SoftMag/ros_workspace/src/data_acquisition:/home/chengjin/Projects/SoftMag/ros_workspace/src/data_processing:/home/chengjin/Projects/SoftMag/ros_workspace/src/launch_project:/home/chengjin/Projects/SoftMag/ros_workspace/src/launch_tcp:/home/chengjin/Projects/SoftMag/ros_workspace/src/qt_interface:/home/chengjin/Projects/SoftMag/ros_workspace/src/qtsofatest:/home/chengjin/Projects/SoftMag/ros_workspace/src/signal_monitoring:/home/chengjin/Projects/SoftMag/ros_workspace/src/sofa_simulation:/opt/ros/noetic/share</value>
+     <value type="QString">SHLVL=2</value>
      <value type="QString">TERM=xterm</value>
      <value type="QString">_=/usr/bin/env</value>
     </valuelist>
