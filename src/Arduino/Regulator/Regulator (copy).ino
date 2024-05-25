@@ -1,0 +1,217 @@
+#include <Wire.h>
+#include <Adafruit_MCP4725.h>
+#include <ros.h>
+#include <std_msgs/Float32.h>
+#include <std_msgs/String.h>
+#include <ArduinoJson.h>
+
+Adafruit_MCP4725 dac; // DAC for pressure control
+ros::NodeHandle nh;
+int monitorPin = A0;
+
+float desiredPressure = 0.0;
+float maxPressure = 35.0;
+bool motorTrigger = false;
+bool forceClosureTrigger = false; // Flag to check if force closure has been achieved
+bool automaticMode = true; // Flag to indicate the mode of operation
+
+std_msgs::String graspStableMsg;
+std_msgs::String releaseFinishMsg;
+std_msgs::Float32 pressure_msg;
+ros::Publisher graspStablePub("grasp_stable", &graspStableMsg);
+ros::Publisher releaseFinishPub("release_finish", &releaseFinishMsg);
+ros::Publisher pressurereadingPub("pressure_reading", &pressure_msg);
+
+void motorStopCallback(const std_msgs::String& msg) {
+  StaticJsonDocument<200> doc;
+  deserializeJson(doc, msg.data);
+  bool motor_stop = doc["motor_stop"];
+  if (automaticMode) {
+    motorTrigger = motor_stop;
+  }
+}
+
+void forceClosureCallback(const std_msgs::String& msg) {
+  if (!automaticMode) return; // Ignore in testing mode
+
+  StaticJsonDocument<200> doc;
+  deserializeJson(doc, msg.data);
+  
+  bool force_closure = doc["force_closure"];
+  
+  if (force_closure && !forceClosureTrigger) {
+    String message = "Force closure detected, adjusting pressure for stability...";
+    nh.loginfo(message.c_str());
+    
+    if (desiredPressure + 1.0 <= maxPressure) {
+      desiredPressure += 0.5;
+      message = "Pressure adjusted for stability: " + String(desiredPressure, 2) + " kPa";
+      forceClosureTrigger = true; // Indicate that force closure has been achieved
+    } else {
+      message = "Max pressure, no adjustment.";
+      forceClosureTrigger = true;
+    }
+    motorTrigger = false;
+    nh.loginfo(message.c_str());
+    
+    StaticJsonDocument<200> stableDoc;
+    stableDoc["grasp_stable_flag"] = true;
+    char jsonBuffer[256];
+    serializeJson(stableDoc, jsonBuffer);
+    graspStableMsg.data = jsonBuffer;
+    graspStablePub.publish(&graspStableMsg);
+    nh.loginfo("Published: grasp is stable.");
+  }
+}
+
+void releaseCallback(const std_msgs::String& msg) {
+
+  StaticJsonDocument<200> doc;
+  deserializeJson(doc, msg.data);
+  bool release_flag = doc["release_flag"];
+  if (release_flag) {
+    desiredPressure = 0.0;
+    nh.loginfo("Release command received, releasing...");
+  }
+
+  StaticJsonDocument<200> stableDoc;
+  stableDoc["release_finish_flag"] = true;
+  char jsonBuffer[256];
+  serializeJson(stableDoc, jsonBuffer);
+  releaseFinishMsg.data = jsonBuffer;
+  releaseFinishPub.publish(&releaseFinishMsg);
+  nh.loginfo("Published: release finished.");
+
+  stableDoc["grasp_stable_flag"] = false;
+  serializeJson(stableDoc, jsonBuffer);
+  graspStableMsg.data = jsonBuffer;
+  graspStablePub.publish(&graspStableMsg);
+}
+
+void restartCallback(const std_msgs::String& msg) {
+  StaticJsonDocument<200> doc;
+  deserializeJson(doc, msg.data);
+  bool restart_flag = doc["restart_flag"];
+  if (restart_flag) {
+    motorTrigger = false;
+    forceClosureTrigger = false;
+    nh.loginfo("Restart command received, restarting...");
+  }
+}
+
+void stopallCallback(const std_msgs::String& msg) {
+  StaticJsonDocument<200> doc;
+  deserializeJson(doc, msg.data);
+  bool stop_all_flag = doc["stop_all_flag"];
+  if (stop_all_flag) {
+    desiredPressure = 0.0;
+    motorTrigger = false;
+    forceClosureTrigger = false;
+    nh.loginfo("Stopping...");
+
+    StaticJsonDocument<200> stableDoc;
+    char jsonBuffer[256];
+    stableDoc["grasp_stable_flag"] = false;
+    serializeJson(stableDoc, jsonBuffer);
+    graspStableMsg.data = jsonBuffer;
+    graspStablePub.publish(&graspStableMsg);
+  }
+}
+
+void pressureCtrlCallback(const std_msgs::Float32& msg) {
+  desiredPressure = msg.data;
+  String message = "Pressure control command received, setting pressure to: " + String(desiredPressure, 2) + " kPa";
+  nh.loginfo(message.c_str());
+}
+
+
+void ctrlmodeCallback(const std_msgs::String& msg) {
+  StaticJsonDocument<200> doc;
+  deserializeJson(doc, msg.data);
+  String ctrl_mode = doc["ctrl_mode"];
+  if (ctrl_mode == "automatic") {
+    automaticMode = true;
+    nh.loginfo("Switched to automatic mode.");
+  } else if (ctrl_mode == "testing") {
+    automaticMode = false;
+    nh.loginfo("Switched to testing mode.");
+  }
+}
+
+ros::Subscriber<std_msgs::String> motorStopSub("motor_stop", &motorStopCallback);
+ros::Subscriber<std_msgs::String> forceClosureSub("force_closure", &forceClosureCallback);
+ros::Subscriber<std_msgs::String> releaseSub("release", &releaseCallback);
+ros::Subscriber<std_msgs::String> restartSub("restart", &restartCallback);
+ros::Subscriber<std_msgs::String> stopallSub("stop_all", &stopallCallback);
+ros::Subscriber<std_msgs::Float32> pressureCtrlSub("pressure_ctrl", &pressureCtrlCallback);
+ros::Subscriber<std_msgs::String> ctrlmodeSub("ctrl_mode", &ctrlmodeCallback);
+
+void setup() {
+  Serial.begin(57600);
+  dac.begin(0x60);
+  nh.initNode();
+  nh.subscribe(motorStopSub);
+  nh.subscribe(forceClosureSub);
+  nh.subscribe(releaseSub);
+  nh.subscribe(restartSub);
+  nh.subscribe(stopallSub);
+  nh.subscribe(ctrlmodeSub);
+  nh.subscribe(pressureCtrlSub);
+  nh.advertise(pressurereadingPub);
+  nh.advertise(graspStablePub);
+  nh.advertise(releaseFinishPub);
+}
+
+void loop() {
+
+  uint16_t dacValue = (uint16_t)((desiredPressure / 50.0) * 4095);
+  dac.setVoltage(dacValue, false);
+
+  // String message = "motorTrigger is: " + String(motorTrigger) + ", forceClosureTrigger: " + String(forceClosureTrigger);
+  // nh.loginfo(message.c_str());
+
+  // Continuously increase pressure after motor stop and before force closure
+  if (automaticMode && motorTrigger && desiredPressure < maxPressure) {
+    desiredPressure += 1.0; // To secure the grasping pressure
+    if (desiredPressure >= maxPressure) {
+      desiredPressure = maxPressure; // Ensure pressure does not exceed the defined maximum pressure
+      motorTrigger = false;
+      forceClosureTrigger = true;
+      
+      StaticJsonDocument<200> stableDoc;
+      stableDoc["grasp_stable_flag"] = true;
+      char jsonBuffer[256];
+      serializeJson(stableDoc, jsonBuffer);
+      graspStableMsg.data = jsonBuffer;
+      graspStablePub.publish(&graspStableMsg);
+      nh.loginfo("Published: grasp is stable.");
+
+    }
+    // Code to adjust pressure via DAC here
+    uint16_t dacValue = (uint16_t)((desiredPressure / 50.0) * 4095); // 50:10 is for converting 0-100kPa to 0-10V, 5 is the full range DAC output
+    dac.setVoltage(dacValue, false);
+    
+    String message = "Pressure increased to: " + String(desiredPressure, 2) + " kPa";
+    nh.loginfo(message.c_str());
+    
+    // Small delay to throttle the rate of pressure increase, adjust as necessary
+    delay(100);
+  }
+
+   // Monitor example: Read voltage and map it to pressure
+  float sensorValue = analogRead(monitorPin); // Read the analog in value
+  float voltage = sensorValue * (5.0 / 1023.0); // Convert it to voltage (0-5V)
+  float pressure = ((voltage - 1) / 4.0) * 100.0; // Convert 1-5V to 0-100kPa, adjust formula as needed
+
+  String message = "Current Pressure: " + String(pressure, 2) + " kPa";
+  nh.loginfo(message.c_str());
+
+  // Publish pressure value
+  pressure_msg.data = pressure;
+  pressurereadingPub.publish(&pressure_msg);
+
+  // nh.loginfo(pressureLog);
+
+  nh.spinOnce();
+  delay(100);
+}
