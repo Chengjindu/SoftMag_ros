@@ -13,6 +13,8 @@ from controller import WholeGripperController
 # from splib3.loaders import loadPointListFromFile
 import sofaros
 
+import signal
+import sys
 
 
 # Get the directory of your script
@@ -190,10 +192,18 @@ def createScene(rootNode):
 
     return rootNode
 
+def signal_handler(sig, frame):
+    rospy.loginfo("SIGINT received. Shutting down gracefully...")
+    Sofa.Gui.GUIManager.closeGUI()
+    rospy.signal_shutdown("SIGINT received")
+    sys.exit(0)
 
 def main():
     # Initialize the ROS node
     # rospy.init_node('sofa_simulation_node', anonymous=True)
+
+    # Signal handling for graceful shutdown
+    signal.signal(signal.SIGINT, signal_handler)
 
     # Make sure to load all necessary libraries
     SofaRuntime.importPlugin("Sofa.Component.StateContainer")
@@ -223,4 +233,5 @@ def main():
     rospy.loginfo("SOFA simulation ended")
 
 if __name__ == '__main__':
+    signal.signal(signal.SIGINT, signal_handler)
     main()
