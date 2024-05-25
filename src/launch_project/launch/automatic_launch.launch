@@ -20,10 +20,10 @@
   
   <!-- Start qt interface node on the local machine -->
   <node name="main_window" pkg="qt_interface" type="main_window.py" output="screen" />
-  <node name="node_manager" pkg="qt_interface" type="node_manager.py" output="screen" />
   
   <!-- Start sofa simulation node on the local machine -->
-  <node name="sofa_simulation_node" pkg="sofa_simulation" type="sofa_simulation_node.py" output="screen" />
-
+  <node name="sofa_simulation_node" pkg="sofa_simulation" type="sofa_simulation_node.py" output="screen">
+    <env name="PYTHONPATH" value="$(optenv PYTHONPATH)${PYTHONPATH}:/home/chengjin/Projects/SoftMag/ros_workspace/src/sofa_simulation/src" />
+  </node>
 
 </launch>
