@@ -59,8 +59,6 @@ def sensor_data_callback(msg):
     with sensor_data_lock:  # Store the measurements in the global dictionary using sensor_id as the key
         sensor_data[sensor_id] = measurements
 
-    # rospy.loginfo(f"Data received from sensor {sensor_id}: {measurements}")
-
 # Function to apply filter to the data
 def filtering(data, filter_config):
     filtered_x, filtered_y, filtered_z = 0, 0, 0
@@ -78,14 +76,6 @@ def filtering(data, filter_config):
     except Exception as e:
         rospy.logwarn("Error filtering data: %s", e)
     return filtered_x[0], filtered_y[0], filtered_z[0]
-
-# # Load the saved scaler for normalization
-# current_script_dir = os.path.dirname(os.path.realpath(__file__))    # Get the directory where the current script is located
-# normalization_params_path = os.path.join(current_script_dir, 'normalization_params.pkl')    # Construct the path to the 'normalization_params.pkl' file
-# with open(normalization_params_path, 'rb') as file:
-#     norm_params = pickle.load(file)
-
-# rospy.loginfo(f"Normalization Parameters: {norm_params}") # Log information about the normalization process
 
 # Process data for a single sensor
 def process_sensor_data(sensor_id):
@@ -118,18 +108,17 @@ def process_sensor_data(sensor_id):
                         rospy.loginfo(f"data stable for {sensor_id}.")
                         initial_values = (filtered_x, filtered_y, filtered_z)   # Set initial values for deviation elimination
                         data_stablized[sensor_id] = True
- 
 
-                if data_stablized[sensor_id]: # If data is stabilized, apply deviation elimination
+                if data_stablized[sensor_id]:  # If data is stabilized, apply deviation elimination
                     filtered_x = filtered_x - initial_values[0]
                     filtered_y = filtered_y - initial_values[1]
                     filtered_z = filtered_z - initial_values[2]
-                    
-                    all_stabilized = all(data_stablized.values()) # Check if all values in the dictionary are True
+
+                    all_stabilized = all(data_stablized.values())  # Check if all values in the dictionary are True
                     if all_stabilized and not all_stabilized_flag:
-                    	rospy.loginfo("All sensor data stabilized.")
-                    	all_stabilized_flag = True
-			
+                        rospy.loginfo("All sensor data stabilized.")
+                        all_stabilized_flag = True
+
                     # Prepare and publish the processed data
                     publish_data = {
                         'sensor_id': sensor_id,
@@ -137,19 +126,18 @@ def process_sensor_data(sensor_id):
                         'stable_flag': all_stabilized  # Include the data_stablized flag
                     }
                     publisher.publish(json.dumps(publish_data))
-                    rospy.loginfo(f"Processed data for {sensor_id}: {filtered_x}, {filtered_y}, {filtered_z}, stable_flag: {all_stabilized}")
 
                 # Publish diagnostic message indicating success
-                publish_diagnostics(sensor_id, True, "Data processing successful")
+                publish_diagnostics(sensor_id, True, "Data processing successful", filtered_data=(filtered_x, filtered_y, filtered_z))
                 rospy.sleep(delay)
 
             except Exception as e:
                 rospy.logerr(f"Error filtering data for sensor {sensor_id}: {e}")
                 # Publish diagnostic message indicating failure
                 publish_diagnostics(sensor_id, False, f"Error filtering data for sensor {sensor_id}: {e}")
-                
 
-def publish_diagnostics(sensor_id, status, message):
+
+def publish_diagnostics(sensor_id, status, message, filtered_data=None):
     diag_msg = DiagnosticArray()
     diag_msg.header.stamp = Time.now()  # Set the current time
     status_msg = DiagnosticStatus()
@@ -157,10 +145,17 @@ def publish_diagnostics(sensor_id, status, message):
     status_msg.level = DiagnosticStatus.OK if status else DiagnosticStatus.ERROR
     status_msg.message = message
     status_msg.hardware_id = sensor_id
+
     status_msg.values = [
         KeyValue("Sensor ID", sensor_id),
         KeyValue("Processing Status", "Success" if status else "Failure")
     ]
+    # If filtered data is provided, add it to the diagnostics message
+    if filtered_data:
+        status_msg.values.append(KeyValue("Filtered X", str(filtered_data[0])))
+        status_msg.values.append(KeyValue("Filtered Y", str(filtered_data[1])))
+        status_msg.values.append(KeyValue("Filtered Z", str(filtered_data[2])))
+
     diag_msg.status.append(status_msg)
     diag_pub.publish(diag_msg)
 

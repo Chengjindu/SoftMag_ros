@@ -3,31 +3,32 @@
 # Function to kill the process started by SSH on the Raspberry Pi
 kill_pi_process() {
   echo "Stopping the ROS system on the Raspberry Pi..."
-  # Send Ctrl+C to the tmux session on the Raspberry Pi, mimicking a graceful shutdown signal
-  ssh chengjindu@10.255.32.38 'tmux send-keys -t ros_session C-c'
-  sleep 2  # Give some time for processes to handle the signal
-  # Kill the tmux session itself, cleaning up all associated processes
-  ssh chengjindu@10.255.32.38 'tmux kill-session -t ros_session'
+  ssh chengjindu@$(jq -r '.pi_ip' start_config.json) 'screen -S ros_session -X quit'
 }
 
 # Function to kill local processes started by this script
 kill_local_process() {
   echo "Stopping the local ROS system..."
-  # Assuming start_local.sh starts processes that can be terminated by terminating start_local.sh itself
-  # If start_local.sh uses tmux or screen, similar commands to kill those sessions can be added here
   pkill -f start_local.sh
 }
 
 # Trap Ctrl+C (SIGINT) and call functions to kill processes
 trap 'kill_local_process; kill_pi_process; exit' SIGINT
 
-# Starting the ROS system on the Raspberry Pi within a tmux session
-echo "Starting the ROS system on the Raspberry Pi..."
-ssh chengjindu@10.255.32.38 'tmux new-session -d -s ros_session "bash /home/chengjindu/SoftMag/Console/ros_workspace/start_console_pi.sh"' &
-sleep 2  # Give some time for tmux to start the session
+# Check if screen is installed on the Raspberry Pi
+echo "Checking if screen is installed on the Raspberry Pi..."
+ssh chengjindu@$(jq -r '.pi_ip' start_config.json) 'command -v screen'
 
-# Verify tmux session on Raspberry Pi
-ssh chengjindu@10.255.32.38 'tmux list-sessions'
+# Starting the ROS system on the Raspberry Pi within a screen session
+echo "Starting the ROS system on the Raspberry Pi..."
+ssh chengjindu@$(jq -r '.pi_ip' start_config.json) 'screen -dmS ros_session bash -c "bash /home/chengjindu/SoftMag/Console/ros_workspace/start_console_pi.sh &> /home/chengjindu/ros_session.log; exec bash"'
+if [ $? -ne 0 ]; then
+  echo "Failed to start screen session on the Raspberry Pi"
+  exit 1
+fi
+
+# Verify screen session on Raspberry Pi
+ssh chengjindu@$(jq -r '.pi_ip' start_config.json) 'screen -list'
 
 # Starting the local ROS system
 echo "Starting the local ROS system..."

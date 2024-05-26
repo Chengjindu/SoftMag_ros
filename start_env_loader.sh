@@ -1,10 +1,14 @@
 #!/bin/bash
 echo "Setting ROS Master URI and ROS_IP..."
-export ROS_MASTER_URI=http://10.255.32.70:11311
-export ROS_IP=10.255.32.70
+ROS_MASTER_URI=$(jq -r '.ros_master_uri' start_config.json)
+export ROS_MASTER_URI
 echo "ROS_MASTER_URI: $ROS_MASTER_URI"
+
+ROS_IP=$(jq -r '.local_ip' start_config.json)
+export ROS_IP
 echo "ROS_IP: $ROS_IP"
-source ~/.bashrc
+
+#source ~/.bashrc
 
 echo "Activating virtual environment..."
 source ~/Projects/SoftMag/softmagenv/bin/activate

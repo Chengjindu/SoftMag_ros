@@ -5,12 +5,29 @@ from std_srvs.srv import Trigger, TriggerResponse
 import subprocess
 import signal
 import sys
+import os
+
+def get_config_param(param):
+    # Adjust the path to locate start_config.json three levels up from the current file
+    config_file = os.path.join(os.path.dirname(__file__), '../../../start_config.json')
+    result = subprocess.run(['jq', '-r', f'.{param}', config_file], capture_output=True, text=True)
+    if result.returncode == 0:
+        return result.stdout.strip()
+    else:
+        raise Exception(f"Failed to get config param '{param}': {result.stderr}")
+
 
 class NodeManager:
     def __init__(self):
         rospy.init_node('node_manager')
         self.current_mode = None
         self.current_process = None
+
+        # Read configuration parameters
+        self.pi_user = get_config_param('pi_user')
+        self.pi_address = get_config_param('pi_ip')
+        self.start_env_loader_pi_path = "/home/chengjindu/SoftMag/Console/ros_workspace/start_env_loader_pi.sh"
+
         self.init_services()
         rospy.loginfo("NodeManager initialized and services started.")  # Debug log
 
@@ -60,6 +77,7 @@ class NodeManager:
 
     def switch_motor_mode(self, mode):
         # Define the current nodes to be killed before switching modes
+        global command
         nodes_to_kill = ['automatic_motor_control_node', 'testing_motor_control_node']
 
         # Kill the existing nodes locally
@@ -77,14 +95,10 @@ class NodeManager:
             self.current_process.wait()
             self.current_process = None
 
-        pi_user = "chengjindu"
-        pi_address = "10.255.32.38"
-        ros_env_loader_path = "/home/chengjindu/SoftMag/Console/ros_workspace/ros_env_loader.sh"
-
         if mode == 'automatic':
-            command = f"ssh {pi_user}@{pi_address} 'source {ros_env_loader_path} && roslaunch launch_console_pi automatic_launch.launch'"
+            command = f"ssh {self.pi_user}@{self.pi_address} 'source {self.start_env_loader_pi_path} && roslaunch launch_console_pi automatic_launch.launch'"
         elif mode == 'testing':
-            command = f"ssh {pi_user}@{pi_address} 'source {ros_env_loader_path} && roslaunch launch_console_pi testing_launch.launch'"
+            command = f"ssh {self.pi_user}@{self.pi_address} 'source {self.start_env_loader_pi_path} && roslaunch launch_console_pi testing_launch.launch'"
 
         rospy.loginfo(f"Executing command: {command}")
         self.current_process = subprocess.Popen(command, shell=True)
