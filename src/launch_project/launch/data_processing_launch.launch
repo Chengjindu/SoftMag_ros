@@ -1,0 +1,7 @@
+<launch>
+  
+  <!-- Start data processing node on the local machine -->
+  <node name="data_processing_node" pkg="data_processing" type="data_processing_node.py" output="screen" />
+  
+
+</launch>
