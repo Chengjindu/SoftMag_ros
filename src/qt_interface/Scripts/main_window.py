@@ -288,11 +288,27 @@ class ModeSwitchWorker(QThread):
 
     def run(self):
         success = False
-        if self.mode == "Automatic":
+        if self.mode == "Sensing":
+            success = self.switch_to_sensing()
+        elif self.mode == "Automatic":
             success = self.switch_to_automatic()
         elif self.mode == "Testing":
             success = self.switch_to_testing()
         self.mode_switched.emit(self.mode, success)
+
+    def switch_to_sensing(self):
+        rospy.wait_for_service('/switch_to_sensing')
+        try:
+            switch_service = rospy.ServiceProxy('/switch_to_sensing', Trigger)
+            response = switch_service()
+            if response.success:
+                rospy.loginfo("Switched to sensing mode")
+                return True
+            else:
+                rospy.logerr("Failed to switch to sensing mode: " + response.message)
+        except rospy.ServiceException as e:
+            rospy.logerr("Service call failed: %s" % e)
+        return False
 
     def switch_to_automatic(self):
         rospy.wait_for_service('/switch_to_automatic')
@@ -336,6 +352,7 @@ class MainWindow(QMainWindow):
         self.current_mode = None  # Add this line to track the current mode
 
         # Initialize comboBox for model selection
+        self.ui.model_selection_comboBox.addItem("Sensing")
         self.ui.model_selection_comboBox.addItem("Automatic")
         self.ui.model_selection_comboBox.addItem("Testing")
         self.ui.model_selection_comboBox.currentIndexChanged.connect(self.switch_mode)
@@ -448,7 +465,7 @@ class MainWindow(QMainWindow):
     def publish_ctrl_mode(self, mode):
         ctrl_mode_message = json.dumps({"ctrl_mode": mode})
         self.ctrl_mode_publisher.publish(ctrl_mode_message)
-        rospy.loginfo(f"Published control mode: {mode}")
+        rospy.loginfo(f"Current mode: {mode}")
 
     def update_motor_pos_ctrl(self, position):
         # Temporarily block signals to prevent recursive updates
@@ -610,7 +627,7 @@ class MainWindow(QMainWindow):
     def contact_detect_callback(self, data):
         data_json = json.loads(data.data)
         # Update UI for contact detect indicator
-        if data_json.get('change_flag'):
+        if data_json.get('contact_detected'):
             # You may need to use a Signal here to update the UI safely
             self.ui.contact_detect_indicator.setStyleSheet("background-color: orange;")
         else:

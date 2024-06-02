@@ -21,11 +21,11 @@ ros::Publisher graspStablePub("grasp_stable", &graspStableMsg);
 ros::Publisher releaseFinishPub("release_finish", &releaseFinishMsg);
 ros::Publisher pressurereadingPub("pressure_reading", &pressure_msg);
 
-void motorStopCallback(const std_msgs::String& msg) {
+void motorStopTriggerCallback(const std_msgs::String& msg) {
   StaticJsonDocument<200> doc;
   deserializeJson(doc, msg.data);
-  bool motor_stop = doc["motor_stop"];
-  motorTrigger = motor_stop;
+  bool motor_stop_trigger = doc["motor_stop_trigger"];
+  motorTrigger = motor_stop_trigger;
 }
 
 void forceClosureCallback(const std_msgs::String& msg) {
@@ -34,7 +34,7 @@ void forceClosureCallback(const std_msgs::String& msg) {
 
   bool force_closure = doc["force_closure"];
   
-  if (force_closure && !forceClosureTrigger) {
+  if (force_closure && !forceClosureTrigger && motorTrigger) {
     if (desiredPressure + 1.0 <= maxPressure) {
       desiredPressure += 0.5;
       forceClosureTrigger = true;
@@ -104,7 +104,7 @@ void stopallCallback(const std_msgs::String& msg) {
   }
 }
 
-ros::Subscriber<std_msgs::String> motorStopSub("motor_stop", &motorStopCallback);
+ros::Subscriber<std_msgs::String> motorStopTriggerSub("motor_stop_trigger", &motorStopTriggerCallback);
 ros::Subscriber<std_msgs::String> forceClosureSub("force_closure", &forceClosureCallback);
 ros::Subscriber<std_msgs::String> releaseSub("release", &releaseCallback);
 ros::Subscriber<std_msgs::String> restartSub("restart", &restartCallback);
@@ -114,7 +114,7 @@ void setup() {
   Serial.begin(57600);
   dac.begin(0x60);
   nh.initNode();
-  nh.subscribe(motorStopSub);
+  nh.subscribe(motorStopTriggerSub);
   nh.subscribe(forceClosureSub);
   nh.subscribe(releaseSub);
   nh.subscribe(restartSub);
@@ -129,7 +129,7 @@ void loop() {
   uint16_t dacValue = (uint16_t)((desiredPressure / 50.0) * 4095);
   dac.setVoltage(dacValue, false);
 
-  if (motorTrigger && desiredPressure < maxPressure) {
+  if (motorTrigger && !forceClosureTrigger && desiredPressure < maxPressure) {
     desiredPressure += 1.0; 
     if (desiredPressure >= maxPressure) {
       desiredPressure = maxPressure;

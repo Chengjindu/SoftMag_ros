@@ -21,18 +21,6 @@ steps_per_rev = 200
 full_stroke_angle = 85
 max_steps = int((full_stroke_angle / 360) * steps_per_rev)
 
-# class SensorDataPlot(FigureCanvas):
-#     def __init__(self, parent=None):
-#         fig = Figure()
-#         self.axes = fig.add_subplot(111)
-#         super(SensorDataPlot, self).__init__(fig)
-#         self.setParent(parent)
-#
-#     def plot_data(self, x, y, z):
-#         self.axes.clear()
-#         self.axes.plot([x, y, z])
-#         self.draw()
-
 class SensorDataPlot(pg.PlotWidget):
     def __init__(self, parent=None, window_size=30):
         super(SensorDataPlot, self).__init__(parent)
