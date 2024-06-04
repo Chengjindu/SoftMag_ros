@@ -20,9 +20,9 @@
   <node name="mode_manager" pkg="qt_interface" type="mode_manager.py" output="screen" />
   
   <!-- Start sofa simulation node on the local machine -->
-<!--   <node name="sofa_simulation_node" pkg="sofa_simulation" type="sofa_simulation_node.py" output="screen"> -->
-<!--     <env name="PYTHONPATH" value="$(optenv PYTHONPATH)${PYTHONPATH}:/home/chengjin/Projects/SoftMag/ros_workspace/src/sofa_simulation/src" /> -->
-<!--   </node> -->
+  <node name="sofa_simulation_node" pkg="sofa_simulation" type="sofa_simulation_node.py" output="screen">
+    <env name="PYTHONPATH" value="$(optenv PYTHONPATH)${PYTHONPATH}:/home/chengjin/Projects/SoftMag/ros_workspace/src/sofa_simulation/src" />
+  </node>
 
   <!-- Include start_diagnostics.launch -->
   <include file="$(find data_processing)/launch/start_diagnostics.launch"/>

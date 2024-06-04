@@ -30,7 +30,7 @@ steps_per_rev = 200
 full_stroke_angle = 85
 max_steps = int((full_stroke_angle / 360) * steps_per_rev)
 
-max_pressure = 35
+max_pressure = 50
 pressure_ctrl_resolution = 0.2
 
 
@@ -352,9 +352,9 @@ class MainWindow(QMainWindow):
         self.current_mode = None  # Add this line to track the current mode
 
         # Initialize comboBox for model selection
-        self.ui.model_selection_comboBox.addItem("Sensing")
-        self.ui.model_selection_comboBox.addItem("Automatic")
-        self.ui.model_selection_comboBox.addItem("Testing")
+        self.ui.model_selection_comboBox.addItem("SoftMag")
+        self.ui.model_selection_comboBox.addItem("Gripper(Automatic)")
+        self.ui.model_selection_comboBox.addItem("Gripper(Testing)")
         self.ui.model_selection_comboBox.currentIndexChanged.connect(self.switch_mode)
 
         # Signal handling for graceful shutdown
@@ -423,6 +423,7 @@ class MainWindow(QMainWindow):
         self.motor_pos_ctrl_publisher = rospy.Publisher('/motor_pos_ctrl', Int32, queue_size=10)
         self.pressure_ctrl_publisher = rospy.Publisher('/pressure_ctrl', Float32, queue_size=10)
         self.force_closure_publisher = rospy.Publisher('/force_closure', String, queue_size=10)
+        self.zero_motor_publisher = rospy.Publisher('/zero_motor', String, queue_size=10)
         self.record_data_publisher = rospy.Publisher('/record_data', String, queue_size=10)
 
         # Set up stop publishers for both modes
@@ -437,6 +438,7 @@ class MainWindow(QMainWindow):
         self.ui.stop_all_button_grasping.clicked.connect(self.stop_all_callback)
 
         self.ui.record_data_button.clicked.connect(self.toggle_recording)
+        self.ui.zero_button_testing.clicked.connect(self.zero_motor_callback)
         self.ui.stop_all_button_testing.clicked.connect(self.stop_all_callback)
         self.ui.motor_pos_ctrl_bar_1.valueChanged.connect(self.update_motor_pos_ctrl)
         self.ui.motor_pos_ctrl_bar_2.valueChanged.connect(self.update_motor_pos_ctrl)
@@ -446,7 +448,13 @@ class MainWindow(QMainWindow):
         self.ui.Pressure_ScrollBar.valueChanged.connect(self.update_pressure_ctrl)
 
     def switch_mode(self):
-        mode = self.ui.model_selection_comboBox.currentText()
+        textmode = self.ui.model_selection_comboBox.currentText()
+        if textmode == "SoftMag":
+            mode = "Sensing"
+        elif textmode == "Gripper(Automatic)":
+            mode = "Automatic"
+        elif textmode == "Gripper(Testing)":
+            mode = "Testing"
         if mode != self.current_mode:  # Only switch if the mode is different
             if self.mode_switch_worker is not None and self.mode_switch_worker.isRunning():
                 return  # Prevent multiple switches at the same time
@@ -483,11 +491,15 @@ class MainWindow(QMainWindow):
         rospy.loginfo(f"Updating motor position to {position}")
         self.motor_pos_ctrl_publisher.publish(position)
 
+    def zero_motor_callback(self):
+        rospy.loginfo("Zero button pressed. Returning motor to zero position.")
+        self.motor_pos_ctrl_publisher.publish(0)
+
     def update_pressure_ctrl(self, value):
-        actual_pressure = value * pressure_ctrl_resolution
-        self.ui.ctrl_pressure_val.display(actual_pressure)
-        rospy.loginfo(f"Updating pressure to {actual_pressure} kPa")
-        self.pressure_ctrl_publisher.publish(Float32(actual_pressure))
+        actual_input_pressure = value * pressure_ctrl_resolution
+        self.ui.ctrl_pressure_val.display(actual_input_pressure)
+        rospy.loginfo(f"Updating pressure to {actual_input_pressure} kPa")
+        self.pressure_ctrl_publisher.publish(Float32(actual_input_pressure))
 
     @Slot(int)
     def onForceControlStateChanged(self, state):

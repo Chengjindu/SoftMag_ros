@@ -10,12 +10,10 @@ def precb(data):
     # rospy.loginfo(f'the received pressure is {p}')
     return p
 
-
 def poscb(data):
     d = data.data
     # rospy.loginfo(f'the received position is {d}')
     return d
-
 
 def moveRestPos(rest_pos, dx, dy, dz):
     out = []
@@ -79,9 +77,9 @@ class RosReceiver(Sofa.Core.Controller):
         self.name = "RosReceiver"
 
         # rospy.Subscriber("/animation/receiver/pressure", Float32, self.pressureCB)
-        rospy.Subscriber("/pressure", Float32, self.pressureCB)
+        rospy.Subscriber("/pressure_ctrl", Float32, self.pressureCB)
         # rospy.Subscriber("/animation/receiver/position", Float32, self.positionCB)
-        rospy.Subscriber("/motor_pos", Int32, self.positionCB)
+        rospy.Subscriber("/motor_pos_reading", Int32, self.positionCB)
 
         self.predata = None
         self.posdata = None
@@ -97,7 +95,7 @@ class RosReceiver(Sofa.Core.Controller):
             p = precb(Float32(self.predata))
             for i in range(2):
                 self.constraints[i].value[0] = p * self.snode.dt.value
-                rospy.loginfo(f'Current Current pressure = {p} kPa')
+                # rospy.loginfo(f'Current pressure = {p} kPa')
                 # new_positions = [[x, y, 50-80] for x, y, z in self.dofs[1].rest_position.value]
                 # self.dofs[1].rest_position.value = new_positions
                 # rospy.loginfo(f'Current Z position = {self.dofs[1].rest_position.value[0][2]} mm')
@@ -105,11 +103,13 @@ class RosReceiver(Sofa.Core.Controller):
 
         if self.posdata is not None:
             d = poscb(Float32(self.posdata))
-            rospy.loginfo(f'Current Z = {self.dofs[1].rest_position.value[0][2]} mm')
-            new_positions = [[x, y, d * 1.0638 -75] for x, y, z in self.dofs[1].rest_position.value]
-            self.dofs[1].rest_position.value = new_positions
+            # rospy.loginfo(f'Current Z = {self.dofs[1].rest_position.value[0][2]} mm')
+            new_positions_0 = [[x, y, -d/2 * 1.0638] for x, y, z in self.dofs[0].rest_position.value]
+            new_positions_1 = [[x, y, d/2 * 1.0638 - 75] for x, y, z in self.dofs[1].rest_position.value]
+            self.dofs[0].rest_position.value = new_positions_0
+            self.dofs[1].rest_position.value = new_positions_1
             # self.dofs[1].rest_position.value[0][2] = d * 1.0638 -75
-            rospy.loginfo(f'Current Z position = {d * -1.0638 + 80} mm')
+            # rospy.loginfo(f'Current Z position = {d * -1.0638 + 80} mm')
             self.posdata = None
 
 def init(nodeName="Sofa"):

@@ -100,12 +100,14 @@ class MLLearningNode:
             # Example postprocessing, adjust as needed
             if predicted_force > 8:
                 predicted_force *= 0.6
-            # elif self.touch_mode == "single" and predicted_position_label == 2:
-            #     predicted_force *= 1.2
-            # elif self.touch_mode == "single" and predicted_position_label == 3:
-            #     predicted_force *= 0.8
-            # elif self.touch_mode == "single" and predicted_position_label == 4:
-            #     predicted_force *= 0.7
+            elif self.touch_mode == "single" and predicted_position_label == 1:
+                predicted_force *= 0.8
+            elif self.touch_mode == "single" and predicted_position_label == 2:
+                predicted_force *= 1.5
+            elif self.touch_mode == "single" and predicted_position_label == 3:
+                predicted_force *= 1.2
+            elif self.touch_mode == "single" and predicted_position_label == 4:
+                predicted_force *= 0.8
 
             # Publish the prediction results
             prediction_result = {

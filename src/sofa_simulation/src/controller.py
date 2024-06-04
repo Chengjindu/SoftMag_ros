@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import Sofa.Core
 from Sofa.constants import *
@@ -15,8 +15,8 @@ def moveRestPos(rest_pos, dx, dy, dz):
 def rotateRestPos(rest_pos,rx,centerPosY,centerPosZ):
     out = []
     for i in range(0,len(rest_pos)) :
-        newRestPosY = (rest_pos[i][1] - centerPosY)*math.cos(rx) - (rest_pos[i][2] - centerPosZ)*math.sin(rx) +  centerPosY
-        newRestPosZ = (rest_pos[i][1] - centerPosY)*math.sin(rx) + (rest_pos[i][2] - centerPosZ)*math.cos(rx) +  centerPosZ
+        newRestPosY = (rest_pos[i][1] - centerPosY) * math.cos(rx) - (rest_pos[i][2] - centerPosZ) * math.sin(rx) +  centerPosY
+        newRestPosZ = (rest_pos[i][1] - centerPosY) * math.sin(rx) + (rest_pos[i][2] - centerPosZ) * math.cos(rx) +  centerPosZ
         out += [[rest_pos[i][0], newRestPosY, newRestPosZ]]
     return out
 
@@ -58,7 +58,7 @@ class WholeGripperController(Sofa.Core.Controller):
 
     def onKeypressedEvent(self,e):
 
-        increment = 1*self.node.dt.value # X[kPa]*dt
+        increment = 1 * self.node.dt.value # X[kPa]*dt
 
         if e["key"] == Sofa.constants.Key.plus:
             for i in range(2):
@@ -74,7 +74,7 @@ class WholeGripperController(Sofa.Core.Controller):
                 if pressureValue < 0:
                     pressureValue = 0
                 self.constraints[i].value[0] = pressureValue
-                print (f'Value = {pressureValue/self.node.dt.value} kPa')
+                print(f'Value = {pressureValue / self.node.dt.value} kPa')
 
         elif e["key"] == Sofa.constants.Key.uparrow:
             for i in range(2):
@@ -87,8 +87,8 @@ class WholeGripperController(Sofa.Core.Controller):
                 self.dofs[i].rest_position.value = results
 
         elif e["key"] == Sofa.constants.Key.leftarrow:
-            dy = 3.0*math.cos(self.rotAngle)
-            dz = 3.0*math.sin(self.rotAngle)
+            dy = 3.0 * math.cos(self.rotAngle)
+            dz = 3.0 * math.sin(self.rotAngle)
             for i in range(2):
                 results = moveRestPos(self.dofs[i].rest_position.value, 0.0, dy, dz)
                 self.dofs[i].rest_position.value = results
@@ -96,8 +96,8 @@ class WholeGripperController(Sofa.Core.Controller):
             self.centerPosZ = self.centerPosZ + dz
 
         elif e["key"] == Sofa.constants.Key.rightarrow:
-            dy = -3.0*math.cos(self.rotAngle)
-            dz = -3.0*math.sin(self.rotAngle)
+            dy = -3.0 * math.cos(self.rotAngle)
+            dz = -3.0 * math.sin(self.rotAngle)
             for i in range(2):
                 results = moveRestPos(self.dofs[i].rest_position.value, 0.0, dy, dz)
                 self.dofs[i].rest_position.value = results

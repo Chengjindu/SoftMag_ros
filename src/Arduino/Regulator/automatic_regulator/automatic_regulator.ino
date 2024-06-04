@@ -10,7 +10,7 @@ ros::NodeHandle nh;
 int monitorPin = A0; 
 
 float desiredPressure = 0.0; 
-float maxPressure = 35.0;
+float maxPressure = 40.0;
 bool motorTrigger = false;
 bool forceClosureTrigger = false;
 
@@ -145,6 +145,7 @@ void loop() {
     }
     uint16_t dacValue = (uint16_t)((desiredPressure / 50.0) * 4095);
     dac.setVoltage(dacValue, false);
+
     delay(100);
   }
 

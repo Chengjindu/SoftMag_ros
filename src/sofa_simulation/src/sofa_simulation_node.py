@@ -58,6 +58,10 @@ def createScene(rootNode):
     rootNode.addObject('BackgroundSetting', color=[0.2, 0.22, 0.25, 1.])
     rootNode.addObject('OglSceneFrame', style='Arrows', alignment='TopRight')
 
+    # # to use opengl: bin\runSofa.exe -g qt
+    # rootNode.addObject('InteractiveCamera', name='camera', position=[-14.776, -202.209, -44.97], orientation=[0.47, -0.54, 0.45, 0.53],
+    #                    zNear=3.4434, zFar=302.77, distance=20)
+
     for i in range(2):
         ####################################sofaros.init()######
         # Finger Model	 						 #

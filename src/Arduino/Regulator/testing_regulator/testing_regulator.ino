@@ -9,8 +9,8 @@ Adafruit_MCP4725 dac; // DAC for pressure control
 ros::NodeHandle nh;
 int monitorPin = A0;
 
-float desiredPressure = 0.0;
-float maxPressure = 35.0;
+float desiredPressure =0.0;
+float maxPressure = 50.0;
 bool dataStabilized = false; // Flag to check if data is stabilized
 bool motorStopped = true;    // Flag to check if motor is stopped
 bool forceClosureEnabled = false; // Flag to check if force closure is enabled
@@ -20,7 +20,6 @@ std_msgs::String graspStableMsg;
 std_msgs::String releaseFinishMsg;
 std_msgs::Float32 pressure_msg;
 ros::Publisher graspStablePub("grasp_stable", &graspStableMsg);
-ros::Publisher releaseFinishPub("release_finish", &releaseFinishMsg);
 ros::Publisher pressurereadingPub("pressure_reading", &pressure_msg);
 
 void motorStopCallback(const std_msgs::String& msg) {
@@ -34,7 +33,7 @@ void forceClosureCallback(const std_msgs::String& msg) {
   deserializeJson(doc, msg.data);
   forceClosureEnabled = doc["force_closure_enabled"];
   
-  if (doc["force_closure"] && !forceClosureTrigger) {
+  if (forceClosureEnabled && doc["force_closure"] && !forceClosureTrigger && motorStopped) {
     if (desiredPressure + 1.0 <= maxPressure) {
       desiredPressure += 0.5;
       forceClosureTrigger = true; // Indicate that force closure has been achieved
@@ -54,7 +53,9 @@ void forceClosureCallback(const std_msgs::String& msg) {
 void stopallCallback(const std_msgs::String& msg) {
   StaticJsonDocument<200> doc;
   deserializeJson(doc, msg.data);
-  if (doc["stop_all_flag"]) {
+
+  bool stop_all_flag = doc["stop_all_flag"];
+  if (stop_all_flag) {
     desiredPressure = 0.0;
     forceClosureTrigger = false;
 
@@ -67,20 +68,21 @@ void stopallCallback(const std_msgs::String& msg) {
   }
 }
 
-void pressureCtrlCallback(const std_msgs::Float32& msg) {
-  desiredPressure = msg.data;
-}
-
 void processedSensorDataCallback(const std_msgs::String& msg) {
   StaticJsonDocument<200> doc;
   deserializeJson(doc, msg.data);
   dataStabilized = doc["stable_flag"];
 }
 
+void pressureCtrlCallback(const std_msgs::Float32& msg) {
+  desiredPressure = msg.data;
+}
+
 ros::Subscriber<std_msgs::String> motorStopSub("motor_stop", &motorStopCallback);
 ros::Subscriber<std_msgs::String> forceClosureSub("force_closure", &forceClosureCallback);
 ros::Subscriber<std_msgs::String> stopallSub("stop_all", &stopallCallback);
 ros::Subscriber<std_msgs::String> processedSensorDataSub("processed_sensor_data", &processedSensorDataCallback);
+ros::Subscriber<std_msgs::Float32> pressureCtrlSub("pressure_ctrl", &pressureCtrlCallback);
 ros::Subscriber<std_msgs::Float32> pressureCtrlSub("pressure_ctrl", &pressureCtrlCallback);
 
 void setup() {
@@ -97,11 +99,13 @@ void setup() {
 }
 
 void loop() {
+
+  uint16_t dacValue = (uint16_t)((desiredPressure / 50.0) * 4095);
+  dac.setVoltage(dacValue, false);
+
   if (dataStabilized && motorStopped) {
-    uint16_t dacValue = (uint16_t)((desiredPressure / 50.0) * 4095);
-    dac.setVoltage(dacValue, false);
-    
-    if (forceClosureEnabled && desiredPressure < maxPressure) {
+    if ((!forceClosureEnabled && desiredPressure < maxPressure) || 
+    (forceClosureEnabled && !forceClosureTrigger && desiredPressure < maxPressure)) {
       desiredPressure += 1.0;
       if (desiredPressure >= maxPressure) {
         desiredPressure = maxPressure;

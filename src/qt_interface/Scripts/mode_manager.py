@@ -9,6 +9,7 @@ import sys
 import os
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 import subprocess
+import time  # Import the time module for sleep
 
 def get_config_param(param):
     # Adjust the path to locate start_config.json
@@ -137,13 +138,18 @@ class ModeManager:
         if self.sensor_process:
             kill_command = "rosnode kill sensors_i2c_reading_node"
             rospy.loginfo(f"Executing kill command: {kill_command}")
-            while True:
+            retry_limit = 5  # Maximum number of retries
+            retries = 0
+
+            while retries < retry_limit:
                 kill_result = subprocess.run(kill_command, shell=True, capture_output=True, text=True)
                 if kill_result.returncode == 0:
                     rospy.loginfo(f"sensors_i2c_reading_node has been killed")
                     break
                 else:
+                    retries += 1
                     rospy.logwarn(f"Failed to kill sensors_i2c_reading_node. Retrying...")
+                    time.sleep(1)  # Delay between retries
 
             self.sensor_process.terminate()
             self.sensor_process.wait()

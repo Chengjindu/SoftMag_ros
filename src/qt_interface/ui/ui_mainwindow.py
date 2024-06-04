@@ -492,6 +492,7 @@ class Ui_MainWindow(object):
         sizePolicy4.setVerticalStretch(1)
         sizePolicy4.setHeightForWidth(self.motor_pos_ctrl_bar_1.sizePolicy().hasHeightForWidth())
         self.motor_pos_ctrl_bar_1.setSizePolicy(sizePolicy4)
+        self.motor_pos_ctrl_bar_1.setMaximum(44)
         self.motor_pos_ctrl_bar_1.setOrientation(Qt.Horizontal)
 
         self.horizontalLayout_15.addWidget(self.motor_pos_ctrl_bar_1)
@@ -505,6 +506,7 @@ class Ui_MainWindow(object):
         self.motor_pos_ctrl_bar_2.setObjectName(u"motor_pos_ctrl_bar_2")
         sizePolicy4.setHeightForWidth(self.motor_pos_ctrl_bar_2.sizePolicy().hasHeightForWidth())
         self.motor_pos_ctrl_bar_2.setSizePolicy(sizePolicy4)
+        self.motor_pos_ctrl_bar_2.setMaximum(44)
         self.motor_pos_ctrl_bar_2.setOrientation(Qt.Horizontal)
         self.motor_pos_ctrl_bar_2.setInvertedAppearance(True)
 
@@ -515,6 +517,28 @@ class Ui_MainWindow(object):
         self.horizontalLayout_15.setStretch(2, 1)
 
         self.verticalLayout_18.addLayout(self.horizontalLayout_15)
+
+        self.hline1_8 = QFrame(self.verticalLayoutWidget_9)
+        self.hline1_8.setObjectName(u"hline1_8")
+        self.hline1_8.setFrameShape(QFrame.HLine)
+        self.hline1_8.setFrameShadow(QFrame.Raised)
+
+        self.verticalLayout_18.addWidget(self.hline1_8)
+
+        self.horizontalLayout_7 = QHBoxLayout()
+        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
+        self.zero_button_testing = QPushButton(self.verticalLayoutWidget_9)
+        self.zero_button_testing.setObjectName(u"zero_button_testing")
+
+        self.horizontalLayout_7.addWidget(self.zero_button_testing)
+
+        self.stop_all_button_testing = QPushButton(self.verticalLayoutWidget_9)
+        self.stop_all_button_testing.setObjectName(u"stop_all_button_testing")
+
+        self.horizontalLayout_7.addWidget(self.stop_all_button_testing)
+
+
+        self.verticalLayout_18.addLayout(self.horizontalLayout_7)
 
         self.verticalLayout_11 = QVBoxLayout()
         self.verticalLayout_11.setObjectName(u"verticalLayout_11")
@@ -529,7 +553,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_18.setStretch(0, 1)
         self.verticalLayout_18.setStretch(1, 1)
         self.verticalLayout_18.setStretch(2, 4)
-        self.verticalLayout_18.setStretch(3, 1)
+        self.verticalLayout_18.setStretch(5, 1)
 
         self.testing_control_panel_layout.addLayout(self.verticalLayout_18)
 
@@ -571,7 +595,7 @@ class Ui_MainWindow(object):
         sizePolicy5.setVerticalStretch(1)
         sizePolicy5.setHeightForWidth(self.Pressure_ScrollBar.sizePolicy().hasHeightForWidth())
         self.Pressure_ScrollBar.setSizePolicy(sizePolicy5)
-        self.Pressure_ScrollBar.setMaximum(35)
+        self.Pressure_ScrollBar.setMaximum(50)
         self.Pressure_ScrollBar.setSingleStep(1)
         self.Pressure_ScrollBar.setOrientation(Qt.Horizontal)
 
@@ -629,23 +653,6 @@ class Ui_MainWindow(object):
 
         self.testing_control_panel_layout.addLayout(self.horizontalLayout_5)
 
-        self.hline1_8 = QFrame(self.verticalLayoutWidget_9)
-        self.hline1_8.setObjectName(u"hline1_8")
-        self.hline1_8.setFrameShape(QFrame.HLine)
-        self.hline1_8.setFrameShadow(QFrame.Raised)
-
-        self.testing_control_panel_layout.addWidget(self.hline1_8)
-
-        self.horizontalLayout_7 = QHBoxLayout()
-        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
-        self.stop_all_button_testing = QPushButton(self.verticalLayoutWidget_9)
-        self.stop_all_button_testing.setObjectName(u"stop_all_button_testing")
-
-        self.horizontalLayout_7.addWidget(self.stop_all_button_testing)
-
-
-        self.testing_control_panel_layout.addLayout(self.horizontalLayout_7)
-
         self.testing_control_panel_layout.setStretch(0, 3)
         self.testing_control_panel_layout.setStretch(1, 1)
         self.testing_control_panel_layout.setStretch(2, 1)
@@ -653,8 +660,6 @@ class Ui_MainWindow(object):
         self.testing_control_panel_layout.setStretch(4, 1)
         self.testing_control_panel_layout.setStretch(5, 1)
         self.testing_control_panel_layout.setStretch(6, 2)
-        self.testing_control_panel_layout.setStretch(7, 1)
-        self.testing_control_panel_layout.setStretch(8, 2)
         self.operating_mode_selection_panel = QGroupBox(self.centralwidget)
         self.operating_mode_selection_panel.setObjectName(u"operating_mode_selection_panel")
         self.operating_mode_selection_panel.setGeometry(QRect(10, 390, 351, 71))
@@ -715,13 +720,14 @@ class Ui_MainWindow(object):
         self.record_data_button.setText(QCoreApplication.translate("MainWindow", u"Record Data", None))
         self.testing_control_panel.setTitle(QCoreApplication.translate("MainWindow", u"Testing Panel", None))
         self.motor_pos_ctrl_label.setText(QCoreApplication.translate("MainWindow", u"Motor Control", None))
+        self.zero_button_testing.setText(QCoreApplication.translate("MainWindow", u"ZERO", None))
+        self.stop_all_button_testing.setText(QCoreApplication.translate("MainWindow", u"STOP", None))
         self.pressure_control_label.setText(QCoreApplication.translate("MainWindow", u"Pressure Control", None))
         self.force_feedback_ctrl_enable.setText(QCoreApplication.translate("MainWindow", u"Force Control", None))
         self.current_pressure_label.setText(QCoreApplication.translate("MainWindow", u"Input Pressure", None))
         self.pressure_unit.setText(QCoreApplication.translate("MainWindow", u"kPa", None))
         self.contact_detect_enable.setText(QCoreApplication.translate("MainWindow", u"Contact Detect", None))
         self.sofa_simulation_enable.setText(QCoreApplication.translate("MainWindow", u"SOFA Simulation", None))
-        self.stop_all_button_testing.setText(QCoreApplication.translate("MainWindow", u"STOP ALL", None))
         self.operating_mode_selection_panel.setTitle(QCoreApplication.translate("MainWindow", u"Operating Mode Selection", None))
         self.toolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
     # retranslateUi

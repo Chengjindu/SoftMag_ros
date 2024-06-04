@@ -696,9 +696,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <layout class="QVBoxLayout" name="testing_control_panel_layout" stretch="3,1,1,1,1,1,2,1,2">
+     <layout class="QVBoxLayout" name="testing_control_panel_layout" stretch="3,1,1,1,1,1,2">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_18" stretch="1,1,4,1">
+       <layout class="QVBoxLayout" name="verticalLayout_18" stretch="1,1,4,0,0,1">
         <item>
          <widget class="QFrame" name="hline1_9">
           <property name="frameShape">
@@ -729,6 +729,9 @@
               <verstretch>1</verstretch>
              </sizepolicy>
             </property>
+            <property name="maximum">
+             <number>44</number>
+            </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -749,11 +752,42 @@
               <verstretch>1</verstretch>
              </sizepolicy>
             </property>
+            <property name="maximum">
+             <number>44</number>
+            </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
             <property name="invertedAppearance">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QFrame" name="hline1_8">
+          <property name="frameShape">
+           <enum>QFrame::HLine</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <item>
+           <widget class="QPushButton" name="zero_button_testing">
+            <property name="text">
+             <string>ZERO</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="stop_all_button_testing">
+            <property name="text">
+             <string>STOP</string>
             </property>
            </widget>
           </item>
@@ -811,7 +845,7 @@
          </sizepolicy>
         </property>
         <property name="maximum">
-         <number>35</number>
+         <number>50</number>
         </property>
         <property name="singleStep">
          <number>1</number>
@@ -874,27 +908,6 @@
          <widget class="QCheckBox" name="sofa_simulation_enable">
           <property name="text">
            <string>SOFA Simulation</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QFrame" name="hline1_8">
-        <property name="frameShape">
-         <enum>QFrame::HLine</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
-        <item>
-         <widget class="QPushButton" name="stop_all_button_testing">
-          <property name="text">
-           <string>STOP ALL</string>
           </property>
          </widget>
         </item>
