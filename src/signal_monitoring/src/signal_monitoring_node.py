@@ -1,124 +1,157 @@
 #!/usr/bin/env python3
 import rospy
-from std_msgs.msg import String
-import json
-import numpy as np
+from std_msgs.msg import Float32MultiArray, String, Bool
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
+import numpy as np
+import subprocess
+import os
 
+
+def get_config_param(param):
+    # Adjust the path to locate start_config.json
+    config_file = os.path.join(os.path.dirname(__file__), '../../../start_config.json')
+    result = subprocess.run(['jq', '-r', f'.{param}', config_file], capture_output=True, text=True)
+    if result.returncode == 0:
+        return result.stdout.strip()
+    else:
+        raise Exception(f"Failed to get config param '{param}': {result.stderr}")
 
 class SignalChangeDetector:
-    def __init__(self, sensor_id, window_size=10, change_threshold=0.3):
+    contact_trigger = True
+    def __init__(self, sensor_id, window_size=20):
         self.sensor_id = sensor_id
         self.window_size = window_size
-        self.change_threshold = change_threshold
         self.contact_detected = False
-        self.contact_trigger = False
-        self.current_mode = "Sensing"
+
+        self.default_mode = get_config_param('default_pi_mode')
+        self.set_default_mode(self.default_mode)
 
         self.data_window = {'x': [], 'y': [], 'z': []}
         self.change_flag = {'x': False, 'y': False, 'z': False}
-        self.processed_sensor_data_subscriber = rospy.Subscriber('processed_sensor_data', String, self.callback)
-        self.release_finish_subscriber = rospy.Subscriber('release_finish', String, self.release_finish_callback)
-        self.stop_all_subscriber = rospy.Subscriber('stop_all', String, self.stop_all_callback)
-        self.contact_trigger_publisher = rospy.Publisher('contact_trigger', String, queue_size=10)
-        self.contact_detected_publisher = rospy.Publisher('contact_detect', String, queue_size=10)
+        self.processed_sensor_data_subscriber = rospy.Subscriber(f'processed_sensor_data_{self.sensor_id}', Float32MultiArray, self.processed_callback)
+
+        self.release_finish_subscriber = rospy.Subscriber('release_finish', Bool, self.release_finish_callback)
+        self.restart_subscriber = rospy.Subscriber('restart', Bool, self.restart_callback)
+        self.stop_all_subscriber = rospy.Subscriber('stop_all', Bool, self.stop_all_callback)
+        self.contact_trigger_publisher = rospy.Publisher('contact_trigger', Bool, queue_size=10)
+        self.contact_detected_publisher = rospy.Publisher('contact_detect', Bool, queue_size=10)
         self.mode_subscriber = rospy.Subscriber('mode_change', String, self.mode_callback)
         self.diag_pub = rospy.Publisher('/diagnostics', DiagnosticArray, queue_size=10)
 
-    def callback(self, msg):
-        data = json.loads(msg.data)
-        if data['sensor_id'] == self.sensor_id:
-            self.contact_detection(data['filtered_data'])
-
-    def release_finish_callback(self, data):
-        data_json = json.loads(data.data)
-        if data_json.get('release_finish_flag'):
-            self.contact_trigger = False
-            self.contact_trigger_publisher.publish(json.dumps({'change_flag': False}))
-            self.reset_data_window()  # Consider resetting data and flags if necessary
-            self.reset_change_flags()
-            self.publish_diagnostics(True, "Release finished, initializing contact flag...")
-
-    def stop_all_callback(self, data):
-        data_json = json.loads(data.data)
-        if data_json.get('stop_all_flag'):
-            self.contact_trigger = False
-            self.contact_trigger_publisher.publish(json.dumps({'change_flag': False}))
-            self.reset_data_window()  # Consider resetting data and flags if necessary
-            self.reset_change_flags()
-            self.publish_diagnostics(True, "Stopping...")
+    def set_default_mode(self, mode):
+        self.current_mode = mode
+        self.update_mode_parameters(self.current_mode)
 
     def mode_callback(self, msg):
         new_mode = msg.data
         if new_mode != self.current_mode:
-            self.contact_trigger = False
-            self.contact_trigger_publisher.publish(json.dumps({'change_flag': False}))
-            self.reset_data_window()  # Consider resetting data and flags if necessary
+            SignalChangeDetector.contact_trigger = False
+            self.contact_trigger_publisher.publish(Bool(data=False))
+            self.reset_data_window()
             self.reset_change_flags()
             self.publish_diagnostics(True, f"Mode changed to {new_mode}, initializing contact flag...")
             self.current_mode = new_mode
+            self.update_mode_parameters(new_mode)
+
+    def update_mode_parameters(self, mode):
+        if mode == "sensor":
+            self.mean_threshold = 0.25
+            self.diff_threshold = 0.7
+            self.axes_required = 2
+            self.lower_threshold = 0.3
+            self.upper_threshold = 0.8
+        else:  # "gripper_automatic" || "gripper_testing"
+            self.mean_threshold = 0.12
+            self.diff_threshold = 0.35
+            self.axes_required = 1
+            self.lower_threshold = 0.05
+            self.upper_threshold = 0.3
+
+    def processed_callback(self, msg):
+        filtered_data = list(msg.data)
+        self.contact_detection(filtered_data)
+
+    def release_finish_callback(self, data):
+        if data.data:
+            self.publish_diagnostics(True, "Release finished, initializing contact flag...")
+
+    def restart_callback(self, data):
+        if data.data:
+            SignalChangeDetector.contact_trigger = False
+            self.contact_trigger_publisher.publish(Bool(data=False))
+            self.reset_data_window()
+            self.reset_change_flags()
+            self.publish_diagnostics(True, "Release finished, initializing contact flag...")
+
+    def stop_all_callback(self, data):
+        if data.data:
+            self.reset_data_window()
+            self.reset_change_flags()
+            self.publish_diagnostics(True, "Stopping...")
 
     def contact_detection(self, filtered_data):
+
         for axis, value in zip(['x', 'y', 'z'], filtered_data):
             self.data_window[axis].append(value)
             if len(self.data_window[axis]) > self.window_size:
                 self.data_window[axis].pop(0)
-                change_detected, max_change = self.analyze_change(self.data_window[axis])
+                change_detected, mean_data, difference = self.analyze_change(self.data_window[axis])
                 if change_detected:
                     self.change_flag[axis] = True
-                    self.publish_diagnostics(True,
-                                             f"Significant change ({max_change}) detected on {axis} axis for {self.sensor_id}.")
+                    self.publish_diagnostics(True, f"Significant change detected on {axis} axis for {self.sensor_id}. Mean: {mean_data}, Difference: {difference}")
             else:
                 self.publish_diagnostics(True, "Detecting signal changes...")
 
-        # if all(self.change_flag.values()): # if changes in all axis are detected
-        if list(self.change_flag.values()).count(True) >= 2:  # If changes are detected in at least two axes
-            if not self.contact_detected:   # when no contact is detected, or at the first run
-                if not self.contact_trigger:    # when contact_trigger is set to be false (first run or reinitialized)
-                    self.contact_trigger = True
-                    self.contact_trigger_publisher.publish(json.dumps({'change_flag': True}))
+        # if all(self.change_flag.values()): # If changes in all axis are detected
+        if list(self.change_flag.values()).count(True) >= self.axes_required:  # If changes are detected in the required number of axes
+            if not self.contact_detected:   # When no contact is detected, or at the first run
+                if not SignalChangeDetector.contact_trigger:    # When contact_trigger is set to be false (first run or reinitialized)
+                    SignalChangeDetector.contact_trigger =True
+                    for _ in range(5):
+                        self.contact_trigger_publisher.publish(Bool(data=True))
                 self.contact_detected = True    # Set status as contact detected
-                # self.contact_detected_publisher.publish(json.dumps({'sensor_id': self.sensor_id, 'contact_detected': True}))
+                self.contact_detected_publisher.publish(Bool(data=True))
                 self.publish_diagnostics(True, f"Contact has been detected on {self.sensor_id}.")
-            else:   # when there is contact detected in the last run, and changes are detected in at least two axes for this run
+            else:   # When there is contact detected in the last run, and changes are detected in at least two axes for this run
                 self.contact_detected = False
-                # self.contact_detected_publisher.publish(json.dumps({'sensor_id': self.sensor_id, 'contact_detected': False}))
+                self.contact_detected_publisher.publish(Bool(data=False))
                 self.publish_diagnostics(True, f"Contact has been removed on {self.sensor_id}.")
-            self.reset_data_window()  # Optionally reset flags and data windows to avoid repeated triggers
-            self.reset_change_flags()
 
-        # Calculate the Euclidean norm of the sensing data vector
-        norm = np.linalg.norm(filtered_data)
+        norm = np.linalg.norm(filtered_data)        # Calculate the Euclidean norm of the sensing data vector
         # Perform the additional significant check
-        if self.contact_detected:   # if contact is detected last time
-            if norm < 0.4:  # Lower threshold check
+        if self.contact_detected:   # If contact is detected last time
+            if norm < self.lower_threshold:  # Lower threshold check
                 self.contact_detected = False
-                self.contact_detected_publisher.publish(
-                    json.dumps({'sensor_id': self.sensor_id, 'contact_detected': False}))
-                self.publish_diagnostics(True, f"Contact has been removed on {self.sensor_id}.")
+                self.contact_detected_publisher.publish(Bool(data=False))
+                self.publish_diagnostics(True, f"No contacts on {self.sensor_id}.")
             else:
-                self.publish_diagnostics(True, "Contact ongoing...")
-                # self.contact_detected_publisher.publish(
-                #     json.dumps({'sensor_id': self.sensor_id, 'contact_detected': True}))
-        else:
-            if norm > 0.8:  # Upper threshold check
                 self.contact_detected = True
-                self.contact_detected_publisher.publish(
-                    json.dumps({'sensor_id': self.sensor_id, 'contact_detected': True}))
+                self.contact_detected_publisher.publish(Bool(data=True))
+                self.publish_diagnostics(True, "Contact ongoing...")
+        else:
+            if norm > self.upper_threshold:  # Upper threshold check
+                self.contact_detected = True
+                self.contact_detected_publisher.publish(Bool(data=True))
                 self.publish_diagnostics(True, f"Contact has been detected on {self.sensor_id}.")
             else:
+                self.contact_detected = False
+                self.contact_detected_publisher.publish(Bool(data=False))
                 self.publish_diagnostics(True, "No significant changes detected.")
-                # self.contact_detected_publisher.publish(
-                #     json.dumps({'sensor_id': self.sensor_id, 'contact_detected': False}))
+
+        self.reset_data_window()  # Optionally reset flags and data windows to avoid repeated triggers
+        self.reset_change_flags()
 
     def analyze_change(self, data):
-        # Simple first derivative calculation (difference)
         change_flag = False
-        differences = np.diff(data)
-        max_change = np.max(np.abs(differences))
-        if max_change > self.change_threshold:
+
+        mean_data = np.abs(np.mean(data))   # Calculate the mean value of the data array
+        # Calculate the difference between the last and first element of the data array
+        difference = abs(data[-1] - data[0])
+
+        if mean_data > self.mean_threshold or difference > self.diff_threshold:
             change_flag = True
-        return change_flag, max_change
+
+        return change_flag
 
     def reset_change_flags(self):
         self.change_flag = {'x': False, 'y': False, 'z': False}
@@ -137,7 +170,6 @@ class SignalChangeDetector:
         status_msg.values = [
             KeyValue("Sensor ID", self.sensor_id),
             KeyValue("Window Size", str(self.window_size)),
-            KeyValue("Change Threshold", str(self.change_threshold)),
             KeyValue("Contact Detected", str(self.contact_detected)),
             KeyValue("Contact Triggered", str(self.contact_trigger))
         ]

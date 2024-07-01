@@ -15,6 +15,19 @@ kill_local_process() {
 # Trap Ctrl+C (SIGINT) and call functions to kill processes
 trap 'kill_local_process; kill_pi_process; exit' SIGINT
 
+# Starting the ROS master on the local machine
+echo "Starting the ROS master on the local machine..."
+roscore &
+ROSCORE_PID=$!
+sleep 5  # Wait for the ROS master to initialize
+
+# Read the default_pi_mode parameter from start_config.json
+DEFAULT_PI_MODE=$(jq -r '.default_pi_mode' start_config.json)
+rosparam set /default_pi_mode "$DEFAULT_PI_MODE"  # sensor, gripper_automatic, gripper_testing
+
+# Set the environment variable for the mode
+export DEFAULT_PI_MODE="$DEFAULT_PI_MODE"
+
 # Check if screen is installed on the Raspberry Pi
 echo "Checking if screen is installed on the Raspberry Pi..."
 ssh chengjindu@$(jq -r '.pi_ip' start_config.json) 'command -v screen'

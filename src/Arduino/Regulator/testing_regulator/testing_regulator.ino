@@ -3,137 +3,147 @@
 #include <ros.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Bool.h>
 #include <ArduinoJson.h>
 
-Adafruit_MCP4725 dac; // DAC for pressure control
-ros::NodeHandle nh;
-int monitorPin = A0;
+Adafruit_MCP4725 dac1; // DAC for pressure control
+Adafruit_MCP4725 dac2; // DAC for pressure control
+int monitorPin1 = A0;
+int monitorPin2 = A1;
 
-float desiredPressure =0.0;
-float maxPressure = 50.0;
+ros::NodeHandle nh;
+
+float desiredPressure1 = 0.0;
+float desiredPressure2 = 0.0;
+float maxPressure = 30.0;
+float pressureCoefficient = 0.8;
+
 bool dataStabilized = false; // Flag to check if data is stabilized
 bool motorStopped = true;    // Flag to check if motor is stopped
 bool forceClosureEnabled = false; // Flag to check if force closure is enabled
 bool forceClosureTrigger = false; // Added forceClosureTrigger flag
 
-std_msgs::String graspStableMsg;
-std_msgs::String releaseFinishMsg;
-std_msgs::Float32 pressure_msg;
+std_msgs::Bool graspStableMsg;
 ros::Publisher graspStablePub("grasp_stable", &graspStableMsg);
-ros::Publisher pressurereadingPub("pressure_reading", &pressure_msg);
 
-void motorStopCallback(const std_msgs::String& msg) {
-  StaticJsonDocument<200> doc;
-  deserializeJson(doc, msg.data);
-  motorStopped = doc["motor_stop"];
+std_msgs::Float32 pressure_msg1;
+ros::Publisher pressurereadingPub1("pressure_reading1", &pressure_msg1);
+std_msgs::Float32 pressure_msg2;
+ros::Publisher pressurereadingPub2("pressure_reading2", &pressure_msg2);
+
+void motorStopCallback(const std_msgs::Bool& msg) {
+  motorStopped = msg.data;
 }
 
-void forceClosureCallback(const std_msgs::String& msg) {
-  StaticJsonDocument<200> doc;
-  deserializeJson(doc, msg.data);
-  forceClosureEnabled = doc["force_closure_enabled"];
+void forceClosureCallback(const std_msgs::Bool& msg) {
+  bool force_closure = msg.data;
   
-  if (forceClosureEnabled && doc["force_closure"] && !forceClosureTrigger && motorStopped) {
-    if (desiredPressure + 1.0 <= maxPressure) {
-      desiredPressure += 0.5;
-      forceClosureTrigger = true; // Indicate that force closure has been achieved
-    } else {
-      forceClosureTrigger = true;
+  if (forceClosureEnabled && force_closure && !forceClosureTrigger && motorStopped) {
+    desiredPressure1 += 0.5;
+    desiredPressure2 += 0.5;
+    if (desiredPressure1 + 1.0 > pressureCoefficient * maxPressure) {
+      desiredPressure1 = pressureCoefficient * maxPressure;
     }
-    
-    StaticJsonDocument<200> stableDoc;
-    stableDoc["grasp_stable_flag"] = true;
-    char jsonBuffer[256];
-    serializeJson(stableDoc, jsonBuffer);
-    graspStableMsg.data = jsonBuffer;
+    if (desiredPressure2 + 1.0 > maxPressure) {
+      desiredPressure2 = maxPressure;
+    }
+    forceClosureTrigger = true;
+
+    graspStableMsg.data = true;
     graspStablePub.publish(&graspStableMsg);
   }
 }
 
-void stopallCallback(const std_msgs::String& msg) {
-  StaticJsonDocument<200> doc;
-  deserializeJson(doc, msg.data);
+void stopallCallback(const std_msgs::Bool& msg) {
+  bool stop_all_flag = msg.data;
 
-  bool stop_all_flag = doc["stop_all_flag"];
   if (stop_all_flag) {
-    desiredPressure = 0.0;
+    desiredPressure1 = 0.0;
+    desiredPressure2 = 0.0;
     forceClosureTrigger = false;
 
-    StaticJsonDocument<200> stableDoc;
-    char jsonBuffer[256];
-    stableDoc["grasp_stable_flag"] = false;
-    serializeJson(stableDoc, jsonBuffer);
-    graspStableMsg.data = jsonBuffer;
+    graspStableMsg.data = false;
     graspStablePub.publish(&graspStableMsg);
   }
 }
 
-void processedSensorDataCallback(const std_msgs::String& msg) {
-  StaticJsonDocument<200> doc;
-  deserializeJson(doc, msg.data);
-  dataStabilized = doc["stable_flag"];
+void sensorsStabilizedCallback(const std_msgs::Bool& msg) {
+  dataStabilized = msg.data;
+}
+
+void maxPressureCallback(const std_msgs::Float32& msg) {
+  maxPressure = msg.data;
+}
+
+void pressureCoefficientCallback(const std_msgs::Float32& msg) {
+  pressureCoefficient = msg.data;
 }
 
 void pressureCtrlCallback(const std_msgs::Float32& msg) {
-  desiredPressure = msg.data;
+  desiredPressure1 = pressureCoefficient * msg.data;
+  desiredPressure2 = msg.data;
 }
 
-ros::Subscriber<std_msgs::String> motorStopSub("motor_stop", &motorStopCallback);
-ros::Subscriber<std_msgs::String> forceClosureSub("force_closure", &forceClosureCallback);
-ros::Subscriber<std_msgs::String> stopallSub("stop_all", &stopallCallback);
-ros::Subscriber<std_msgs::String> processedSensorDataSub("processed_sensor_data", &processedSensorDataCallback);
+ros::Subscriber<std_msgs::Bool> motorStopSub("motor_stop", &motorStopCallback);
+ros::Subscriber<std_msgs::Bool> forceClosureSub("force_closure", &forceClosureCallback);
+ros::Subscriber<std_msgs::Bool> stopallSub("stop_all", &stopallCallback);
+ros::Subscriber<std_msgs::Bool> sensorsStabilizedSub("sensors_stabilized", &sensorsStabilizedCallback);
+ros::Subscriber<std_msgs::Float32> maxPressureSub("max_pressure", &maxPressureCallback);
 ros::Subscriber<std_msgs::Float32> pressureCtrlSub("pressure_ctrl", &pressureCtrlCallback);
-ros::Subscriber<std_msgs::Float32> pressureCtrlSub("pressure_ctrl", &pressureCtrlCallback);
+ros::Subscriber<std_msgs::Float32> pressureCoefficientSub("pressure_coefficient", &pressureCoefficientCallback);
+
 
 void setup() {
   Serial.begin(57600);
-  dac.begin(0x60);
+  dac1.begin(0x60);
+  dac2.begin(0x61);
   nh.initNode();
   nh.subscribe(motorStopSub);
   nh.subscribe(forceClosureSub);
   nh.subscribe(stopallSub);
-  nh.subscribe(processedSensorDataSub);
+  nh.subscribe(sensorsStabilizedSub);
+  nh.subscribe(maxPressureSub);
   nh.subscribe(pressureCtrlSub);
-  nh.advertise(pressurereadingPub);
+  nh.subscribe(pressureCoefficientSub);
+  nh.advertise(pressurereadingPub1);
+  nh.advertise(pressurereadingPub2);
   nh.advertise(graspStablePub);
 }
 
 void loop() {
 
-  uint16_t dacValue = (uint16_t)((desiredPressure / 50.0) * 4095);
-  dac.setVoltage(dacValue, false);
-
   if (dataStabilized && motorStopped) {
-    if ((!forceClosureEnabled && desiredPressure < maxPressure) || 
-    (forceClosureEnabled && !forceClosureTrigger && desiredPressure < maxPressure)) {
-      desiredPressure += 1.0;
-      if (desiredPressure >= maxPressure) {
-        desiredPressure = maxPressure;
+    if ((!forceClosureEnabled && desiredPressure2 < maxPressure) || 
+    (forceClosureEnabled && !forceClosureTrigger && desiredPressure2 < maxPressure)) {
+      if (desiredPressure2 >= maxPressure) {
+        desiredPressure1 = pressureCoefficient * maxPressure;
+        desiredPressure2 = maxPressure;
         forceClosureTrigger = true;
         
-        StaticJsonDocument<200> stableDoc;
-        stableDoc["grasp_stable_flag"] = true;
-        char jsonBuffer[256];
-        serializeJson(stableDoc, jsonBuffer);
-        graspStableMsg.data = jsonBuffer;
-        graspStablePub.publish(&graspStableMsg);
+        graspStableMsg.data = true;
+      graspStablePub.publish(&graspStableMsg);
       }
-
-      uint16_t dacValue = (uint16_t)((desiredPressure / 50.0) * 4095);
-      dac.setVoltage(dacValue, false);
-
-      delay(100);
     }
   }
 
-  float sensorValue = analogRead(monitorPin);
-  float voltage = sensorValue * (5.0 / 1023.0);
-  float pressure = ((voltage - 1) / 4.0) * 100.0;
+  uint16_t dacValue1 = (uint16_t)((desiredPressure1 / 50) * 4095);
+  uint16_t dacValue2 = (uint16_t)((desiredPressure2 / 50) * 4095);
+  dac1.setVoltage(dacValue1, false);
+  dac2.setVoltage(dacValue2, false);
 
-  pressure_msg.data = pressure;
-  pressurereadingPub.publish(&pressure_msg);
+  float sensorValue1 = analogRead(monitorPin1);
+  float sensorValue2 = analogRead(monitorPin2);
+  float voltage1 = sensorValue1 * (5.0 / 1023.0);
+  float voltage2 = sensorValue2 * (5.0 / 1023.0);
+  float pressure1 = ((voltage1 - 1) / 4.0) * 100.0;
+  float pressure2 = ((voltage2 - 1) / 4.0) * 100.0;
+
+  pressure_msg1.data = pressure1;
+  pressure_msg2.data = pressure2;
+  pressurereadingPub1.publish(&pressure_msg1);
+  pressurereadingPub2.publish(&pressure_msg2);
   
   nh.spinOnce();
-  delay(100);
+  delay(15);
 }
 

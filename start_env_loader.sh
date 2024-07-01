@@ -1,5 +1,4 @@
 #!/bin/bash
-echo "Setting ROS Master URI and ROS_IP..."
 
 # Provide the full path to start_config.json
 CONFIG_FILE_PATH="/home/chengjin/Projects/SoftMag/ros_workspace/start_config.json"
@@ -9,6 +8,7 @@ if [ ! -f "$CONFIG_FILE_PATH" ]; then
     exit 1
 fi
 
+echo "Setting ROS Master URI and ROS_IP..."
 ROS_MASTER_URI=$(jq -r '.ros_master_uri' "$CONFIG_FILE_PATH")
 export ROS_MASTER_URI
 echo "ROS_MASTER_URI: $ROS_MASTER_URI"
@@ -30,3 +30,6 @@ echo "ROS_PACKAGE_PATH: $ROS_PACKAGE_PATH"
 echo "Sourcing ROS workspace setup..."
 source ~/Projects/SoftMag/ros_workspace/devel/setup.bash
 echo "ROS_PACKAGE_PATH: $ROS_PACKAGE_PATH"
+
+# Propagate DEFAULT_PI_MODE environment variable
+export DEFAULT_PI_MODE
