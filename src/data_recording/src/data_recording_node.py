@@ -34,8 +34,12 @@ class DataRecordingNode:
             'sensor_data_S2': [],
             'prediction_position_S1': [],
             'prediction_position_S2': [],
-            'prediction_force_S1': [],
-            'prediction_force_S2': [],
+            'prediction_fz_S1': [],
+            'prediction_fz_S2': [],
+            'prediction_fx_S1': [],
+            'prediction_fx_S2': [],
+            'prediction_fy_S1': [],
+            'prediction_fy_S2': [],
             'pressure_reading1': [],
             'pressure_reading2': []
         }
@@ -44,7 +48,7 @@ class DataRecordingNode:
         self.recording_service = rospy.Service('/record_data', Trigger, self.handle_recording)
 
         # Set the output directory
-        self.output_directory = '/home/chengjin/Projects/SoftMag/ros_workspace/src/data_recording/src'
+        self.output_directory = '/home/chengjin/Projects/SoftMag/ros_workspace/src/data_recording/src/recorded_data'
         if not os.path.exists(self.output_directory):
             os.makedirs(self.output_directory)
 
@@ -74,15 +78,23 @@ class DataRecordingNode:
             self.subscribers['sensor_data_S2'] = rospy.Subscriber('/processed_sensor_data_S2', Float32MultiArray, self.sensor_data_callback, 'sensor_data_S2')
             self.subscribers['prediction_position_S1'] = rospy.Subscriber('/prediction_position_S1', Int32, self.prediction_callback, 'prediction_position_S1')
             self.subscribers['prediction_position_S2'] = rospy.Subscriber('/prediction_position_S2', Int32, self.prediction_callback, 'prediction_position_S2')
-            self.subscribers['prediction_force_S1'] = rospy.Subscriber('/prediction_force_S1', Float32, self.prediction_callback, 'prediction_force_S1')
-            self.subscribers['prediction_force_S2'] = rospy.Subscriber('/prediction_force_S2', Float32, self.prediction_callback, 'prediction_force_S2')
+            self.subscribers['prediction_fz_S1'] = rospy.Subscriber('/prediction_fz_S1', Float32, self.prediction_callback, 'prediction_fz_S1')
+            self.subscribers['prediction_fz_S2'] = rospy.Subscriber('/prediction_fz_S2', Float32, self.prediction_callback, 'prediction_fz_S2')
+            self.subscribers['prediction_fx_S1'] = rospy.Subscriber('/prediction_fx_S1', Float32, self.prediction_callback, 'prediction_fx_S1')
+            self.subscribers['prediction_fx_S2'] = rospy.Subscriber('/prediction_fx_S2', Float32, self.prediction_callback, 'prediction_fx_S2')
+            self.subscribers['prediction_fy_S1'] = rospy.Subscriber('/prediction_fy_S1', Float32, self.prediction_callback, 'prediction_fy_S1')
+            self.subscribers['prediction_fy_S2'] = rospy.Subscriber('/prediction_fy_S2', Float32, self.prediction_callback, 'prediction_fy_S2')
         elif mode in ["gripper_automatic", "gripper_testing"]:
             self.subscribers['sensor_data_S1'] = rospy.Subscriber('/processed_sensor_data_S1', Float32MultiArray, self.sensor_data_callback, 'sensor_data_S1')
             self.subscribers['sensor_data_S2'] = rospy.Subscriber('/processed_sensor_data_S2', Float32MultiArray, self.sensor_data_callback, 'sensor_data_S2')
             self.subscribers['prediction_position_S1'] = rospy.Subscriber('/prediction_position_S1', Int32, self.prediction_callback, 'prediction_position_S1')
             self.subscribers['prediction_position_S2'] = rospy.Subscriber('/prediction_position_S2', Int32, self.prediction_callback, 'prediction_position_S2')
-            self.subscribers['prediction_force_S1'] = rospy.Subscriber('/prediction_force_S1', Float32, self.prediction_callback, 'prediction_force_S1')
-            self.subscribers['prediction_force_S2'] = rospy.Subscriber('/prediction_force_S2', Float32, self.prediction_callback, 'prediction_force_S2')
+            self.subscribers['prediction_fz_S1'] = rospy.Subscriber('/prediction_fz_S1', Float32, self.prediction_callback, 'prediction_fz_S1')
+            self.subscribers['prediction_fz_S2'] = rospy.Subscriber('/prediction_fz_S2', Float32, self.prediction_callback, 'prediction_fz_S2')
+            self.subscribers['prediction_fx_S1'] = rospy.Subscriber('/prediction_fx_S1', Float32, self.prediction_callback, 'prediction_fx_S1')
+            self.subscribers['prediction_fx_S2'] = rospy.Subscriber('/prediction_fx_S2', Float32, self.prediction_callback, 'prediction_fx_S2')
+            self.subscribers['prediction_fy_S1'] = rospy.Subscriber('/prediction_fy_S1', Float32, self.prediction_callback, 'prediction_fy_S1')
+            self.subscribers['prediction_fy_S2'] = rospy.Subscriber('/prediction_fy_S2', Float32, self.prediction_callback, 'prediction_fy_S2')
             self.subscribers['pressure_reading1'] = rospy.Subscriber('/pressure_reading1', Float32, self.pressure_callback, 'pressure_reading1')
             self.subscribers['pressure_reading2'] = rospy.Subscriber('/pressure_reading2', Float32, self.pressure_callback, 'pressure_reading2')
 
@@ -132,10 +144,10 @@ class DataRecordingNode:
 
     def interpolate_data(self, timestamps, values, target_timestamps):
         if not timestamps or not values:
-            rospy.loginfo("No data available for interpolation.")
+            rospy.logwarn("No data available for interpolation.")
             return [0] * len(target_timestamps)  # Return a list of zeros if there is no data
 
-        rospy.loginfo(f"Interpolating data: {len(timestamps)} timestamps, {len(values)} values")
+        # rospy.loginfo(f"Interpolating data: {len(timestamps)} timestamps, {len(values)} values")
         if len(timestamps) < 2 or len(timestamps) != len(values):
             rospy.logwarn(
                 f"Insufficient data for interpolation: {len(timestamps)} timestamps and {len(values)} values.")
@@ -146,7 +158,7 @@ class DataRecordingNode:
 
     def write_data_to_file(self):
         if not any(self.data_buffer.values()):
-            rospy.loginfo("No data to write.")
+            rospy.logerr("No data to write.")
             return
 
         all_timestamps = sorted(set(
@@ -197,7 +209,6 @@ class DataRecordingNode:
 
     def signal_handler(self, sig, frame):
         if self.is_recording:
-            rospy.loginfo("SIGINT received. Stopping recording and saving data.")
             self.stop_recording()
         rospy.signal_shutdown("SIGINT received")
         sys.exit(0)
@@ -208,3 +219,4 @@ if __name__ == "__main__":
         rospy.spin()
     except KeyboardInterrupt:
         pass
+

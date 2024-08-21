@@ -12,7 +12,7 @@ import time
 
 
 def get_config_param(param):
-    # Adjust the path to locate start_config.json
+    # Adjust the path to locate start_config.json (# this is an useful comment)
     config_file = os.path.join(os.path.dirname(__file__), '../../../start_config.json')
     result = subprocess.run(['jq', '-r', f'.{param}', config_file], capture_output=True, text=True)
     if result.returncode == 0:
@@ -40,20 +40,22 @@ class ModeManager:
         self.start_env_loader_local_path = "/home/chengjin/Projects/SoftMag/ros_workspace/start_env_loader.sh"
         self.start_env_loader_pi_path = "/home/chengjindu/SoftMag/Console/ros_workspace/start_env_loader_pi.sh"
 
+        # Initialize ROS publishers and services
         self.diag_pub = rospy.Publisher('/diagnostics', DiagnosticArray, queue_size=10)
-        self.mode_pub = rospy.Publisher('mode_change', String, queue_size=10)  # Publisher for mode changes
+        self.mode_pub = rospy.Publisher('mode_change', String, queue_size=10)
         self.init_services()
-        rospy.loginfo("ModeManager initialized and services started.")  # Debug log
 
+        # Initialize default mode
         self.set_default_mode(self.default_mode)
 
+        # Setup signal handlers for graceful shutdown
         signal.signal(signal.SIGINT, self.signal_handler)
         signal.signal(signal.SIGTERM, self.signal_handler)
 
-        # Set up a timer to periodically publish diagnostics
+        # Periodic diagnostics publishing
         self.diagnostics_timer = rospy.Timer(rospy.Duration(5), self.publish_periodic_diagnostics)
 
-    def set_default_mode(self, mode):
+    def set_default_mode(self, mode):   # Set the default mode of operation
         self.switch_motor_mode(mode)
         self.current_mode = mode
         if mode == 'sensor':
@@ -69,12 +71,12 @@ class ModeManager:
             self.current_sensor_node_name = "gripper_reading_node"
             self.current_motor_node_name = "testing_motor_control_node"
 
-    def init_services(self):
+    def init_services(self):    # Initialize ROS services for mode switching
         rospy.Service('/switch_to_sensor', Trigger, self.switch_to_sensor)
         rospy.Service('/switch_to_gripper_automatic', Trigger, self.switch_to_gripper_automatic)
         rospy.Service('/switch_to_gripper_testing', Trigger, self.switch_to_gripper_testing)
 
-    def switch_to_sensor(self, req):
+    def switch_to_sensor(self, req):    # Service response when switched to "sensor" mode
         if self.current_mode != 'sensor':
             self.switch_sensor_node('sensor')
             self.restart_data_processing_node()
@@ -87,7 +89,7 @@ class ModeManager:
         else:
             return TriggerResponse(success=True, message="Already in sensor mode")
 
-    def switch_to_gripper_automatic(self, req):
+    def switch_to_gripper_automatic(self, req): # Service response when switched to "gripper_automatic" mode
         if self.current_mode != 'gripper_automatic':
             if self.current_mode == 'sensor':
                 self.switch_sensor_node('gripper')
@@ -102,7 +104,7 @@ class ModeManager:
         else:
             return TriggerResponse(success=True, message="Already in gripper_automatic mode")
 
-    def switch_to_gripper_testing(self, req):
+    def switch_to_gripper_testing(self, req):   # Service response when switched to "gripper_testing" mode
         if self.current_mode != 'gripper_testing':
             if self.current_mode == 'sensor':
                 self.switch_sensor_node('gripper')
@@ -117,7 +119,7 @@ class ModeManager:
         else:
             return TriggerResponse(success=True, message="Already in gripper_testing mode")
 
-    def switch_sensor_node(self, node_type):
+    def switch_sensor_node(self, node_type):        # Operation logic for the sensor node switching
         if self.current_sensor_node_name is not None:
             kill_command = f"rosnode kill {self.current_sensor_node_name}"
             rospy.loginfo(f"Executing kill command: {kill_command}")
@@ -132,7 +134,7 @@ class ModeManager:
                 else:
                     retries += 1
                     rospy.logwarn(f"Failed to kill {self.current_sensor_node_name}. Retrying...")
-                    time.sleep(1)  # Delay between retries
+                    time.sleep(1)
 
         if self.current_sensor_process and not isinstance(self.current_sensor_process, str):
             self.current_sensor_process.terminate()
@@ -149,7 +151,7 @@ class ModeManager:
         rospy.loginfo(f"Executing command: {command}")
         self.current_sensor_process = subprocess.Popen(command, shell=True)
 
-    def switch_motor_mode(self, mode):
+    def switch_motor_mode(self, mode):  # Operation logic for the motor node switching
         if self.current_motor_node_name is not None:
             kill_command = f"rosnode kill {self.current_motor_node_name}"
             rospy.loginfo(f"Executing kill command: {kill_command}")
@@ -176,8 +178,8 @@ class ModeManager:
         self.current_motor_process = subprocess.Popen(command, shell=True)
         self.current_mode = mode
 
-    def restart_data_processing_node(self):
-        kill_command = "rosnode kill data_processing_node"      # Kill the existing data processing node
+    def restart_data_processing_node(self):     # Restart data_processing_node is necessary when sensor addresses change
+        kill_command = "rosnode kill data_processing_node"
         rospy.loginfo(f"Executing kill command: {kill_command}")
         kill_result = subprocess.run(kill_command, shell=True, capture_output=True, text=True)
         if kill_result.returncode == 0:
@@ -186,17 +188,15 @@ class ModeManager:
             rospy.logwarn(f"Failed to kill data_processing_node. It might not be running. Error: {kill_result.stderr}")
 
         command = f"bash -c 'roslaunch launch_project data_processing_launch.launch'"
-        # command = f"bash -c 'source {self.start_env_loader_local_path} && roslaunch launch_project data_processing_launch.launch'"
 
-        rospy.loginfo(f"Restarting data processing node...")
         self.current_data_process = subprocess.Popen(command, shell=True)
         rospy.loginfo("data_processing_node restarted successfully.")
 
-    def publish_mode_change(self, mode):
+    def publish_mode_change(self, mode):    # Publish the mode change event
         mode_msg = String(data=mode)
         self.mode_pub.publish(mode_msg)
 
-    def switch_serial_node(self, action):
+    def switch_serial_node(self, action):   # Start or stop the serial node
         if action == 'start':
             if self.serial_process is None or self.serial_process.poll() is not None:
                 command = f"rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0 _baud:=57600"
@@ -224,7 +224,7 @@ class ModeManager:
                 else:
                     rospy.logwarn(f"Failed to kill /serial_node. It might not be running. Error: {kill_result.stderr}")
 
-    def upload_firmware(self, firmware_path):
+    def upload_firmware(self, firmware_path):   # Compile and upload firmware to the Arduino
         compile_result = subprocess.run(['arduino-cli', 'compile', '--fqbn', 'arduino:avr:mega', firmware_path])
         if compile_result.returncode != 0:
             self.publish_diagnostics(False, "Failed to compile firmware")
@@ -238,7 +238,7 @@ class ModeManager:
             rospy.logerr("Failed to upload firmware")
             return False
 
-    def signal_handler(self, sig, frame):
+    def signal_handler(self, sig, frame):    # Handle shutdown signals to gracefully terminate processes
         if self.current_sensor_process and not isinstance(self.current_sensor_process, str):
             self.current_sensor_process.terminate()
             self.current_sensor_process.wait()
@@ -255,10 +255,10 @@ class ModeManager:
         self.publish_diagnostics(False, "SIGINT received, shutting down")
         sys.exit(0)
 
-    def publish_periodic_diagnostics(self, event):
+    def publish_periodic_diagnostics(self, event):  # Periodically publish diagnostics
         self.publish_diagnostics(True, f"Current mode is: {self.current_mode}")
 
-    def publish_diagnostics(self, status, message):
+    def publish_diagnostics(self, status, message): # Publish diagnostic information
         diag_msg = DiagnosticArray()
         diag_msg.header.stamp = rospy.Time.now()
         status_msg = DiagnosticStatus()

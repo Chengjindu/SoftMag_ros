@@ -55,14 +55,14 @@ class SignalChangeDetector:
 
     def update_mode_parameters(self, mode):
         if mode == "sensor":
-            self.mean_threshold = 0.25
-            self.diff_threshold = 0.7
+            self.mean_threshold = 0.25      # mean value within a data window
+            self.diff_threshold = 0.7       # difference between the first and last value within a window
             self.axes_required = 2
-            self.lower_threshold = 0.3
+            self.lower_threshold = 0.3      # second check for absolute value
             self.upper_threshold = 0.8
         else:  # "gripper_automatic" || "gripper_testing"
-            self.mean_threshold = 0.12
-            self.diff_threshold = 0.35
+            self.mean_threshold = 0.12      # the mean value is the feature parameter
+            self.diff_threshold = 0.35      # difference is the additional condition
             self.axes_required = 1
             self.lower_threshold = 0.05
             self.upper_threshold = 0.3
@@ -90,7 +90,6 @@ class SignalChangeDetector:
             self.publish_diagnostics(True, "Stopping...")
 
     def contact_detection(self, filtered_data):
-
         for axis, value in zip(['x', 'y', 'z'], filtered_data):
             self.data_window[axis].append(value)
             if len(self.data_window[axis]) > self.window_size:

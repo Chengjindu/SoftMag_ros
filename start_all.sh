@@ -32,6 +32,10 @@ export DEFAULT_PI_MODE="$DEFAULT_PI_MODE"
 echo "Checking if screen is installed on the Raspberry Pi..."
 ssh chengjindu@$(jq -r '.pi_ip' start_config.json) 'command -v screen'
 
+# Create/update start_config_pi.json on the Raspberry Pi
+echo "Creating or updating start_config_pi.json on the Raspberry Pi..."
+scp start_config.json chengjindu@$(jq -r '.pi_ip' start_config.json):/home/chengjindu/SoftMag/Console/ros_workspace/start_config_pi.json
+
 # Starting the ROS system on the Raspberry Pi within a screen session
 echo "Starting the ROS system on the Raspberry Pi..."
 ssh chengjindu@$(jq -r '.pi_ip' start_config.json) 'screen -dmS ros_session bash -c "bash /home/chengjindu/SoftMag/Console/ros_workspace/start_console_pi.sh &> /home/chengjindu/ros_session.log; exec bash"'

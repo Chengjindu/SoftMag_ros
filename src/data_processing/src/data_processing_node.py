@@ -15,15 +15,11 @@ sensor_data = {}
 filters = {}
 delay = None
 data_stablized = {}
-contact_detected = {}
-contact_status = False
-contact_check_flag = False
 recalibration_flag = False
 data_count = 0
 processing_count = 0
 publishing_count = 0
 start_time = 0.0
-contact_false_count = 0
 
 # Filter parameters
 initilization_window = 500
@@ -33,7 +29,6 @@ passband_frequency = 3
 order = 2
 passband_ripple = 0.8
 recalibration_interval = 60  # Time interval to check for recalibration (60 seconds)
-contact_threshold = 200  # Number of continuous false readings required to trigger recalibration
 
 
 def individual_sensor_data_callback(msg, sensor_id): # Callback function for sensor_data topic
@@ -41,11 +36,10 @@ def individual_sensor_data_callback(msg, sensor_id): # Callback function for sen
 
     if start_time == 0.0:      # Initialize start time on first callback
         start_time = time.time()
-
     data_count += 1  # Increment the data count
 
-    # Directly use the data from Float32MultiArray
-    measurements = list(msg.data)
+
+    measurements = list(msg.data)   # Directly use the data from Float32MultiArray
     sensor_data[sensor_id] = measurements
 
 def initialize_filters(sensor_ids, sampling_freq=sampling_frequency, passband_freq=passband_frequency, order=order, passband_ripple=passband_ripple):
@@ -102,10 +96,10 @@ def filtering(data, filter_config):     # Function to apply filter to the data
         return filtered_x[0], filtered_y[0], filtered_z[0]
 
     except Exception as e:
-        rospy.logwarn("Error filtering data: %s", e)
+        rospy.logerr("Error filtering data: %s", e)
         return 0.0, 0.0, 0.0
 
-def measure_data_rate():
+def measure_data_rate():    # Measure the rate of incoming sensor data
     global data_count, start_time
     rate = 0.0
 
@@ -122,35 +116,12 @@ def measure_data_rate():
     return rate
 
 
-def contact_callback(msg):
-    global contact_status, contact_false_count, recalibration_flag, contact_check_flag
-    contact_status = msg.data
-    if contact_check_flag:
-        if not contact_status:
-            contact_false_count += 1
-            if contact_false_count >= contact_threshold:
-                recalibration_flag = True
-                contact_check_flag = False  # Stop checking contacts
-                contact_false_count = 0
-                rospy.loginfo("Recalibration triggered due to continuous no contact")
-        else:
-            contact_false_count = 0
-
-
-def zero_sensor_callback(msg):
-    global recalibration_flag, contact_check_flag
-
+def zero_sensor_callback(msg):  # Callback to start the zeroing process for sensors
     if msg.data:
-        rospy.loginfo("Starting contact check for recalibration")
-        contact_check_flag = True  # Enable contact check
-        while not recalibration_flag and not rospy.is_shutdown():
-            rospy.sleep(2)
-        if recalibration_flag:
-            recalibrate_sensors()
-            recalibration_flag = False
-        contact_check_flag = False  # Disable contact check after recalibration
+        rospy.loginfo("Zeroing sensors upon request")
+        recalibrate_sensors()
 
-def recalibrate_sensors():
+def recalibrate_sensors():  # Recalibrate all sensors
     global sensor_ids
 
     # Reinitialize filters with the measured sampling frequency
@@ -160,11 +131,10 @@ def recalibrate_sensors():
     for sensor_id in sensor_data.keys():
         zero_sensor(sensor_id)  # Call the zeroing method for each sensor
 
-    recalibration_flag = False
     sensor_zero_publisher.publish(Bool(data=True))  # Publish the completion message
 
-def zero_sensor(sensor_id):
-    global initilization_window, initial_values, data_stablized, sensor_data, filters, delay, contact_status
+def zero_sensor(sensor_id):  # Function for offset elimination
+    global initilization_window, initial_values, data_stablized, sensor_data, filters, delay
 
     while True:
         local_data_stablized = False
@@ -173,13 +143,6 @@ def zero_sensor(sensor_id):
         data_points = []
 
         while Readout_count < initilization_window and not rospy.is_shutdown():
-            if contact_status:  # Check for contact during stabilization
-                rospy.logwarn(f"Contact detected during stabilization of {sensor_id}. Restarting zeroing process.")
-                Readout_count = 0
-                data_points = []
-                rospy.sleep(1)  # Small delay before retrying
-                continue
-
             data = sensor_data.get(sensor_id)
             if data is not None and len(data) == 3:
                 if all(value == 0.0 for value in data):
@@ -200,26 +163,16 @@ def zero_sensor(sensor_id):
                 except Exception as e:
                     rospy.logerr(f"Error zeroing data for sensor {sensor_id}: {e}")
 
-        # Collect stablized data
-        if local_data_stablized:
+        if local_data_stablized:  # Collect stablized data
             rospy.loginfo(f"Collecting data points for averaging for {sensor_id}...")
             for _ in range(stablized_average_window):
-                if contact_status:  # Check for contact during averaging
-                    rospy.logwarn(f"Contact detected during averaging of {sensor_id}. Restarting zeroing process.")
-                    local_data_stablized = False
-                    break
-
                 data = sensor_data.get(sensor_id)
                 if data is not None and len(data) == 3:
                     filtered_x, filtered_y, filtered_z = filtering(data, filters[sensor_id])
                     data_points.append((filtered_x, filtered_y, filtered_z))
                     rospy.sleep(delay)  # Add a delay between readings to match the data rate
 
-            if not local_data_stablized:
-                continue  # Restart the zeroing process if contact was detected
-
-            # Calculate the average of the collected data points
-            if data_points:
+            if data_points:  # Calculate the average of the collected data points
                 avg_x = np.mean([point[0] for point in data_points])
                 avg_y = np.mean([point[1] for point in data_points])
                 avg_z = np.mean([point[2] for point in data_points])
@@ -230,15 +183,11 @@ def zero_sensor(sensor_id):
                 data_stablized[sensor_id] = local_data_stablized
                 break  # Exit the loop if zeroing is successful
 
-# Process data for a single sensor
-def process_sensor_data(sensor_id, publisher):
-    global sensor_data, filters, delay, initial_values, data_stablized, contact_detected, processing_count, publishing_count, start_time
+def process_sensor_data(sensor_id, publisher):      # Process data for a single sensor
+    global sensor_data, filters, delay, initial_values, data_stablized, processing_count, publishing_count, start_time
 
     # if start_time is None:
     #     start_time = time.time()
-
-    # Initialize the contact_detected dictionary with default values for each sensor
-    contact_detected[sensor_id] = False
 
     while not rospy.is_shutdown():
         data = sensor_data.get(sensor_id)
@@ -309,23 +258,22 @@ if __name__ == '__main__':
     # rospy.init_node('data_processing_node', anonymous=True)
     sensor_ids = ['S1', 'S2']  # Update with actual sensor IDs
 
-    for sensor_id in sensor_ids:            # Initialization
+    for sensor_id in sensor_ids:            # Initialize global variables
         sensor_data[sensor_id] = None
     initial_values = {sensor_id: None for sensor_id in sensor_ids}
     data_stablized = {sensor_id: False for sensor_id in sensor_ids}
 
-    for sensor_id in sensor_ids:
+    for sensor_id in sensor_ids:    # Subscribe to necessary topics
         rospy.Subscriber(f'sensor_data_{sensor_id}', Float32MultiArray,
                          lambda msg, sid=sensor_id: individual_sensor_data_callback(msg, sid))
-    rospy.Subscriber('/contact_detect', Bool, contact_callback)
     rospy.Subscriber('/zero_sensor', Bool, zero_sensor_callback)
 
+    # Initialize ROS publishers
     diag_pub = rospy.Publisher('/diagnostics', DiagnosticArray, queue_size=10)
     all_stabilized_publisher = rospy.Publisher('sensors_stabilized', Bool, queue_size=10)
     sensor_zero_publisher = rospy.Publisher('/sensor_zero', Bool, queue_size=10)
 
-    rospy.sleep(3)  # Run the node for a few seconds to gather data rate information
-
+    rospy.sleep(8)  # Run the node for a few seconds to gather data rate information
     if start_time == 0.0:
         rospy.logwarn("No data received from sensors.")
         sampling_frequency = 50  # Default value
@@ -345,11 +293,9 @@ if __name__ == '__main__':
     for sensor_id in sensor_ids:
         zero_sensor(sensor_id)  # Perform initial zeroing
 
+    # Use ThreadPoolExecutor to process data from sensors concurrently
     with ThreadPoolExecutor(max_workers=len(sensor_ids)) as executor:
         for sensor_id in sensor_ids:
             executor.submit(process_sensor_data, sensor_id, publishers[sensor_id])
 
     rospy.spin()
-
-
-

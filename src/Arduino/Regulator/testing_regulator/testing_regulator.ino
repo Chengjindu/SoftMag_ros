@@ -16,7 +16,7 @@ ros::NodeHandle nh;
 float desiredPressure1 = 0.0;
 float desiredPressure2 = 0.0;
 float maxPressure = 30.0;
-float pressureCoefficient = 0.8;
+float pressureCoefficient = 0.87;
 
 bool dataStabilized = false; // Flag to check if data is stabilized
 bool motorStopped = true;    // Flag to check if motor is stopped

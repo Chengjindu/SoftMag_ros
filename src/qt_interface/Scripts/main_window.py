@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 import sys
 import signal
+import time
+import threading
 import json
 import rospy
 from std_srvs.srv import Trigger
 import numpy as np
 from std_msgs.msg import String, Int32, Float32, Float32MultiArray, Bool
-from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QSizePolicy, QCheckBox, QLCDNumber, QDoubleSpinBox
+from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QHBoxLayout, QSizePolicy, QCheckBox, QLCDNumber, QDoubleSpinBox
 from PySide6.QtCore import  (Signal, Slot, QTimer, QThread, QMutex, QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect, QSize, QTime, QUrl, Qt)
 from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QGradient, QIcon,
@@ -16,10 +18,12 @@ import subprocess
 import seaborn as sns
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.ticker import FuncFormatter
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.colors as mcolors
 from ui_mainwindow import Ui_MainWindow
+from rulerscale import RulerScale
 import datetime
 import os
 
@@ -29,15 +33,18 @@ np.random.BitGenerator = np.random.bit_generator
 # Parameters to be set
 sns.set_theme(context='notebook', style='whitegrid', palette='muted')   # Set the Seaborn style
 
+default_motor_speed_ctrl_input = 3
 steps_per_rev = 200     # Motor steps per revolute
 full_stroke_angle = 85      # Gripper full stroll angle
 max_steps = int((full_stroke_angle / 360) * steps_per_rev)
 
-max_ctrl_pressure = 35       # Maximum scroll pressure for testing mode
+default_initial_ctrl_pressure = 0
+default_max_ctrl_pressure = 35       # Maximum scroll pressure for testing mode
 pressure_ctrl_resolution = 0.1
+default_ctrl_coefficient = 0.90
 
 sensor_plot_window_size = 1000      # sensor frequency ~50Hz
-force_plot_window_size = 50          # force prediction frequency 15Hz
+force_plot_window_size = 500          # force prediction frequency 15Hz
 pressure_plot_window_size = 500     # pressure monitoring frequency ~30Hz
 
 def get_config_param(param):
@@ -97,20 +104,23 @@ class SensorDataCanvas(FigureCanvas):
         self.bg = None  # For blitting
 
     def setup_plot(self, sensor_title):
-        self.fig.subplots_adjust(left = 0.15, right = 0.9, top = 0.9, bottom = 0.15)
-        self.ax.set_title(sensor_title, fontsize = 10)
-        self.ax.set_xlabel('Time', fontsize = 10)
+        self.fig.subplots_adjust(left=0.1, right=0.98, top=0.88, bottom=0.1)
+        self.ax.set_title(sensor_title, fontsize = 9, pad = 5)
+        self.ax.set_xlabel('Time', fontsize = 9, labelpad=-5)
         # self.ax.set_ylabel('Sensor Reading', fontsize=8)
-        self.ax.grid(True, color='lightgrey', linewidth=2, alpha=0.4)  # Set grid color, line thickness, and transparency
+        self.ax.grid(True, color='lightgrey', linewidth=1.5, alpha=0.4)  # Set grid color, line thickness, and transparency
         self.lines = {      # Initialize empty lines for each axis and store them
-            'x': self.ax.plot(self.x_data, label='X-Axis', color='r')[0],
-            'y': self.ax.plot(self.y_data, label='Y-Axis', color='g')[0],
-            'z': self.ax.plot(self.z_data, label='Z-Axis', color='b')[0]
+            'Bx': self.ax.plot(self.x_data, label='Bx', color='r')[0],
+            'By': self.ax.plot(self.y_data, label='By', color='g')[0],
+            'Bz': self.ax.plot(self.z_data, label='Bz', color='b')[0]
         }
 
-        self.ax.legend(loc='upper right', handlelength = 2, handletextpad = 0.5, borderaxespad = 0.5, fontsize = 8)
-        self.ax.annotate('(s)  ', xy=(1.05, -0.05), xycoords='axes fraction', ha='left', va='center')
-        self.ax.annotate('(G)  ', xy=(-0.05, 1.02), xycoords='axes fraction', ha='center', va='bottom', rotation = 0)
+        self.ax.legend(loc='upper right', handlelength = 2, handletextpad = 0.5, borderaxespad = 0.5, fontsize = 9)
+        self.ax.tick_params(axis='both', which='major', labelsize=9)  # Set tick labels font size
+        self.ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{x:.2f}'))  # show 2 decimal places
+        self.ax.annotate('(s)  ', xy=(0.95, -0.05), xycoords='axes fraction', ha='left', va='center', fontsize = 9)
+        self.ax.annotate('(G)  ', xy=(-0.05, 1.06), xycoords='axes fraction', ha='center', va='bottom', rotation = 0, fontsize = 9)
+
         self.ax.set_xticklabels([])  # Hide x-axis tick labels
         self.draw()
         self.bg = self.copy_from_bbox(self.ax.bbox)  # Save background for blitting
@@ -126,9 +136,9 @@ class SensorDataCanvas(FigureCanvas):
             self.y_data.pop(0)
             self.z_data.pop(0)
 
-        self.lines['x'].set_data(range(len(self.x_data)), self.x_data)
-        self.lines['y'].set_data(range(len(self.y_data)), self.y_data)
-        self.lines['z'].set_data(range(len(self.z_data)), self.z_data)
+        self.lines['Bx'].set_data(range(len(self.x_data)), self.x_data)
+        self.lines['By'].set_data(range(len(self.y_data)), self.y_data)
+        self.lines['Bz'].set_data(range(len(self.z_data)), self.z_data)
 
         self.rescale_axes()
         self.redraw_plot()
@@ -150,11 +160,11 @@ class SensorDataCanvas(FigureCanvas):
             self.ax.draw_artist(line)
         self.blit(self.ax.bbox)  # Blit updated region
 
-def clear_plot(self):
+    def clear_plot(self):
         self.x_data, self.y_data, self.z_data = [], [], []
-        self.lines['x'].set_data([], [])
-        self.lines['y'].set_data([], [])
-        self.lines['z'].set_data([], [])
+        self.lines['Bx'].set_data([], [])
+        self.lines['By'].set_data([], [])
+        self.lines['Bz'].set_data([], [])
         self.ax.set_xlim(0, self.window_size)
         self.ax.set_ylim(-3, 3)
         self.draw()
@@ -187,6 +197,9 @@ class QuadrantCanvas(FigureCanvas):
 
         super(QuadrantCanvas, self).__init__(fig)
         self.setParent(parent)
+        self.bg = None  # For blitting
+        self.draw()
+        self.bg = self.copy_from_bbox(self.ax.bbox)  # Save background for blitting
 
     def create_gradient_color(self, base_color, force_value):
         # Create a color with transparency based on the force value.
@@ -218,12 +231,78 @@ class QuadrantCanvas(FigureCanvas):
                         if touch == 1:  # If touch is detected in the quadrant
                             self.quadrants[i].set_facecolor(color)
 
-        self.draw()  # Redraw the canvas to show updated colors
+        self.redraw_plot()
 
+    def redraw_plot(self):
+        if self.bg is None:  # Ensure bg is initialized before using it
+            self.bg = self.copy_from_bbox(self.ax.bbox)
+        self.restore_region(self.bg)  # Restore background
+        for quad in self.quadrants:
+            self.ax.draw_artist(quad)
+        self.blit(self.ax.bbox)  # Blit updated region
 
-# Create a Matplotlib canvas class that can update the force plot dynamically
+class ShearMapCanvas(FigureCanvas):
+    def __init__(self, parent=None, max_force = 6, color=(179/255, 229/255, 252/255, 1.0), rotation_angle_degrees=-90, size_factor=1):
+        plt.style.use('ggplot')
+        self.fig, self.ax = plt.subplots(figsize=(5, 5))
+        self.fig.patch.set_facecolor((1, 1, 1, 0))  # Set figure background to transparent
+        self.ax.set_facecolor((1, 1, 1, 0))  # Keep the axes background white
+        super(ShearMapCanvas, self).__init__(self.fig)
+        self.setParent(parent)
+        self.max_force = max_force
+        self.color = color
+        self.rotation_angle = np.radians(rotation_angle_degrees)
+        self.size_factor = size_factor
+        self.setup_plot()
+        self.bg = None  # For blitting
+
+    def setup_plot(self):
+        self.ax.set_xlim(-2, 2)
+        self.ax.set_ylim(-2, 2)
+        self.ax.set_aspect('equal')
+        self.ax.axis('off')  # Hide axes
+
+        self.inner_circle_radius = 1 * self.size_factor
+
+        # Create the ellipse (initially centered and not deformed)
+        self.ellipse = patches.Ellipse((0, 0), width=self.inner_circle_radius, height=self.inner_circle_radius, angle=0,
+                                       color=self.color)
+        self.ax.add_artist(self.ellipse)
+        self.draw()
+        self.bg = self.copy_from_bbox(self.ax.bbox)  # Save background for blitting
+
+    def update_shear_map(self, fx, fy):
+        # Perform rotation according to the actual configuration
+        rotated_fx = fx * np.cos(self.rotation_angle) - fy * np.sin(self.rotation_angle)
+        rotated_fy = fx * np.sin(self.rotation_angle) + fy * np.cos(self.rotation_angle)
+
+        force_magnitude = np.sqrt(rotated_fx ** 2 + rotated_fy ** 2) / self.max_force
+        angle = np.arctan2(rotated_fy, rotated_fx)  # Use the angle of the force vector directly
+
+        deformation_scale = 1.0  # Adjust scale to achieve desired stretching
+
+        ellipse_width = self.inner_circle_radius * (1 + deformation_scale * force_magnitude)
+        ellipse_height = self.inner_circle_radius * (1 - 0.5 * deformation_scale * force_magnitude)
+
+        ellipse_x = self.size_factor * rotated_fx / self.max_force
+        ellipse_y = self.size_factor * rotated_fy / self.max_force
+
+        self.ellipse.set_width(ellipse_width)
+        self.ellipse.set_height(ellipse_height)
+        self.ellipse.set_angle(np.degrees(angle))
+        self.ellipse.set_center((ellipse_x, ellipse_y))
+
+        self.redraw_plot()
+
+    def redraw_plot(self):
+        if self.bg is None:  # Ensure bg is initialized before using it
+            self.bg = self.copy_from_bbox(self.ax.bbox)
+        self.restore_region(self.bg)  # Restore background
+        self.ax.draw_artist(self.ellipse)
+        self.blit(self.ax.bbox)  # Blit updated region
+
 class ForceDataCanvas(FigureCanvas):
-    def __init__(self, parent = None, window_size = 50, title = ''):
+    def __init__(self, parent=None, window_size=200, title=''):
         plt.style.use('ggplot')
         self.fig, self.ax = plt.subplots(figsize=(10, 4))
         self.fig.patch.set_facecolor((1, 1, 1, 0))  # Set figure background to transparent
@@ -231,70 +310,74 @@ class ForceDataCanvas(FigureCanvas):
         super(ForceDataCanvas, self).__init__(self.fig)
         self.setParent(parent)
         self.window_size = window_size
-        self.force_data_s1 = []
-        self.force_data_s2 = []
+        self.fz_data, self.fx_data, self.fy_data = [], [], []
         self.max_data_points = window_size  # Limit the number of data points
         self.setup_plot(title)
         self.bg = None  # For blitting
 
     def setup_plot(self, title):
-        self.fig.subplots_adjust(left=0.15, right=0.9, top=0.9, bottom=0.15)
-        self.ax.set_title(title, fontsize=10)
-        self.ax.set_xlabel('Time', fontsize=10)
-        self.ax.grid(True, color='lightgrey', linewidth=2, alpha=0.4)  # Set grid color, line thickness, and transparency
+        self.fig.subplots_adjust(left=0.12, right=0.98, top=0.88, bottom=0.1)
+        self.ax.set_title(title, fontsize = 9, pad = 5)
+        self.ax.set_xlabel('Time', fontsize = 9, labelpad = -5)
+        self.ax.grid(True, color='lightgrey', linewidth=1.5, alpha=0.4)  # Set grid color, line thickness, and transparency
+        self.lines = {  # Initialize empty lines for each axis and store them
+            'fz': self.ax.plot(self.fz_data, label='Fz', color='b')[0],
+            'fx': self.ax.plot(self.fx_data, label='Fx', color='r')[0],
+            'fy': self.ax.plot(self.fy_data, label='Fy', color='g')[0]
+        }
 
-        self.force_line_s1, = self.ax.plot(self.force_data_s1, label='Force S1', color='m')
-        self.force_line_s2, = self.ax.plot(self.force_data_s2, label='Force S2', color='c')
-
-        self.ax.legend(loc='upper right', handlelength = 2, handletextpad = 0.5, borderaxespad = 0.5, fontsize = 8)
-        self.ax.annotate(' (s)  ', xy=(1.05, -0.05), xycoords='axes fraction', ha='left', va='center')
-        self.ax.annotate(' (N)  ', xy=(-0.05, 1.02), xycoords='axes fraction', ha='center', va='bottom', rotation=0)
+        self.ax.legend(loc='upper right', handlelength = 2, handletextpad = 0.5, borderaxespad = 0.5, fontsize = 9)
+        self.ax.tick_params(axis='both', which='major', labelsize=9)  # Set tick labels font size
+        self.ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{x:.2f}'))  # show 2 decimal places
+        self.ax.annotate(' (s)  ', xy=(0.95, -0.05), xycoords='axes fraction', ha='left', va='center', fontsize=8)
+        self.ax.annotate(' (N)  ', xy=(-0.05, 1.06), xycoords='axes fraction', ha='center', va='bottom', rotation=0, fontsize=8)
         self.ax.set_xticklabels([])  # Hide x-axis tick labels
         self.draw()
         self.bg = self.copy_from_bbox(self.ax.bbox)  # Save background for blitting
 
-    def update_plot(self, sensor_id, force):
-        if sensor_id == 'S1':
-            self.force_data_s1.append(force)
-            if len(self.force_data_s1) > self.max_data_points:
-                self.force_data_s1.pop(0)
-            self.force_line_s1.set_data(range(len(self.force_data_s1)), self.force_data_s1)
+    def update_plot(self, fx = None, fy = None, fz = None):
+        self.fz_data.append(fz)
+        self.fx_data.append(fx)
+        self.fy_data.append(fy)
 
-        elif sensor_id == 'S2':
-            self.force_data_s2.append(force)
-            if len(self.force_data_s2) > self.max_data_points:
-                self.force_data_s2.pop(0)
-            self.force_line_s2.set_data(range(len(self.force_data_s2)), self.force_data_s2)
+        # Limit the number of data points to avoid memory issues
+        if len(self.fz_data) > self.max_data_points:
+            self.fz_data.pop(0)
+            self.fx_data.pop(0)
+            self.fy_data.pop(0)
+
+        self.lines['fz'].set_data(range(len(self.fz_data)), self.fz_data)
+        self.lines['fx'].set_data(range(len(self.fx_data)), self.fx_data)
+        self.lines['fy'].set_data(range(len(self.fy_data)), self.fy_data)
 
         self.rescale_axes()
         self.redraw_plot()
 
     def rescale_axes(self):
-        sample_number = max(len(self.force_data_s1), len(self.force_data_s2))
-        self.ax.set_xlim(max(0, sample_number - self.window_size), max(self.window_size, sample_number))
+        sample_number = len(self.fz_data)
+        self.ax.set_xlim(max(0, sample_number - self.window_size), sample_number)
 
-        all_force_data = self.force_data_s1[-self.window_size:] + self.force_data_s2[-self.window_size:]
-        y_min, y_max = min(all_force_data), max(all_force_data)
-        self.ax.set_ylim(y_min - 0.1, y_max + 0.1)
-
-        if self.bg is None:
-            self.bg = self.copy_from_bbox(self.ax.bbox)
+        # Dynamic y-axis scaling based on the visible data
+        all_visible_data = self.fz_data[-self.window_size:] + self.fx_data[-self.window_size:] + self.fy_data[
+                                                                                               -self.window_size:]
+        y_min, y_max = min(all_visible_data), max(all_visible_data)
+        self.ax.set_ylim(y_min - 0.1, y_max + 0.1)  # Add some padding
 
     def redraw_plot(self):
         if self.bg is None:  # Ensure bg is initialized before using it
             self.bg = self.copy_from_bbox(self.ax.bbox)
         self.restore_region(self.bg)
-        self.ax.draw_artist(self.force_line_s1)
-        self.ax.draw_artist(self.force_line_s2)
+        for line in self.lines.values():
+            self.ax.draw_artist(line)
         self.blit(self.ax.bbox)
 
     def clear_plot(self):
-        self.force_data_s1 = []
-        self.force_data_s2 = []
-        self.force_line_s1.set_data([], [])
-        self.force_line_s2.set_data([], [])
+        self.fz_data, self.fx_data, self.fy_data = [], [], []
+        self.lines['fz'].set_data([], [])
+        self.lines['fx'].set_data([], [])
+        self.lines['fy'].set_data([], [])
         self.ax.set_xlim(0, self.window_size)
-        self.ax.set_ylim(0, 6)
+        self.ax.set_ylim(-2, 6)
         self.draw()
         self.bg = self.copy_from_bbox(self.ax.bbox)  # Save background for blitting
 
@@ -315,18 +398,19 @@ class PressureDataCanvas(FigureCanvas):
         self.bg = None  # For blitting
 
     def setup_plot(self, title):
-        self.fig.subplots_adjust(left=0.15, right=0.9, top=0.9, bottom=0.15)
-        self.ax.set_title('Pressure Monitoring', fontsize=10)
-        self.ax.set_xlabel('Time', fontsize=10)
+        self.fig.subplots_adjust(left=0.12, right=0.98, top=0.88, bottom=0.1)
+        self.ax.set_title('Pressure Monitoring', fontsize=9)
+        self.ax.set_xlabel('Time', fontsize=9)
         # self.ax.set_ylabel('Pressure (kPa)', fontsize=10)
         self.ax.grid(True, color='lightgrey', linewidth=2, alpha=0.4)  # Set grid color, line thickness, and transparency
 
         # Initialize an empty line for the pressure data
         self.pressure_line1, = self.ax.plot(self.pressure_data1, label='Pressure 1', color='purple')
         self.pressure_line2, = self.ax.plot(self.pressure_data2, label='Pressure 2', color='orange')
-        self.ax.legend(loc='upper right', handlelength=2, handletextpad=0.5, borderaxespad=0.5, fontsize=8)
-        self.ax.annotate(' (s)  ', xy=(1.05, -0.05), xycoords='axes fraction', ha='left', va='center')
-        self.ax.annotate(' (kPa)  ', xy=(-0.05, 1.02), xycoords='axes fraction', ha='center', va='bottom', rotation=0)
+        self.ax.legend(loc='upper right', handlelength=2, handletextpad=0.5, borderaxespad=0.5, fontsize=9)
+        self.ax.tick_params(axis='both', which='major', labelsize=9.5)  # Set tick labels font size
+        self.ax.annotate(' (s)  ', xy=(0.9, -0.05), xycoords='axes fraction', ha='left', va='center', fontsize=9)
+        self.ax.annotate(' (kPa)  ', xy=(-0.05, 1.06), xycoords='axes fraction', ha='center', va='bottom', rotation=0, fontsize=9)
         self.ax.set_xticklabels([])  # Hide x-axis tick labels
 
         self.draw()
@@ -445,6 +529,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
+        self.probing_mutex = QMutex()  # Initialize the QMutex object
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.setWindowTitle("SoftMag Interface")
@@ -455,7 +540,11 @@ class MainWindow(QMainWindow):
         self.current_motor_stop_status = None  # Initialize current motor stop status
         self.current_data_stable_flag = None  # Initialize current data stable flag
 
-        self.current_force = {'S1': 0.0, 'S2': 0.0}
+        self.current_force = {
+            'S1': {'fx': 0.0, 'fy': 0.0, 'fz': 0.0},
+            'S2': {'fx': 0.0, 'fy': 0.0, 'fz': 0.0}
+        }
+
         self.current_position = {'S1': 0, 'S2': 0}
 
         # Initialize elapsed time timer
@@ -498,21 +587,45 @@ class MainWindow(QMainWindow):
         self.ui.S1_graph_layout.addWidget(self.sensor_plots["S1"])
         self.ui.S2_graph_layout.addWidget(self.sensor_plots["S2"])
 
-        # Create instances for the two quadrant plots
+        # Create instances for the quadrant plots
         self.quadrant_canvas_s1 = QuadrantCanvas(self.ui.quadrant_1_1,
-                                                 base_color=(179 / 255, 229 / 255, 252 / 255, 0.2))  # Light blue
+                                                 base_color=(184/255, 220/255, 252/255, 0.45))  # Light blue
         self.ui.quadrant_1_1_layout = QVBoxLayout(self.ui.quadrant_1_1)
         self.ui.quadrant_1_1_layout.addWidget(self.quadrant_canvas_s1)
 
         self.quadrant_canvas_s2 = QuadrantCanvas(self.ui.quadrant_2_2,
-                                                 base_color=(255 / 255, 182 / 255, 193 / 255, 0.2))  # Light red
+                                                 base_color=(255/255, 182/255, 193/255, 0.35))  # Light red
         self.ui.quadrant_2_2_layout = QVBoxLayout(self.ui.quadrant_2_2)
         self.ui.quadrant_2_2_layout.addWidget(self.quadrant_canvas_s2)
 
+        # Create instances for the shear map plots
+
+        if self.current_mode == 'sensor':
+            self.shear_plot_s1 = ShearMapCanvas(self.ui.shear_map_1_1, color=(179 / 255, 229 / 255, 252 / 255, 1.0),
+                                                rotation_angle_degrees=90, size_factor=1.2)
+        else:
+            self.shear_plot_s1 = ShearMapCanvas(self.ui.shear_map_1_1, color=(179 / 255, 229 / 255, 252 / 255, 1.0),
+                                                rotation_angle_degrees=-215, size_factor=1.5)
+        self.ui.shear_map_1_1_layout = QVBoxLayout(self.ui.shear_map_1_1)
+        self.ui.shear_map_1_1_layout.addWidget(self.shear_plot_s1)
+
+
+        self.shear_plot_s2 = ShearMapCanvas(self.ui.shear_map_2_2, color=(255 / 255, 192 / 255, 192 / 255, 1.0),
+                                                rotation_angle_degrees=-215, size_factor=1.5)
+
+        self.ui.shear_map_2_2_layout = QVBoxLayout(self.ui.shear_map_2_2)
+        self.ui.shear_map_2_2_layout.addWidget(self.shear_plot_s2)
+
         # Create an instance of the ForceDataCanvas for plotting force values
-        self.force_plot = ForceDataCanvas(self.ui.force_val_graph, window_size=force_plot_window_size, title='Real-time Force')
-        self.ui.force_val_graph_layout = QVBoxLayout(self.ui.force_val_graph)
-        self.ui.force_val_graph_layout.addWidget(self.force_plot)
+        self.force_plot_s1 = ForceDataCanvas(self.ui.force_val_1_graph, window_size=force_plot_window_size,
+                                             title='S1 Force')
+        self.ui.force_val_1_graph_layout = QVBoxLayout(self.ui.force_val_1_graph)
+        self.ui.force_val_1_graph_layout.addWidget(self.force_plot_s1)
+
+        self.force_plot_s2 = ForceDataCanvas(self.ui.force_val_2_graph, window_size=force_plot_window_size,
+                                             title='S2 Force')
+        self.ui.force_val_2_graph_layout = QVBoxLayout(self.ui.force_val_2_graph)
+        self.ui.force_val_2_graph_layout.addWidget(self.force_plot_s2)
 
         # Create instances for the two pressure plot
         self.pressure_plot = PressureDataCanvas(self.ui.pressure_graph, window_size=pressure_plot_window_size)
@@ -523,12 +636,15 @@ class MainWindow(QMainWindow):
         self.ui.motor_pos_reading_bar_1.setRange(0, max_steps)
         self.ui.motor_pos_reading_bar_2.setRange(0, max_steps)
 
+        # Create and integrate the RulerScale widget
+        self.ruler_scale = RulerScale(self.ui.centralwidget, min_value=-35, max_value=35, interval=10)
+        self.ruler_scale.setMinimumHeight(25)  # Adjust as necessary for visibility
+        # Find the vertical layout where the ruler should be placed
+        self.ui.verticalLayout_9.insertWidget(1, self.ruler_scale)
+
         # Connect the existing checkboxes to the appropriate slots
         self.ui.forceControlCheckBox = self.findChild(QCheckBox, "force_feedback_ctrl_enable")
         self.ui.forceControlCheckBox.stateChanged.connect(self.onForceControlStateChanged)
-
-        self.ui.sofaSimulationCheckBox = self.findChild(QCheckBox, "sofa_simulation_enable")
-        self.ui.sofaSimulationCheckBox.stateChanged.connect(self.onSofaSimulationStateChanged)
 
         # Set up ROS subscribers
         rospy.Subscriber(f"/processed_sensor_data_S1", Float32MultiArray, self.update_sensor_data_S1)
@@ -536,8 +652,13 @@ class MainWindow(QMainWindow):
         rospy.Subscriber("/sensors_stabilized", Bool, self.update_data_stable_flag)
         rospy.Subscriber(f"/prediction_position_S1", Int32, self.update_prediction_position_S1)
         rospy.Subscriber(f"/prediction_position_S2", Int32, self.update_prediction_position_S2)
-        rospy.Subscriber(f"/prediction_force_S1", Float32, self.update_prediction_force_S1)
-        rospy.Subscriber(f"/prediction_force_S2", Float32, self.update_prediction_force_S2)
+        rospy.Subscriber(f"/prediction_fz_S1", Float32, self.update_prediction_fz_S1)
+        rospy.Subscriber(f"/prediction_fz_S2", Float32, self.update_prediction_fz_S2)
+        rospy.Subscriber(f"/prediction_fx_S1", Float32, self.update_prediction_fx_S1)
+        rospy.Subscriber(f"/prediction_fx_S2", Float32, self.update_prediction_fx_S2)
+        rospy.Subscriber(f"/prediction_fy_S1", Float32, self.update_prediction_fy_S1)
+        rospy.Subscriber(f"/prediction_fy_S2", Float32, self.update_prediction_fy_S2)
+
         rospy.Subscriber("/pressure_reading1", Float32, self.update_pressure_reading1)
         rospy.Subscriber("/pressure_reading2", Float32, self.update_pressure_reading2)
         rospy.Subscriber("/motor_zero", Bool, self.motor_zero_callback)
@@ -561,11 +682,11 @@ class MainWindow(QMainWindow):
         # Set up ROS publishers for testing mode
         self.max_pressure_publisher = rospy.Publisher('/max_pressure', Float32, queue_size=10)
         self.motor_pos_ctrl_publisher = rospy.Publisher('/motor_pos_ctrl', Int32, queue_size=10)
+        self.motor_speed_ctrl_publisher = rospy.Publisher('/motor_speed_ctrl', Int32, queue_size=10)
         self.pressure_ctrl_publisher = rospy.Publisher('/pressure_ctrl', Float32, queue_size=10)
         self.force_closure_publisher = rospy.Publisher('/force_closure', Bool, queue_size=10)
         self.zero_motor_publisher = rospy.Publisher('/zero_motor', Bool, queue_size=10)
         self.zero_sensor_publisher = rospy.Publisher('/zero_sensor', Bool, queue_size=10)
-        self.record_data_publisher = rospy.Publisher('/record_data', Bool, queue_size=10)
         self.ctrl_coefficient_publisher = rospy.Publisher('/pressure_coefficient', Float32, queue_size=10)
 
         # Set up stop publishers for both modes
@@ -586,7 +707,7 @@ class MainWindow(QMainWindow):
                     QPushButton {
                         background-color: red;
                         color: white;
-                        border: 2px solid darkred;
+                        border: 1px solid darkred;
                         border-radius: 10px;
                         padding: 10px 20px;
                     }
@@ -600,39 +721,101 @@ class MainWindow(QMainWindow):
         self.ui.stop_all_button.style().unpolish(self.ui.stop_all_button)
         self.ui.stop_all_button.style().polish(self.ui.stop_all_button)
 
+        self.ui.motor_speed_ctrl_input.setValue(default_motor_speed_ctrl_input)
+        self.ui.motor_speed_ctrl_input.valueChanged.connect(self.publish_motor_speed_ctrl_input)
         self.ui.motor_pos_ctrl_bar_1.valueChanged.connect(self.update_motor_pos_ctrl)
         self.ui.motor_pos_ctrl_bar_2.valueChanged.connect(self.update_motor_pos_ctrl)
         self.ui.motor_zero_button.clicked.connect(self.zero_motor_callback)
         self.ui.sensor_zero_button.clicked.connect(self.zero_sensor_callback)
+        self.ui.ctrl_coefficient.setValue(default_ctrl_coefficient)
         self.ui.ctrl_coefficient.valueChanged.connect(self.publish_ctrl_coefficient)
+        self.ui.sofa_simulation_button.clicked.connect(self.toggle_simulation)
+        self.sofa_simulation_process = None    # Initialize the subprocess object
+        self.ui.sofa_simulation_button.setStyleSheet("""
+                QPushButton {
+                    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                stop:0 rgba(255, 192, 192, 0.7), 
+                                                stop:1 rgba(179, 229, 252, 0.7));
+                    border: none;
+                    border-radius: 5px;
+                    padding: 5px;
+                }
+                QPushButton:hover {
+                    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                stop:0 rgba(255, 192, 192, 0.9), 
+                                                stop:1 rgba(179, 229, 252, 0.9));
+                }
+                QPushButton:pressed {
+                    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                stop:0 rgba(255, 192, 192, 0.5), 
+                                                stop:1 rgba(179, 229, 252, 0.5));
+                }
+            """)
+        self.ui.sofa_simulation_button.style().unpolish(self.ui.sofa_simulation_button)
+        self.ui.sofa_simulation_button.style().polish(self.ui.sofa_simulation_button)
         self.ui.record_data_button.clicked.connect(self.toggle_recording)
         self.ui.record_data_button.setStyleSheet("""
-                    QPushButton {
-                        background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
-                                                    stop:0 rgba(179, 229, 252, 0.7), 
-                                                    stop:1 rgba(255, 192, 192, 0.7));
-                        border: none;
-                        border-radius: 5px;
-                        padding: 5px;
-                    }
-                    QPushButton:hover {
-                        background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
-                                                    stop:0 rgba(179, 229, 252, 0.9), 
-                                                    stop:1 rgba(255, 192, 192, 0.9));
-                    }
-                    QPushButton:pressed {
-                        background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
-                                                    stop:0 rgba(179, 229, 252, 0.5), 
-                                                    stop:1 rgba(255, 192, 192, 0.5));
-                    }
-                """)
+                QPushButton {
+                    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                stop:0 rgba(179, 229, 252, 0.7), 
+                                                stop:1 rgba(255, 192, 192, 0.7));
+                    border: none;
+                    border-radius: 5px;
+                    padding: 5px;
+                }
+                QPushButton:hover {
+                    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                stop:0 rgba(179, 229, 252, 0.9), 
+                                                stop:1 rgba(255, 192, 192, 0.9));
+                }
+                QPushButton:pressed {
+                    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                stop:0 rgba(179, 229, 252, 0.5), 
+                                                stop:1 rgba(255, 192, 192, 0.5));
+                }
+            """)
         self.ui.record_data_button.style().unpolish(self.ui.record_data_button)
         self.ui.record_data_button.style().polish(self.ui.record_data_button)
+        self.ui.probing_button.clicked.connect(self.toggle_probing)
+        self.ui.probing_button.setStyleSheet("""
+                        QPushButton {
+                            background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                        stop:0 rgba(179, 229, 252, 0.7), 
+                                                        stop:1 rgba(255, 192, 192, 0.7));
+                            border: none;
+                            border-radius: 5px;
+                            padding: 5px;
+                        }
+                        QPushButton:hover {
+                            background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                        stop:0 rgba(179, 229, 252, 0.9), 
+                                                        stop:1 rgba(255, 192, 192, 0.9));
+                        }
+                        QPushButton:pressed {
+                            background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                        stop:0 rgba(179, 229, 252, 0.5), 
+                                                        stop:1 rgba(255, 192, 192, 0.5));
+                        }
+                    """)
+        self.ui.probing_button.style().unpolish(self.ui.probing_button)
+        self.ui.probing_button.style().polish(self.ui.probing_button)
 
-        # Set maximum value for the pressure_scrollbar
-        self.ui.pressure_scrollbar.setMaximum(max_ctrl_pressure/pressure_ctrl_resolution)
-        self.ui.pressure_scrollbar.valueChanged.connect(self.scrollbar_to_spinbox)
+        # Probing related variables
+        self.probing_pressure_increment = 4  # Pressure increment P in kPa
+        self.probing_pressurize_duration = 3000  # Duration T in ms (milliseconds)
+        self.probing_repeat_times = 3  # Repeat times N
+        self.is_probing = False  # Flag to track the probing state
+        self.probing_initial_pressure = 0  # To store the initial pressure be for probing
+        self.probing_timer = QTimer(self)  # Timer for probing control
+        self.current_probing_cycle = 0  # Track the current probing cycle
+
+        # Set initial and maximum value for the pressure control
+        self.ui.pressure_type_input.setValue(default_initial_ctrl_pressure)
+        self.ui.max_pressure_input.setValue(default_max_ctrl_pressure)
+        self.ui.pressure_type_input.setMaximum(default_max_ctrl_pressure)
         self.ui.pressure_type_input.valueChanged.connect(self.spinbox_to_scrollbar)
+        self.ui.pressure_scrollbar.setMaximum(default_max_ctrl_pressure/pressure_ctrl_resolution)
+        self.ui.pressure_scrollbar.valueChanged.connect(self.scrollbar_to_spinbox)
 
         # Connect the time reset button
         self.ui.time_reset_button.clicked.connect(self.reset_elapsed_time)
@@ -686,7 +869,11 @@ class MainWindow(QMainWindow):
     def publish_ctrl_mode(self, mode):
         ctrl_mode_message = json.dumps({"ctrl_mode": mode})
         self.ctrl_mode_publisher.publish(ctrl_mode_message)
-        rospy.loginfo(f"Current mode: {mode}")
+        rospy.loginfo(f"Set mode as: {mode}")
+
+    def publish_motor_speed_ctrl_input(self, speed):
+        self.motor_speed_ctrl_publisher.publish(speed)
+        rospy.loginfo(f"Set motor speed as: {speed}")
 
     def update_motor_pos_ctrl(self, position):
         # Temporarily block signals to prevent recursive updates
@@ -763,13 +950,6 @@ class MainWindow(QMainWindow):
         self.force_closure_publisher.publish(msg)
         rospy.loginfo(f"Force control set to: {state == Qt.Checked}")
 
-    @Slot(int)
-    def onSofaSimulationStateChanged(self, state):
-        msg = Bool()
-        msg.data = (state == Qt.Checked)
-        self.sofaSimulationCheckBox.publish(msg)
-        rospy.loginfo(f"SOFA simulation set to: {state == Qt.Checked}")
-
     def enable_nodes(self, nodes):
         for node in nodes:
             subprocess.Popen(['roslaunch', 'package_name', f'{node}.launch'])
@@ -780,13 +960,87 @@ class MainWindow(QMainWindow):
             subprocess.Popen(['rosnode', 'kill', node])
             rospy.loginfo(f"Disabled node: {node}")
 
+    def toggle_simulation(self):
+        try:
+            if self.sofa_simulation_process is None:
+                command = "roslaunch launch_project sofa_simulation_launch.launch"
+                self.sofa_simulation_process = subprocess.Popen(command, shell=True, preexec_fn=os.setsid)
+                rospy.loginfo("sofa_simulation_node started successfully.")
+                self.ui.sofa_simulation_button.setText("Stop Simulation")
+                self.ui.sofa_simulation_button.setStyleSheet("""
+                                QPushButton {
+                                    background-color: red;
+                                    color: white;
+                                    border: none;
+                                    border-radius: 5px;
+                                    padding: 5px;
+                                }
+                                QPushButton:hover {
+                                    background-color: darkred;
+                                }
+                                QPushButton:pressed {
+                                    background-color: crimson;
+                                }
+                            """)
+            else:
+                # Send SIGTERM to the process group to terminate all child processes
+                os.killpg(os.getpgid(self.sofa_simulation_process.pid), signal.SIGTERM)
+                self.sofa_simulation_process.wait()  # Wait for the process to terminate
+                rospy.loginfo("sofa_simulation_node has been killed")
+                self.sofa_simulation_process = None
+                self.ui.sofa_simulation_button.setText("Simulation")
+                self.ui.sofa_simulation_button.setStyleSheet("""
+                        QPushButton {
+                            background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                        stop:0 rgba(255, 192, 192, 0.7), 
+                                                        stop:1 rgba(179, 229, 252, 0.7));
+                            border: none;
+                            border-radius: 5px;
+                            padding: 5px;
+                        }
+                        QPushButton:hover {
+                            background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                        stop:0 rgba(255, 192, 192, 0.9), 
+                                                        stop:1 rgba(179, 229, 252, 0.9));
+                        }
+                        QPushButton:pressed {
+                            background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                        stop:0 rgba(255, 192, 192, 0.5), 
+                                                        stop:1 rgba(179, 229, 252, 0.5));
+                        }
+                    """)
+        except subprocess.SubprocessError as e:
+            rospy.logerr(f"Failed to toggle Simulation: {e}")
+            self.sofa_simulation_process = None
+            self.ui.sofa_simulation_button.setText("Simulation")
+            self.ui.sofa_simulation_button.setStyleSheet("""
+                    QPushButton {
+                        background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                    stop:0 rgba(255, 192, 192, 0.7), 
+                                                    stop:1 rgba(179, 229, 252, 0.7));
+                        border: none;
+                        border-radius: 5px;
+                        padding: 5px;
+                    }
+                    QPushButton:hover {
+                        background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                    stop:0 rgba(255, 192, 192, 0.9), 
+                                                    stop:1 rgba(179, 229, 252, 0.9));
+                    }
+                    QPushButton:pressed {
+                        background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                    stop:0 rgba(255, 192, 192, 0.5), 
+                                                    stop:1 rgba(179, 229, 252, 0.5));
+                    }
+                """)
+
     def toggle_recording(self):
         rospy.wait_for_service('/record_data')
         try:
             record_service = rospy.ServiceProxy('/record_data', Trigger)
             response = record_service()
             if response.success:
-                if self.ui.record_data_button.text() == "Record Data":
+                if self.ui.record_data_button.text() == "Recording":
                     self.ui.record_data_button.setText("Stop Recording")
                     self.ui.record_data_button.setStyleSheet("""
                             QPushButton {
@@ -804,7 +1058,7 @@ class MainWindow(QMainWindow):
                             }
                         """)
                 else:
-                    self.ui.record_data_button.setText("Record Data")
+                    self.ui.record_data_button.setText("Recording")
                     self.ui.record_data_button.setStyleSheet("""
                             QPushButton {
                                 background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
@@ -830,6 +1084,112 @@ class MainWindow(QMainWindow):
                 rospy.logerr("Failed to toggle recording: " + response.message)
         except rospy.ServiceException as e:
             rospy.logerr("Service call failed: %s" % e)
+
+    def toggle_probing(self):
+        if not self.is_probing:
+            # Start probing
+            self.is_probing = True
+            self.ui.probing_button.setText("Stop Probing")
+            self.ui.probing_button.setStyleSheet("""
+                    QPushButton {
+                        background-color: red;
+                        color: white;
+                        border: none;
+                        border-radius: 5px;
+                        padding: 5px;
+                    }
+                    QPushButton:hover {
+                        background-color: darkred;
+                    }
+                    QPushButton:pressed {
+                        background-color: crimson;
+                    }
+                """)
+
+            # Save the initial pressure before starting probing
+            self.probing_initial_pressure = self.ui.pressure_type_input.value()
+            self.current_probing_cycle = 0
+
+            rospy.wait_for_service('/record_data')  # Start data recording
+            try:
+                record_service = rospy.ServiceProxy('/record_data', Trigger)
+                response = record_service()
+                if response.success:
+                    rospy.loginfo("Data recording started.")
+                else:
+                    rospy.logerr("Failed to start data recording: " + response.message)
+            except rospy.ServiceException as e:
+                rospy.logerr("Service call failed: %s" % e)
+
+            # Initialize the probing timer
+            self.probing_timer = QTimer(self)
+            self.probing_timer.timeout.connect(self.perform_probing_step)
+            self.probing_timer.start(self.probing_pressurize_duration)
+
+        else:
+            self.end_probing()
+
+    def perform_probing_step(self):
+        if self.current_probing_cycle < self.probing_repeat_times * 2:
+            if self.current_probing_cycle % 2 == 0:
+                # Increase pressure by a pre-defined value
+                new_pressure = self.probing_initial_pressure + self.probing_pressure_increment
+            else:
+                new_pressure = self.probing_initial_pressure        # Decrease pressure back to initial
+
+            self.ui.pressure_type_input.setValue(new_pressure)
+            self.pressure_ctrl_publisher.publish(Float32(new_pressure))
+
+            self.current_probing_cycle += 1
+        else:
+            self.end_probing()
+
+    def end_probing(self):
+        self.is_probing = False     # Reset the probing state
+        self.current_probing_cycle = 0
+
+        # Ensure the pressure returns to the initial value
+        self.ui.pressure_type_input.setValue(self.probing_initial_pressure)
+        self.pressure_ctrl_publisher.publish(Float32(self.probing_initial_pressure))
+
+        rospy.wait_for_service('/record_data')       # Stop data recording
+        try:
+            record_service = rospy.ServiceProxy('/record_data', Trigger)
+            response = record_service()
+            if response.success:
+                rospy.loginfo("Data recording stopped.")
+            else:
+                rospy.logerr("Failed to stop data recording: " + response.message)
+        except rospy.ServiceException as e:
+            rospy.logerr("Service call failed: %s" % e)
+
+        if self.probing_timer.isActive():       # Stop the timer
+            self.probing_timer.stop()
+
+        # Reset the button to its initial state
+        self.ui.probing_button.setText("Probing")
+        self.ui.probing_button.setStyleSheet("""
+                        QPushButton {
+                            background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                        stop:0 rgba(255, 192, 192, 0.7), 
+                                                        stop:1 rgba(179, 229, 252, 0.7));
+                            border: none;
+                            border-radius: 5px;
+                            padding: 5px;
+                        }
+                        QPushButton:hover {
+                            background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                        stop:0 rgba(255, 192, 192, 0.9), 
+                                                        stop:1 rgba(179, 229, 252, 0.9));
+                        }
+                        QPushButton:pressed {
+                            background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                        stop:0 rgba(255, 192, 192, 0.5), 
+                                                        stop:1 rgba(179, 229, 252, 0.5));
+                        }
+                    """)
+
+        rospy.loginfo("Probing ended and parameters reset.")
 
     def restart_callback(self):
         if self.ui.restart_button.text() in ["Start", "Restart"]:
@@ -861,7 +1221,7 @@ class MainWindow(QMainWindow):
                 QPushButton {
                     background-color: red;
                     color: white;
-                    border: 2px solid darkred;
+                    border: 1px solid darkred;
                     border-radius: 10px;
                     padding: 10px 20px;
                 }
@@ -903,7 +1263,7 @@ class MainWindow(QMainWindow):
                     QLabel#contact_detect_indicator {
                         background-color: lightgray; /* Light gray background */
                         color: black; /* Black text */
-                        border: 1px solid gray; /* Gray border */
+                        border: 2px solid gray; /* Gray border */
                         border-radius: 5px; /* Rounded corners */
                         padding: 5px; /* Padding */
                         min-width: 100px; /* Minimum width */
@@ -917,7 +1277,7 @@ class MainWindow(QMainWindow):
                     QLabel#contact_detect_indicator {
                         background-color: lightgray; /* Light gray background */
                         color: black; /* Black text */
-                        border: 1px solid gray; /* Gray border */
+                        border: 2px solid gray; /* Gray border */
                         border-radius: 5px; /* Rounded corners */
                         padding: 5px; /* Padding */
                         min-width: 100px; /* Minimum width */
@@ -925,7 +1285,7 @@ class MainWindow(QMainWindow):
                     }
                     QLabel#contact_detect_indicator.active {
                         background-color: orange;
-                        border: 1px solid #B8860B;
+                        border: 2px solid #B8860B;
                         color: white;
                     }
                 """)
@@ -943,7 +1303,7 @@ class MainWindow(QMainWindow):
                     QLabel#grasp_stable_flag_indicator {
                         background-color: lightgray; /* Light gray background */
                         color: black; /* Black text */
-                        border: 1px solid gray; /* Gray border */
+                        border: 2px solid gray; /* Gray border */
                         border-radius: 5px; /* Rounded corners */
                         padding: 5px; /* Padding */
                         min-width: 100px; /* Minimum width */
@@ -951,7 +1311,7 @@ class MainWindow(QMainWindow):
                     }
                     QLabel#grasp_stable_flag_indicator.active {
                         background-color: #2ecc71;
-                        border: 1px solid #27ae60;
+                        border: 2px solid #27ae60;
                         color: white;
                     }
                 """)
@@ -962,7 +1322,7 @@ class MainWindow(QMainWindow):
                     QLabel#grasp_stable_flag_indicator {
                         background-color: lightgray; /* Light gray background */
                         color: black; /* Black text */
-                        border: 1px solid gray; /* Gray border */
+                        border: 2px solid gray; /* Gray border */
                         border-radius: 5px; /* Rounded corners */
                         padding: 5px; /* Padding */
                         min-width: 100px; /* Minimum width */
@@ -981,7 +1341,7 @@ class MainWindow(QMainWindow):
                     QLabel#motor_stop_indicator {
                         background-color: lightcyan;
                         color: black;
-                        border: 1px solid #00ced1; /* Dark Cyan border */
+                        border: 2px solid #00ced1; /* Dark Cyan border */
                         border-radius: 5px;
                         padding: 5px;
                         min-width: 100px;
@@ -995,7 +1355,7 @@ class MainWindow(QMainWindow):
                     QLabel#motor_stop_indicator {
                         background-color: lightgray; /* Light gray background */
                         color: black; /* Black text */
-                        border: 1px solid gray; /* Gray border */
+                        border: 2px solid gray; /* Gray border */
                         border-radius: 5px; /* Rounded corners */
                         padding: 5px; /* Padding */
                         min-width: 100px; /* Minimum width */
@@ -1003,7 +1363,7 @@ class MainWindow(QMainWindow):
                     }
                     QLabel#motor_stop_indicator.active {
                         background-color: orange;
-                        border: 1px solid #B8860B;
+                        border: 2px solid #B8860B;
                         color: white;
                     }
                 """)
@@ -1049,7 +1409,7 @@ class MainWindow(QMainWindow):
                             QLabel#data_stable_flag_indicator {
                                 background-color: lightgray; /* Light gray background */
                                 color: black; /* Black text */
-                                border: 1px solid gray; /* Gray border */
+                                border:2px solid gray; /* Gray border */
                                 border-radius: 5px; /* Rounded corners */
                                 padding: 5px; /* Padding */
                                 min-width: 100px; /* Minimum width */
@@ -1057,7 +1417,7 @@ class MainWindow(QMainWindow):
                             }
                             QLabel#data_stable_flag_indicator.active {
                                 background-color: #2ecc71;
-                                border: 1px solid #27ae60;
+                                border: 2px solid #27ae60;
                                 color: white;
                             }
                         """)
@@ -1068,7 +1428,7 @@ class MainWindow(QMainWindow):
             QLabel#data_stable_flag_indicator {
                 background-color: lightgray; /* Light gray background */
                 color: black; /* Black text */
-                border: 1px solid gray; /* Gray border */
+                border: 2px solid gray; /* Gray border */
                 border-radius: 5px; /* Rounded corners */
                 padding: 5px; /* Padding */
                 min-width: 100px; /* Minimum width */
@@ -1082,23 +1442,47 @@ class MainWindow(QMainWindow):
     def update_prediction_position_S2(self, msg):
         self.prediction_results_signal.emit(json.dumps({"sensor_id": "S2", "type": "position", "data": msg.data}))
 
-    def update_prediction_force_S1(self, msg):
-        self.prediction_results_signal.emit(json.dumps({"sensor_id": "S1", "type": "force", "data": msg.data}))
+    def update_prediction_fz_S1(self, msg):
+        self.prediction_results_signal.emit(json.dumps({"sensor_id": "S1", "type": "fz", "data": msg.data}))
 
-    def update_prediction_force_S2(self, msg):
-        self.prediction_results_signal.emit(json.dumps({"sensor_id": "S2", "type": "force", "data": msg.data}))
+    def update_prediction_fz_S2(self, msg):
+        self.prediction_results_signal.emit(json.dumps({"sensor_id": "S2", "type": "fz", "data": msg.data}))
 
-    def get_current_force(self, sensor_id):
-        return self.current_force[sensor_id]
+    def update_prediction_fx_S1(self, msg):
+        self.prediction_results_signal.emit(json.dumps({"sensor_id": "S1", "type": "fx", "data": msg.data}))
+
+    def update_prediction_fx_S2(self, msg):
+        self.prediction_results_signal.emit(json.dumps({"sensor_id": "S2", "type": "fx", "data": msg.data}))
+
+    def update_prediction_fy_S1(self, msg):
+        self.prediction_results_signal.emit(json.dumps({"sensor_id": "S1", "type": "fy", "data": msg.data}))
+
+    def update_prediction_fy_S2(self, msg):
+        self.prediction_results_signal.emit(json.dumps({"sensor_id": "S2", "type": "fy", "data": msg.data}))
 
     def get_current_position(self, sensor_id):
         return self.current_position[sensor_id]
 
-    def set_current_force(self, sensor_id, value):
-        self.current_force[sensor_id] = value
-
     def set_current_position(self, sensor_id, value):
         self.current_position[sensor_id] = value
+
+    def get_current_fz(self, sensor_id):
+        return self.current_force[sensor_id]['fz']
+
+    def get_current_fx(self, sensor_id):
+        return self.current_force[sensor_id]['fx']
+
+    def get_current_fy(self, sensor_id):
+        return self.current_force[sensor_id]['fy']
+
+    def set_current_fz(self, sensor_id, value):
+        self.current_force[sensor_id]['fz'] = value
+
+    def set_current_fx(self, sensor_id, value):
+        self.current_force[sensor_id]['fx'] = value
+
+    def set_current_fy(self, sensor_id, value):
+        self.current_force[sensor_id]['fy'] = value
 
     def on_prediction_results_received(self, data):
         result = json.loads(data)
@@ -1106,25 +1490,52 @@ class MainWindow(QMainWindow):
         data_type = result.get('type')
         value = result.get('data')
 
+        position = self.get_current_position(sensor_id)  # Initialize position with the current value
+        force_fx = self.get_current_fx(sensor_id)
+        force_fy = self.get_current_fy(sensor_id)
+        force_fz = self.get_current_fz(sensor_id)
+
         if data_type == 'position':
             position = int(value)
             self.set_current_position(sensor_id, position)
-            force = self.get_current_force(sensor_id)
-        elif data_type == 'force':
-            force = float(value)
-            self.set_current_force(sensor_id, force)
-            position = self.get_current_position(sensor_id)
+            force_fz = self.get_current_fz(sensor_id)
+            force_fx = self.get_current_fx(sensor_id)
+            force_fy = self.get_current_fy(sensor_id)
+        elif data_type == 'fz':
+            force_fz = float(value)
+            self.set_current_fz(sensor_id, force_fz)
+            force_fx = self.get_current_fx(sensor_id)
+            force_fy = self.get_current_fy(sensor_id)
+        elif data_type == 'fx':
+            force_fx = float(value)
+            self.set_current_fx(sensor_id, force_fx)
+            force_fy = self.get_current_fy(sensor_id)
+            force_fz = self.get_current_fz(sensor_id)
+        elif data_type == 'fy':
+            force_fy = float(value)
+            self.set_current_fy(sensor_id, force_fy)
+            force_fx = self.get_current_fx(sensor_id)
+            force_fz = self.get_current_fz(sensor_id)
 
         # Update the corresponding force plot based on the sensor ID
-        self.force_plot.update_plot(sensor_id, force)
+        if sensor_id == 'S1':
+            self.force_plot_s1.update_plot(force_fx, force_fy, force_fz)
+            self.shear_plot_s1.update_shear_map(force_fx, force_fy)
+        elif sensor_id == 'S2':
+            self.force_plot_s2.update_plot(force_fx, force_fy, force_fz)
+            self.shear_plot_s2.update_shear_map(force_fx, force_fy)
 
         # Update the LCD and plot based on sensor ID
         if sensor_id == 'S1':
-            self.ui.force_val_1.display(force)
-            self.quadrant_canvas_s1.update_quadrant(sensor_id, position, force)
+            self.ui.force_val_1_z.display(force_fz)
+            self.ui.force_val_1_x.display(force_fx)
+            self.ui.force_val_1_y.display(force_fy)
+            self.quadrant_canvas_s1.update_quadrant(sensor_id, position, force_fz)
         elif sensor_id == 'S2':
-            self.ui.force_val_2.display(force)
-            self.quadrant_canvas_s2.update_quadrant(sensor_id, position, force)
+            self.ui.force_val_2_z.display(force_fz)
+            self.ui.force_val_2_x.display(force_fx)
+            self.ui.force_val_2_y.display(force_fy)
+            self.quadrant_canvas_s2.update_quadrant(sensor_id, position, force_fz)
 
     def update_pressure_reading1(self, data):
         pressure_value = float(data.data)
@@ -1147,7 +1558,8 @@ class MainWindow(QMainWindow):
             sensor_plot.draw()
 
     def update_prediction_plots(self):
-        self.force_plot.draw()
+        self.force_plot_s1.draw()
+        self.force_plot_s2.draw()
 
     def update_pressure_plots(self):
         self.pressure_plot.draw()
@@ -1160,7 +1572,9 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
     rospy.init_node('main_interface')
     app = QApplication(sys.argv)
+
     main_window = MainWindow()
     main_window.show()
+
     signal.signal(signal.SIGINT, main_window.signal_handler)  # Register the signal handler
     sys.exit(app.exec())

@@ -13,15 +13,10 @@
   <node name="ml_prediction" pkg="ml_prediction" type="ml_prediction_node.py" output="screen" />
 
   <!-- Start qt interface node on the local machine -->
-  <node name="main_interface" pkg="qt_interface" type="main_window.py" output="screen" />
   <node name="mode_manager" pkg="qt_interface" type="mode_manager.py" output="screen" />
+  <node name="main_interface" pkg="qt_interface" type="main_window.py" output="screen" />
 
   <!-- Start data recording node on the local machine -->
   <node name="data_recording_node" pkg="data_recording" type="data_recording_node.py" output="screen" />
-
-  <!-- Start sofa simulation node on the local machine -->
-<!--   <node name="sofa_simulation_node" pkg="sofa_simulation" type="sofa_simulation_node.py" output="screen"> -->
-<!--     <env name="PYTHONPATH" value="$(optenv PYTHONPATH)${PYTHONPATH}:/home/chengjin/Projects/SoftMag/ros_workspace/src/sofa_simulation/src" /> -->
-<!--   </node> -->
 
 </launch>

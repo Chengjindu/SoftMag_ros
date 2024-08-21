@@ -20,13 +20,14 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBo
     QFrame, QGroupBox, QHBoxLayout, QLCDNumber,
     QLabel, QLayout, QMainWindow, QMenuBar,
     QPushButton, QScrollBar, QSizePolicy, QSlider,
-    QStatusBar, QToolBar, QVBoxLayout, QWidget)
+    QSpinBox, QStatusBar, QToolBar, QVBoxLayout,
+    QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1573, 885)
+        MainWindow.resize(1692, 924)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(20)
         sizePolicy.setVerticalStretch(0)
@@ -36,7 +37,7 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName(u"centralwidget")
         self.automatic_grasping_control_panel = QGroupBox(self.centralwidget)
         self.automatic_grasping_control_panel.setObjectName(u"automatic_grasping_control_panel")
-        self.automatic_grasping_control_panel.setGeometry(QRect(390, 420, 331, 121))
+        self.automatic_grasping_control_panel.setGeometry(QRect(390, 442, 331, 121))
         self.verticalLayoutWidget_2 = QWidget(self.automatic_grasping_control_panel)
         self.verticalLayoutWidget_2.setObjectName(u"verticalLayoutWidget_2")
         self.verticalLayoutWidget_2.setGeometry(QRect(10, 30, 311, 89))
@@ -98,207 +99,425 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.setStretch(0, 4)
         self.verticalLayout_2.setStretch(1, 1)
         self.verticalLayout_2.setStretch(2, 1)
-        self.other_signal_monitoring_panel = QGroupBox(self.centralwidget)
-        self.other_signal_monitoring_panel.setObjectName(u"other_signal_monitoring_panel")
-        self.other_signal_monitoring_panel.setGeometry(QRect(740, 420, 821, 411))
-        self.other_signal_monitoring_panel.setFlat(False)
-        self.other_signal_monitoring_panel.setCheckable(False)
-        self.horizontalLayoutWidget_2 = QWidget(self.other_signal_monitoring_panel)
-        self.horizontalLayoutWidget_2.setObjectName(u"horizontalLayoutWidget_2")
-        self.horizontalLayoutWidget_2.setGeometry(QRect(10, 30, 801, 371))
-        self.horizontalLayout_9 = QHBoxLayout(self.horizontalLayoutWidget_2)
-        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
-        self.horizontalLayout_9.setContentsMargins(0, 0, 0, 0)
-        self.force_val_graph = QFrame(self.horizontalLayoutWidget_2)
-        self.force_val_graph.setObjectName(u"force_val_graph")
-        self.force_val_graph.setStyleSheet(u"background-color: rgba(0, 0, 0, 0); /* Fully transparent background */\n"
+        self.force_monitoring_panel = QGroupBox(self.centralwidget)
+        self.force_monitoring_panel.setObjectName(u"force_monitoring_panel")
+        self.force_monitoring_panel.setGeometry(QRect(840, 20, 391, 401))
+        self.force_monitoring_panel.setFlat(False)
+        self.force_monitoring_panel.setCheckable(False)
+        self.line_19 = QFrame(self.force_monitoring_panel)
+        self.line_19.setObjectName(u"line_19")
+        self.line_19.setGeometry(QRect(60, 212, 291, 2))
+        self.line_19.setStyleSheet(u"    border: none;\n"
+"    background: qlineargradient(spread:pad, x1:0, x2:1, stop:0 rgba(179, 229, 252, 1), stop:0.5 rgba(0, 0, 0, 0), stop:1 rgba(255, 192, 192, 1));")
+        self.line_19.setFrameShape(QFrame.HLine)
+        self.line_19.setFrameShadow(QFrame.Sunken)
+        self.force_val_1_graph = QFrame(self.force_monitoring_panel)
+        self.force_val_1_graph.setObjectName(u"force_val_1_graph")
+        self.force_val_1_graph.setGeometry(QRect(10, 30, 371, 184))
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.force_val_1_graph.sizePolicy().hasHeightForWidth())
+        self.force_val_1_graph.setSizePolicy(sizePolicy1)
+        self.force_val_1_graph.setAutoFillBackground(False)
+        self.force_val_1_graph.setStyleSheet(u"background-color: rgba(0, 0, 0, 0); /* Fully transparent background */\n"
 "    border: none; /* No border */")
-        self.force_val_graph.setFrameShape(QFrame.NoFrame)
-        self.force_val_graph.setFrameShadow(QFrame.Raised)
-        self.force_val_graph.setLineWidth(0)
-
-        self.horizontalLayout_9.addWidget(self.force_val_graph)
-
-        self.pressure_graph = QFrame(self.horizontalLayoutWidget_2)
-        self.pressure_graph.setObjectName(u"pressure_graph")
-        self.pressure_graph.setStyleSheet(u"background-color: rgba(0, 0, 0, 0); /* Fully transparent background */\n"
+        self.force_val_1_graph.setFrameShape(QFrame.NoFrame)
+        self.force_val_1_graph.setFrameShadow(QFrame.Raised)
+        self.force_val_1_graph.setLineWidth(0)
+        self.force_val_2_graph = QFrame(self.force_monitoring_panel)
+        self.force_val_2_graph.setObjectName(u"force_val_2_graph")
+        self.force_val_2_graph.setGeometry(QRect(10, 213, 371, 186))
+        self.force_val_2_graph.setStyleSheet(u"background-color: rgba(0, 0, 0, 0); /* Fully transparent background */\n"
 "    border: none; /* No border */")
-        self.pressure_graph.setFrameShape(QFrame.NoFrame)
-        self.pressure_graph.setFrameShadow(QFrame.Raised)
-
-        self.horizontalLayout_9.addWidget(self.pressure_graph)
-
-        self.horizontalLayout_9.setStretch(0, 9)
-        self.horizontalLayout_9.setStretch(1, 9)
-        self.status_monitoring_panel_1 = QGroupBox(self.centralwidget)
-        self.status_monitoring_panel_1.setObjectName(u"status_monitoring_panel_1")
-        self.status_monitoring_panel_1.setGeometry(QRect(10, 20, 611, 371))
-        self.horizontalLayoutWidget = QWidget(self.status_monitoring_panel_1)
-        self.horizontalLayoutWidget.setObjectName(u"horizontalLayoutWidget")
-        self.horizontalLayoutWidget.setGeometry(QRect(10, 30, 591, 331))
-        self.horizontalLayout = QHBoxLayout(self.horizontalLayoutWidget)
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_3 = QVBoxLayout()
+        self.force_val_2_graph.setFrameShape(QFrame.StyledPanel)
+        self.force_val_2_graph.setFrameShadow(QFrame.Raised)
+        self.force_val_1_graph.raise_()
+        self.force_val_2_graph.raise_()
+        self.line_19.raise_()
+        self.tactile_monitoring_panel = QGroupBox(self.centralwidget)
+        self.tactile_monitoring_panel.setObjectName(u"tactile_monitoring_panel")
+        self.tactile_monitoring_panel.setGeometry(QRect(10, 20, 261, 401))
+        self.layoutWidget = QWidget(self.tactile_monitoring_panel)
+        self.layoutWidget.setObjectName(u"layoutWidget")
+        self.layoutWidget.setGeometry(QRect(10, 30, 239, 361))
+        self.verticalLayout_3 = QVBoxLayout(self.layoutWidget)
         self.verticalLayout_3.setSpacing(6)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.S1_tactile_info_label = QLabel(self.horizontalLayoutWidget)
-        self.S1_tactile_info_label.setObjectName(u"S1_tactile_info_label")
-        self.S1_tactile_info_label.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
-        self.S1_tactile_info_label.setMargin(0)
+        self.verticalLayout_3.setSizeConstraint(QLayout.SetDefaultConstraint)
+        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
+        self.S1_tactile_monitoring_label = QLabel(self.layoutWidget)
+        self.S1_tactile_monitoring_label.setObjectName(u"S1_tactile_monitoring_label")
+        self.S1_tactile_monitoring_label.setAlignment(Qt.AlignBottom|Qt.AlignHCenter)
+        self.S1_tactile_monitoring_label.setMargin(0)
 
-        self.verticalLayout_3.addWidget(self.S1_tactile_info_label)
+        self.verticalLayout_3.addWidget(self.S1_tactile_monitoring_label)
 
         self.horizontalLayout_11 = QHBoxLayout()
         self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
-        self.widget_11 = QWidget(self.horizontalLayoutWidget)
-        self.widget_11.setObjectName(u"widget_11")
+        self.widget1 = QWidget(self.layoutWidget)
+        self.widget1.setObjectName(u"widget1")
 
-        self.horizontalLayout_11.addWidget(self.widget_11)
+        self.horizontalLayout_11.addWidget(self.widget1)
 
-        self.force_val_1 = QLCDNumber(self.horizontalLayoutWidget)
-        self.force_val_1.setObjectName(u"force_val_1")
+        self.force_value_1_x = QLabel(self.layoutWidget)
+        self.force_value_1_x.setObjectName(u"force_value_1_x")
         font1 = QFont()
-        font1.setFamilies([u"Ubuntu"])
-        font1.setBold(True)
-        font1.setItalic(False)
-        self.force_val_1.setFont(font1)
-        self.force_val_1.setAutoFillBackground(False)
-        self.force_val_1.setStyleSheet(u"QLCDNumber {\n"
-"    background-color: black;\n"
-"    color: green;\n"
-"    font-weight: bold;\n"
-"}\n"
-"")
-        self.force_val_1.setFrameShape(QFrame.Box)
-        self.force_val_1.setFrameShadow(QFrame.Raised)
-        self.force_val_1.setLineWidth(1)
-        self.force_val_1.setMidLineWidth(0)
-        self.force_val_1.setSmallDecimalPoint(True)
-        self.force_val_1.setSegmentStyle(QLCDNumber.Filled)
-        self.force_val_1.setProperty("value", 0.000000000000000)
+        font1.setPointSize(12)
+        self.force_value_1_x.setFont(font1)
+        self.force_value_1_x.setAlignment(Qt.AlignCenter)
 
-        self.horizontalLayout_11.addWidget(self.force_val_1)
+        self.horizontalLayout_11.addWidget(self.force_value_1_x)
 
-        self.force_unit_1 = QLabel(self.horizontalLayoutWidget)
-        self.force_unit_1.setObjectName(u"force_unit_1")
-        self.force_unit_1.setAlignment(Qt.AlignCenter)
+        self.force_val_1_x = QLCDNumber(self.layoutWidget)
+        self.force_val_1_x.setObjectName(u"force_val_1_x")
+        font2 = QFont()
+        font2.setFamilies([u"Ubuntu"])
+        font2.setPointSize(11)
+        font2.setBold(True)
+        font2.setItalic(False)
+        self.force_val_1_x.setFont(font2)
+        self.force_val_1_x.setAutoFillBackground(False)
+        self.force_val_1_x.setStyleSheet(u"background-color: rgba(179, 229, 252, 0.35);\n"
+"color: rgba(0, 0, 139, 1); /* Dark blue color */\n"
+"font-weight: bold;")
+        self.force_val_1_x.setFrameShape(QFrame.WinPanel)
+        self.force_val_1_x.setFrameShadow(QFrame.Raised)
+        self.force_val_1_x.setLineWidth(1)
+        self.force_val_1_x.setMidLineWidth(0)
+        self.force_val_1_x.setSmallDecimalPoint(True)
+        self.force_val_1_x.setDigitCount(3)
+        self.force_val_1_x.setSegmentStyle(QLCDNumber.Flat)
+        self.force_val_1_x.setProperty("value", 0.000000000000000)
 
-        self.horizontalLayout_11.addWidget(self.force_unit_1)
+        self.horizontalLayout_11.addWidget(self.force_val_1_x)
 
-        self.horizontalLayout_11.setStretch(1, 6)
+        self.widget11 = QWidget(self.layoutWidget)
+        self.widget11.setObjectName(u"widget11")
+
+        self.horizontalLayout_11.addWidget(self.widget11)
+
+        self.force_value_1_y = QLabel(self.layoutWidget)
+        self.force_value_1_y.setObjectName(u"force_value_1_y")
+        self.force_value_1_y.setFont(font1)
+        self.force_value_1_y.setAlignment(Qt.AlignCenter)
+
+        self.horizontalLayout_11.addWidget(self.force_value_1_y)
+
+        self.force_val_1_y = QLCDNumber(self.layoutWidget)
+        self.force_val_1_y.setObjectName(u"force_val_1_y")
+        self.force_val_1_y.setFont(font2)
+        self.force_val_1_y.setAutoFillBackground(False)
+        self.force_val_1_y.setStyleSheet(u"background-color: rgba(179, 229, 252, 0.35);\n"
+"color: rgba(0, 0, 139, 1); /* Dark blue color */\n"
+"font-weight: bold;")
+        self.force_val_1_y.setFrameShape(QFrame.WinPanel)
+        self.force_val_1_y.setFrameShadow(QFrame.Raised)
+        self.force_val_1_y.setLineWidth(1)
+        self.force_val_1_y.setMidLineWidth(0)
+        self.force_val_1_y.setSmallDecimalPoint(True)
+        self.force_val_1_y.setDigitCount(3)
+        self.force_val_1_y.setSegmentStyle(QLCDNumber.Flat)
+        self.force_val_1_y.setProperty("value", 0.000000000000000)
+
+        self.horizontalLayout_11.addWidget(self.force_val_1_y)
+
+        self.widget_10 = QWidget(self.layoutWidget)
+        self.widget_10.setObjectName(u"widget_10")
+
+        self.horizontalLayout_11.addWidget(self.widget_10)
+
+        self.force_value_1_z = QLabel(self.layoutWidget)
+        self.force_value_1_z.setObjectName(u"force_value_1_z")
+        self.force_value_1_z.setFont(font1)
+        self.force_value_1_z.setAlignment(Qt.AlignCenter)
+
+        self.horizontalLayout_11.addWidget(self.force_value_1_z)
+
+        self.force_val_1_z = QLCDNumber(self.layoutWidget)
+        self.force_val_1_z.setObjectName(u"force_val_1_z")
+        self.force_val_1_z.setFont(font2)
+        self.force_val_1_z.setAutoFillBackground(False)
+        self.force_val_1_z.setStyleSheet(u"background-color: rgba(179, 229, 252, 0.35);\n"
+"color: rgba(0, 0, 139, 1); /* Dark blue color */\n"
+"font-weight: bold;")
+        self.force_val_1_z.setFrameShape(QFrame.WinPanel)
+        self.force_val_1_z.setFrameShadow(QFrame.Raised)
+        self.force_val_1_z.setLineWidth(1)
+        self.force_val_1_z.setMidLineWidth(0)
+        self.force_val_1_z.setSmallDecimalPoint(True)
+        self.force_val_1_z.setDigitCount(3)
+        self.force_val_1_z.setSegmentStyle(QLCDNumber.Flat)
+        self.force_val_1_z.setProperty("value", 0.000000000000000)
+
+        self.horizontalLayout_11.addWidget(self.force_val_1_z)
+
+        self.widget_14 = QWidget(self.layoutWidget)
+        self.widget_14.setObjectName(u"widget_14")
+
+        self.horizontalLayout_11.addWidget(self.widget_14)
+
+        self.horizontalLayout_11.setStretch(0, 1)
+        self.horizontalLayout_11.setStretch(1, 1)
         self.horizontalLayout_11.setStretch(2, 1)
+        self.horizontalLayout_11.setStretch(3, 1)
+        self.horizontalLayout_11.setStretch(4, 1)
+        self.horizontalLayout_11.setStretch(5, 1)
+        self.horizontalLayout_11.setStretch(6, 1)
+        self.horizontalLayout_11.setStretch(7, 1)
+        self.horizontalLayout_11.setStretch(8, 1)
+        self.horizontalLayout_11.setStretch(9, 1)
 
         self.verticalLayout_3.addLayout(self.horizontalLayout_11)
 
-        self.quadrant_1 = QWidget(self.horizontalLayoutWidget)
+        self.hline1_2 = QFrame(self.layoutWidget)
+        self.hline1_2.setObjectName(u"hline1_2")
+        self.hline1_2.setFrameShape(QFrame.HLine)
+        self.hline1_2.setFrameShadow(QFrame.Raised)
+
+        self.verticalLayout_3.addWidget(self.hline1_2)
+
+        self.horizontalLayout_9 = QHBoxLayout()
+        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
+        self.quadrant_1 = QWidget(self.layoutWidget)
         self.quadrant_1.setObjectName(u"quadrant_1")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.quadrant_1.sizePolicy().hasHeightForWidth())
-        self.quadrant_1.setSizePolicy(sizePolicy1)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.quadrant_1.sizePolicy().hasHeightForWidth())
+        self.quadrant_1.setSizePolicy(sizePolicy2)
         self.quadrant_1.setStyleSheet(u"background-color: rgba(0, 0, 0, 0); /* Fully transparent background */\n"
 "    border: none; /* No border */")
         self.quadrant_1_1 = QWidget(self.quadrant_1)
         self.quadrant_1_1.setObjectName(u"quadrant_1_1")
-        self.quadrant_1_1.setGeometry(QRect(-20, -30, 151, 151))
+        self.quadrant_1_1.setGeometry(QRect(-32, -33, 171, 171))
         self.quadrant_1_1.setStyleSheet(u"background-color: rgba(0, 0, 0, 0); /* Fully transparent background */\n"
 "    border: none; /* No border */")
 
-        self.verticalLayout_3.addWidget(self.quadrant_1)
+        self.horizontalLayout_9.addWidget(self.quadrant_1)
 
-        self.hline1 = QFrame(self.horizontalLayoutWidget)
+        self.line_7 = QFrame(self.layoutWidget)
+        self.line_7.setObjectName(u"line_7")
+        self.line_7.setFrameShape(QFrame.VLine)
+        self.line_7.setFrameShadow(QFrame.Sunken)
+
+        self.horizontalLayout_9.addWidget(self.line_7)
+
+        self.shear_1 = QWidget(self.layoutWidget)
+        self.shear_1.setObjectName(u"shear_1")
+        self.shear_1.setStyleSheet(u"background-color: rgba(0, 0, 0, 0); /* Fully transparent background */\n"
+"    border: none; /* No border */")
+        self.shear_map_1_1 = QWidget(self.shear_1)
+        self.shear_map_1_1.setObjectName(u"shear_map_1_1")
+        self.shear_map_1_1.setGeometry(QRect(-36, -30, 171, 171))
+        self.shear_map_1_1.setStyleSheet(u"background-color: rgba(0, 0, 0, 0); /* Fully transparent background */\n"
+"    border: none; /* No border */")
+
+        self.horizontalLayout_9.addWidget(self.shear_1)
+
+        self.horizontalLayout_9.setStretch(0, 1)
+        self.horizontalLayout_9.setStretch(2, 1)
+
+        self.verticalLayout_3.addLayout(self.horizontalLayout_9)
+
+        self.hline1 = QFrame(self.layoutWidget)
         self.hline1.setObjectName(u"hline1")
         self.hline1.setFrameShape(QFrame.HLine)
         self.hline1.setFrameShadow(QFrame.Raised)
 
         self.verticalLayout_3.addWidget(self.hline1)
 
-        self.S2_tactile_info_label = QLabel(self.horizontalLayoutWidget)
-        self.S2_tactile_info_label.setObjectName(u"S2_tactile_info_label")
-        self.S2_tactile_info_label.setAlignment(Qt.AlignCenter)
+        self.S2_tactile_monitoring_label = QLabel(self.layoutWidget)
+        self.S2_tactile_monitoring_label.setObjectName(u"S2_tactile_monitoring_label")
+        self.S2_tactile_monitoring_label.setAlignment(Qt.AlignCenter)
 
-        self.verticalLayout_3.addWidget(self.S2_tactile_info_label)
+        self.verticalLayout_3.addWidget(self.S2_tactile_monitoring_label)
 
         self.horizontalLayout_13 = QHBoxLayout()
         self.horizontalLayout_13.setObjectName(u"horizontalLayout_13")
-        self.widget_10 = QWidget(self.horizontalLayoutWidget)
-        self.widget_10.setObjectName(u"widget_10")
+        self.widget_15 = QWidget(self.layoutWidget)
+        self.widget_15.setObjectName(u"widget_15")
 
-        self.horizontalLayout_13.addWidget(self.widget_10)
+        self.horizontalLayout_13.addWidget(self.widget_15)
 
-        self.force_val_2 = QLCDNumber(self.horizontalLayoutWidget)
-        self.force_val_2.setObjectName(u"force_val_2")
-        self.force_val_2.setFont(font1)
-        self.force_val_2.setStyleSheet(u"QLCDNumber {\n"
-"    background-color: black;\n"
-"    color: green;\n"
-"    font-weight: bold;\n"
-"}\n"
-"")
-        self.force_val_2.setFrameShape(QFrame.Box)
-        self.force_val_2.setSmallDecimalPoint(True)
-        self.force_val_2.setProperty("value", 0.000000000000000)
+        self.force_value_2_x = QLabel(self.layoutWidget)
+        self.force_value_2_x.setObjectName(u"force_value_2_x")
+        self.force_value_2_x.setFont(font1)
+        self.force_value_2_x.setAlignment(Qt.AlignCenter)
 
-        self.horizontalLayout_13.addWidget(self.force_val_2)
+        self.horizontalLayout_13.addWidget(self.force_value_2_x)
 
-        self.force_unit_2 = QLabel(self.horizontalLayoutWidget)
-        self.force_unit_2.setObjectName(u"force_unit_2")
-        self.force_unit_2.setAlignment(Qt.AlignCenter)
+        self.force_val_2_x = QLCDNumber(self.layoutWidget)
+        self.force_val_2_x.setObjectName(u"force_val_2_x")
+        self.force_val_2_x.setFont(font2)
+        self.force_val_2_x.setAutoFillBackground(False)
+        self.force_val_2_x.setStyleSheet(u"background-color: rgba(255, 192, 192, 0.3);\n"
+"color: rgba(0, 0, 139, 1); /* Dark blue color */\n"
+"font-weight: bold;")
+        self.force_val_2_x.setFrameShape(QFrame.WinPanel)
+        self.force_val_2_x.setFrameShadow(QFrame.Raised)
+        self.force_val_2_x.setLineWidth(1)
+        self.force_val_2_x.setMidLineWidth(0)
+        self.force_val_2_x.setSmallDecimalPoint(True)
+        self.force_val_2_x.setDigitCount(3)
+        self.force_val_2_x.setSegmentStyle(QLCDNumber.Flat)
+        self.force_val_2_x.setProperty("value", 0.000000000000000)
 
-        self.horizontalLayout_13.addWidget(self.force_unit_2)
+        self.horizontalLayout_13.addWidget(self.force_val_2_x)
 
-        self.horizontalLayout_13.setStretch(1, 6)
+        self.widget_17 = QWidget(self.layoutWidget)
+        self.widget_17.setObjectName(u"widget_17")
+
+        self.horizontalLayout_13.addWidget(self.widget_17)
+
+        self.force_value_2_y = QLabel(self.layoutWidget)
+        self.force_value_2_y.setObjectName(u"force_value_2_y")
+        self.force_value_2_y.setFont(font1)
+        self.force_value_2_y.setAlignment(Qt.AlignCenter)
+
+        self.horizontalLayout_13.addWidget(self.force_value_2_y)
+
+        self.force_val_2_y = QLCDNumber(self.layoutWidget)
+        self.force_val_2_y.setObjectName(u"force_val_2_y")
+        self.force_val_2_y.setFont(font2)
+        self.force_val_2_y.setAutoFillBackground(False)
+        self.force_val_2_y.setStyleSheet(u"background-color: rgba(255, 192, 192, 0.3);\n"
+"color: rgba(0, 0, 139, 1); /* Dark blue color */\n"
+"font-weight: bold;")
+        self.force_val_2_y.setFrameShape(QFrame.WinPanel)
+        self.force_val_2_y.setFrameShadow(QFrame.Raised)
+        self.force_val_2_y.setLineWidth(1)
+        self.force_val_2_y.setMidLineWidth(0)
+        self.force_val_2_y.setSmallDecimalPoint(True)
+        self.force_val_2_y.setDigitCount(3)
+        self.force_val_2_y.setSegmentStyle(QLCDNumber.Flat)
+        self.force_val_2_y.setProperty("value", 0.000000000000000)
+
+        self.horizontalLayout_13.addWidget(self.force_val_2_y)
+
+        self.widget_18 = QWidget(self.layoutWidget)
+        self.widget_18.setObjectName(u"widget_18")
+
+        self.horizontalLayout_13.addWidget(self.widget_18)
+
+        self.force_value_2_z = QLabel(self.layoutWidget)
+        self.force_value_2_z.setObjectName(u"force_value_2_z")
+        self.force_value_2_z.setFont(font1)
+        self.force_value_2_z.setAlignment(Qt.AlignCenter)
+
+        self.horizontalLayout_13.addWidget(self.force_value_2_z)
+
+        self.force_val_2_z = QLCDNumber(self.layoutWidget)
+        self.force_val_2_z.setObjectName(u"force_val_2_z")
+        font3 = QFont()
+        font3.setFamilies([u"Ubuntu"])
+        font3.setPointSize(12)
+        font3.setBold(True)
+        font3.setItalic(False)
+        self.force_val_2_z.setFont(font3)
+        self.force_val_2_z.setStyleSheet(u"background-color: rgba(255, 192, 192, 0.3);\n"
+"color: rgba(0, 0, 139, 1); /* Dark blue color */\n"
+"font-weight: bold;")
+        self.force_val_2_z.setFrameShape(QFrame.WinPanel)
+        self.force_val_2_z.setSmallDecimalPoint(True)
+        self.force_val_2_z.setDigitCount(3)
+        self.force_val_2_z.setSegmentStyle(QLCDNumber.Flat)
+        self.force_val_2_z.setProperty("value", 0.000000000000000)
+
+        self.horizontalLayout_13.addWidget(self.force_val_2_z)
+
+        self.widget_16 = QWidget(self.layoutWidget)
+        self.widget_16.setObjectName(u"widget_16")
+
+        self.horizontalLayout_13.addWidget(self.widget_16)
+
+        self.horizontalLayout_13.setStretch(0, 1)
+        self.horizontalLayout_13.setStretch(1, 1)
         self.horizontalLayout_13.setStretch(2, 1)
+        self.horizontalLayout_13.setStretch(4, 1)
+        self.horizontalLayout_13.setStretch(5, 1)
+        self.horizontalLayout_13.setStretch(7, 1)
+        self.horizontalLayout_13.setStretch(8, 1)
+        self.horizontalLayout_13.setStretch(9, 1)
 
         self.verticalLayout_3.addLayout(self.horizontalLayout_13)
 
-        self.quadrant_2 = QWidget(self.horizontalLayoutWidget)
+        self.hline1_5 = QFrame(self.layoutWidget)
+        self.hline1_5.setObjectName(u"hline1_5")
+        self.hline1_5.setFrameShape(QFrame.HLine)
+        self.hline1_5.setFrameShadow(QFrame.Raised)
+
+        self.verticalLayout_3.addWidget(self.hline1_5)
+
+        self.horizontalLayout_19 = QHBoxLayout()
+        self.horizontalLayout_19.setObjectName(u"horizontalLayout_19")
+        self.quadrant_2 = QWidget(self.layoutWidget)
         self.quadrant_2.setObjectName(u"quadrant_2")
-        sizePolicy1.setHeightForWidth(self.quadrant_2.sizePolicy().hasHeightForWidth())
-        self.quadrant_2.setSizePolicy(sizePolicy1)
+        sizePolicy2.setHeightForWidth(self.quadrant_2.sizePolicy().hasHeightForWidth())
+        self.quadrant_2.setSizePolicy(sizePolicy2)
+        self.quadrant_2.setSizeIncrement(QSize(9, 9))
         self.quadrant_2.setStyleSheet(u"background-color: rgba(0, 0, 0, 0); /* Fully transparent background */\n"
 "    border: none; /* No border */")
         self.quadrant_2_2 = QWidget(self.quadrant_2)
         self.quadrant_2_2.setObjectName(u"quadrant_2_2")
-        self.quadrant_2_2.setGeometry(QRect(-20, -30, 151, 151))
+        self.quadrant_2_2.setGeometry(QRect(-32, -28, 171, 171))
         self.quadrant_2_2.setStyleSheet(u"background-color: rgba(0, 0, 0, 0); /* Fully transparent background */\n"
 "    border: none; /* No border */")
 
-        self.verticalLayout_3.addWidget(self.quadrant_2)
+        self.horizontalLayout_19.addWidget(self.quadrant_2)
 
-        self.verticalLayout_3.setStretch(2, 3)
-        self.verticalLayout_3.setStretch(3, 1)
-        self.verticalLayout_3.setStretch(6, 3)
+        self.line_16 = QFrame(self.layoutWidget)
+        self.line_16.setObjectName(u"line_16")
+        self.line_16.setFrameShape(QFrame.VLine)
+        self.line_16.setFrameShadow(QFrame.Sunken)
 
-        self.horizontalLayout.addLayout(self.verticalLayout_3)
+        self.horizontalLayout_19.addWidget(self.line_16)
 
-        self.hline2 = QFrame(self.horizontalLayoutWidget)
-        self.hline2.setObjectName(u"hline2")
-        self.hline2.setFrameShape(QFrame.VLine)
-        self.hline2.setFrameShadow(QFrame.Raised)
+        self.shear_2 = QWidget(self.layoutWidget)
+        self.shear_2.setObjectName(u"shear_2")
+        self.shear_2.setStyleSheet(u"background-color: rgba(0, 0, 0, 0); /* Fully transparent background */\n"
+"    border: none; /* No border */")
+        self.shear_map_2_2 = QWidget(self.shear_2)
+        self.shear_map_2_2.setObjectName(u"shear_map_2_2")
+        self.shear_map_2_2.setGeometry(QRect(-36, -30, 171, 171))
+        self.shear_map_2_2.setStyleSheet(u"background-color: rgba(0, 0, 0, 0); /* Fully transparent background */\n"
+"    border: none; /* No border */")
 
-        self.horizontalLayout.addWidget(self.hline2)
+        self.horizontalLayout_19.addWidget(self.shear_2)
 
-        self.openGLWidget = QOpenGLWidget(self.horizontalLayoutWidget)
-        self.openGLWidget.setObjectName(u"openGLWidget")
+        self.horizontalLayout_19.setStretch(0, 1)
+        self.horizontalLayout_19.setStretch(2, 1)
 
-        self.horizontalLayout.addWidget(self.openGLWidget)
+        self.verticalLayout_3.addLayout(self.horizontalLayout_19)
 
-        self.horizontalLayout.setStretch(0, 1)
-        self.horizontalLayout.setStretch(1, 1)
-        self.horizontalLayout.setStretch(2, 4)
+        self.verticalLayout_3.setStretch(3, 3)
+        self.verticalLayout_3.setStretch(4, 1)
+        self.verticalLayout_3.setStretch(8, 3)
         self.sensing_signal_monitoring_panel = QGroupBox(self.centralwidget)
         self.sensing_signal_monitoring_panel.setObjectName(u"sensing_signal_monitoring_panel")
-        self.sensing_signal_monitoring_panel.setGeometry(QRect(640, 20, 921, 371))
-        self.verticalLayoutWidget = QWidget(self.sensing_signal_monitoring_panel)
-        self.verticalLayoutWidget.setObjectName(u"verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(10, 30, 451, 331))
-        self.verticalLayout = QVBoxLayout(self.verticalLayoutWidget)
-        self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
-        self.S1_graph = QFrame(self.verticalLayoutWidget)
+        self.sensing_signal_monitoring_panel.setGeometry(QRect(740, 442, 931, 411))
+        self.horizontalLayoutWidget = QWidget(self.sensing_signal_monitoring_panel)
+        self.horizontalLayoutWidget.setObjectName(u"horizontalLayoutWidget")
+        self.horizontalLayoutWidget.setGeometry(QRect(510, 30, 411, 381))
+        self.horizontalLayout = QHBoxLayout(self.horizontalLayoutWidget)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
+        self.pressure_graph = QFrame(self.horizontalLayoutWidget)
+        self.pressure_graph.setObjectName(u"pressure_graph")
+        self.pressure_graph.setStyleSheet(u"background-color: rgba(0, 0, 0, 0); /* Fully transparent background */\n"
+"    border: none; /* No border */")
+        self.pressure_graph.setFrameShape(QFrame.NoFrame)
+        self.pressure_graph.setFrameShadow(QFrame.Raised)
+
+        self.horizontalLayout.addWidget(self.pressure_graph)
+
+        self.verticalLayoutWidget_7 = QWidget(self.sensing_signal_monitoring_panel)
+        self.verticalLayoutWidget_7.setObjectName(u"verticalLayoutWidget_7")
+        self.verticalLayoutWidget_7.setGeometry(QRect(10, 30, 481, 191))
+        self.verticalLayout_10 = QVBoxLayout(self.verticalLayoutWidget_7)
+        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
+        self.verticalLayout_10.setContentsMargins(0, 0, 0, 0)
+        self.S1_graph = QFrame(self.verticalLayoutWidget_7)
         self.S1_graph.setObjectName(u"S1_graph")
         self.S1_graph.setStyleSheet(u"background-color: rgba(0, 0, 0, 0); /* Fully transparent background */\n"
 "    border: none; /* No border */")
@@ -306,26 +525,40 @@ class Ui_MainWindow(object):
         self.S1_graph.setFrameShadow(QFrame.Raised)
         self.S1_graph.setLineWidth(0)
 
-        self.verticalLayout.addWidget(self.S1_graph)
+        self.verticalLayout_10.addWidget(self.S1_graph)
 
-        self.verticalLayoutWidget_3 = QWidget(self.sensing_signal_monitoring_panel)
-        self.verticalLayoutWidget_3.setObjectName(u"verticalLayoutWidget_3")
-        self.verticalLayoutWidget_3.setGeometry(QRect(460, 30, 451, 331))
-        self.verticalLayout_4 = QVBoxLayout(self.verticalLayoutWidget_3)
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
-        self.S2_graph = QFrame(self.verticalLayoutWidget_3)
+        self.horizontalLayoutWidget_8 = QWidget(self.sensing_signal_monitoring_panel)
+        self.horizontalLayoutWidget_8.setObjectName(u"horizontalLayoutWidget_8")
+        self.horizontalLayoutWidget_8.setGeometry(QRect(10, 220, 481, 191))
+        self.horizontalLayout_22 = QHBoxLayout(self.horizontalLayoutWidget_8)
+        self.horizontalLayout_22.setObjectName(u"horizontalLayout_22")
+        self.horizontalLayout_22.setContentsMargins(0, 0, 0, 0)
+        self.S2_graph = QFrame(self.horizontalLayoutWidget_8)
         self.S2_graph.setObjectName(u"S2_graph")
         self.S2_graph.setStyleSheet(u"background-color: rgba(0, 0, 0, 0); /* Fully transparent background */\n"
 "    border: none; /* No border */")
         self.S2_graph.setFrameShape(QFrame.NoFrame)
         self.S2_graph.setFrameShadow(QFrame.Raised)
 
-        self.verticalLayout_4.addWidget(self.S2_graph)
+        self.horizontalLayout_22.addWidget(self.S2_graph)
 
+        self.line_17 = QFrame(self.sensing_signal_monitoring_panel)
+        self.line_17.setObjectName(u"line_17")
+        self.line_17.setGeometry(QRect(67, 220, 381, 2))
+        self.line_17.setStyleSheet(u"    border: none;\n"
+"    background: qlineargradient(spread:pad, x1:0, x2:1, stop:0 rgba(179, 229, 252, 1), stop:0.5 rgba(0, 0, 0, 0), stop:1 rgba(255, 192, 192, 1));")
+        self.line_17.setFrameShape(QFrame.HLine)
+        self.line_17.setFrameShadow(QFrame.Sunken)
+        self.line_18 = QFrame(self.sensing_signal_monitoring_panel)
+        self.line_18.setObjectName(u"line_18")
+        self.line_18.setGeometry(QRect(500, 30, 2, 371))
+        self.line_18.setStyleSheet(u"    border: none;\n"
+"    background: qlineargradient(spread:pad, y1:0, y2:1,stop:0 rgba(0, 0, 0, 0), stop:0.25 rgba(179, 229, 252, 1), stop:0.5 rgba(0, 0, 0, 0), stop:0.75 rgba(255, 192, 192, 1), stop:1 rgba(0, 0, 0, 0));")
+        self.line_18.setFrameShape(QFrame.VLine)
+        self.line_18.setFrameShadow(QFrame.Sunken)
         self.status_monitoring_panel_2 = QGroupBox(self.centralwidget)
         self.status_monitoring_panel_2.setObjectName(u"status_monitoring_panel_2")
-        self.status_monitoring_panel_2.setGeometry(QRect(390, 550, 331, 281))
+        self.status_monitoring_panel_2.setGeometry(QRect(390, 572, 331, 281))
         self.verticalLayoutWidget_6 = QWidget(self.status_monitoring_panel_2)
         self.verticalLayoutWidget_6.setObjectName(u"verticalLayoutWidget_6")
         self.verticalLayoutWidget_6.setGeometry(QRect(10, 30, 311, 241))
@@ -426,13 +659,13 @@ class Ui_MainWindow(object):
 
         self.data_stable_flag_indicator = QLabel(self.verticalLayoutWidget_6)
         self.data_stable_flag_indicator.setObjectName(u"data_stable_flag_indicator")
-        font2 = QFont()
-        font2.setPointSize(12)
-        font2.setBold(False)
-        self.data_stable_flag_indicator.setFont(font2)
+        font4 = QFont()
+        font4.setPointSize(12)
+        font4.setBold(False)
+        self.data_stable_flag_indicator.setFont(font4)
         self.data_stable_flag_indicator.setStyleSheet(u"background-color: lightgray; /* Light gray background */\n"
 "    color: black; /* Black text */\n"
-"    border: 1px solid gray; /* Gray border */\n"
+"    border: 2px solid gray; /* Gray border */\n"
 "    border-radius: 5px; /* Rounded corners */\n"
 "    padding: 5px; /* Padding */\n"
 "    min-width: 100px; /* Minimum width */\n"
@@ -457,12 +690,10 @@ class Ui_MainWindow(object):
 
         self.contact_detect_indicator = QLabel(self.verticalLayoutWidget_6)
         self.contact_detect_indicator.setObjectName(u"contact_detect_indicator")
-        font3 = QFont()
-        font3.setPointSize(12)
-        self.contact_detect_indicator.setFont(font3)
+        self.contact_detect_indicator.setFont(font1)
         self.contact_detect_indicator.setStyleSheet(u"background-color: lightgray; /* Light gray background */\n"
 "    color: black; /* Black text */\n"
-"    border: 1px solid gray; /* Gray border */\n"
+"    border: 2px solid gray; /* Gray border */\n"
 "    border-radius: 5px; /* Rounded corners */\n"
 "    padding: 5px; /* Padding */\n"
 "    min-width: 100px; /* Minimum width */\n"
@@ -506,7 +737,7 @@ class Ui_MainWindow(object):
         self.grasp_stable_flag_indicator.setObjectName(u"grasp_stable_flag_indicator")
         self.grasp_stable_flag_indicator.setStyleSheet(u"background-color: lightgray; /* Light gray background */\n"
 "    color: black; /* Black text */\n"
-"    border: 1px solid gray; /* Gray border */\n"
+"    border: 2px solid gray; /* Gray border */\n"
 "    border-radius: 5px; /* Rounded corners */\n"
 "    padding: 5px; /* Padding */\n"
 "    min-width: 100px; /* Minimum width */\n"
@@ -533,12 +764,12 @@ class Ui_MainWindow(object):
         self.motor_stop_indicator.setObjectName(u"motor_stop_indicator")
         self.motor_stop_indicator.setAutoFillBackground(False)
         self.motor_stop_indicator.setStyleSheet(u"background-color: lightcyan;\n"
-"                        color: black;\n"
-"                        border: 1px solid #00ced1; /* Dark Cyan border */\n"
-"                        border-radius: 5px;\n"
-"                        padding: 5px;\n"
-"                        min-width: 100px;\n"
-"                        text-align: center;")
+"color: black;\n"
+"border: 2px solid #00ced1; /* Dark Cyan border */\n"
+"border-radius: 5px;\n"
+"padding: 5px;\n"
+"min-width: 100px;\n"
+"text-align: center;")
         self.motor_stop_indicator.setScaledContents(False)
         self.motor_stop_indicator.setAlignment(Qt.AlignCenter)
         self.motor_stop_indicator.setMargin(0)
@@ -597,15 +828,15 @@ class Ui_MainWindow(object):
         self.verticalLayout_7.setStretch(3, 1)
         self.testing_control_panel = QGroupBox(self.centralwidget)
         self.testing_control_panel.setObjectName(u"testing_control_panel")
-        self.testing_control_panel.setGeometry(QRect(10, 500, 361, 331))
+        self.testing_control_panel.setGeometry(QRect(10, 522, 361, 331))
         self.verticalLayoutWidget_9 = QWidget(self.testing_control_panel)
         self.verticalLayoutWidget_9.setObjectName(u"verticalLayoutWidget_9")
-        self.verticalLayoutWidget_9.setGeometry(QRect(10, 30, 341, 291))
-        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.verticalLayoutWidget_9.sizePolicy().hasHeightForWidth())
-        self.verticalLayoutWidget_9.setSizePolicy(sizePolicy2)
+        self.verticalLayoutWidget_9.setGeometry(QRect(10, 30, 351, 291))
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.verticalLayoutWidget_9.sizePolicy().hasHeightForWidth())
+        self.verticalLayoutWidget_9.setSizePolicy(sizePolicy3)
         self.testing_control_panel_layout = QVBoxLayout(self.verticalLayoutWidget_9)
         self.testing_control_panel_layout.setObjectName(u"testing_control_panel_layout")
         self.testing_control_panel_layout.setContentsMargins(0, 0, 0, 0)
@@ -618,49 +849,57 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_18.addWidget(self.hline1_9)
 
-        self.verticalLayout_10 = QVBoxLayout()
-        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
-        self.widget = QWidget(self.verticalLayoutWidget_9)
-        self.widget.setObjectName(u"widget")
+        self.verticalLayout = QVBoxLayout()
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.widget_11 = QWidget(self.verticalLayoutWidget_9)
+        self.widget_11.setObjectName(u"widget_11")
 
-        self.verticalLayout_10.addWidget(self.widget)
+        self.verticalLayout.addWidget(self.widget_11)
 
 
-        self.verticalLayout_18.addLayout(self.verticalLayout_10)
+        self.verticalLayout_18.addLayout(self.verticalLayout)
 
         self.horizontalLayout_15 = QHBoxLayout()
         self.horizontalLayout_15.setSpacing(9)
         self.horizontalLayout_15.setObjectName(u"horizontalLayout_15")
         self.motor_pos_ctrl_bar_1 = QSlider(self.verticalLayoutWidget_9)
         self.motor_pos_ctrl_bar_1.setObjectName(u"motor_pos_ctrl_bar_1")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(1)
-        sizePolicy3.setHeightForWidth(self.motor_pos_ctrl_bar_1.sizePolicy().hasHeightForWidth())
-        self.motor_pos_ctrl_bar_1.setSizePolicy(sizePolicy3)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(1)
+        sizePolicy4.setHeightForWidth(self.motor_pos_ctrl_bar_1.sizePolicy().hasHeightForWidth())
+        self.motor_pos_ctrl_bar_1.setSizePolicy(sizePolicy4)
         self.motor_pos_ctrl_bar_1.setMaximum(44)
         self.motor_pos_ctrl_bar_1.setOrientation(Qt.Horizontal)
 
         self.horizontalLayout_15.addWidget(self.motor_pos_ctrl_bar_1)
 
-        self.motor_pos_ctrl_label = QLabel(self.verticalLayoutWidget_9)
-        self.motor_pos_ctrl_label.setObjectName(u"motor_pos_ctrl_label")
+        self.motor_speed_ctrl_label = QLabel(self.verticalLayoutWidget_9)
+        self.motor_speed_ctrl_label.setObjectName(u"motor_speed_ctrl_label")
 
-        self.horizontalLayout_15.addWidget(self.motor_pos_ctrl_label)
+        self.horizontalLayout_15.addWidget(self.motor_speed_ctrl_label)
+
+        self.motor_speed_ctrl_input = QSpinBox(self.verticalLayoutWidget_9)
+        self.motor_speed_ctrl_input.setObjectName(u"motor_speed_ctrl_input")
+        self.motor_speed_ctrl_input.setMaximum(20)
+        self.motor_speed_ctrl_input.setValue(2)
+
+        self.horizontalLayout_15.addWidget(self.motor_speed_ctrl_input)
 
         self.motor_pos_ctrl_bar_2 = QSlider(self.verticalLayoutWidget_9)
         self.motor_pos_ctrl_bar_2.setObjectName(u"motor_pos_ctrl_bar_2")
-        sizePolicy3.setHeightForWidth(self.motor_pos_ctrl_bar_2.sizePolicy().hasHeightForWidth())
-        self.motor_pos_ctrl_bar_2.setSizePolicy(sizePolicy3)
+        sizePolicy4.setHeightForWidth(self.motor_pos_ctrl_bar_2.sizePolicy().hasHeightForWidth())
+        self.motor_pos_ctrl_bar_2.setSizePolicy(sizePolicy4)
         self.motor_pos_ctrl_bar_2.setMaximum(44)
         self.motor_pos_ctrl_bar_2.setOrientation(Qt.Horizontal)
         self.motor_pos_ctrl_bar_2.setInvertedAppearance(True)
 
         self.horizontalLayout_15.addWidget(self.motor_pos_ctrl_bar_2)
 
-        self.horizontalLayout_15.setStretch(0, 1)
+        self.horizontalLayout_15.setStretch(0, 10)
         self.horizontalLayout_15.setStretch(1, 1)
         self.horizontalLayout_15.setStretch(2, 1)
+        self.horizontalLayout_15.setStretch(3, 10)
 
         self.verticalLayout_18.addLayout(self.horizontalLayout_15)
 
@@ -734,9 +973,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4.setSizeConstraint(QLayout.SetMinimumSize)
         self.pressure_control_module_label = QLabel(self.verticalLayoutWidget_9)
         self.pressure_control_module_label.setObjectName(u"pressure_control_module_label")
-        font4 = QFont()
-        font4.setPointSize(13)
-        self.pressure_control_module_label.setFont(font4)
+        font5 = QFont()
+        font5.setPointSize(13)
+        self.pressure_control_module_label.setFont(font5)
         self.pressure_control_module_label.setAlignment(Qt.AlignCenter)
         self.pressure_control_module_label.setWordWrap(True)
 
@@ -749,7 +988,7 @@ class Ui_MainWindow(object):
 
         self.force_feedback_ctrl_enable = QCheckBox(self.verticalLayoutWidget_9)
         self.force_feedback_ctrl_enable.setObjectName(u"force_feedback_ctrl_enable")
-        self.force_feedback_ctrl_enable.setFont(font3)
+        self.force_feedback_ctrl_enable.setFont(font1)
 
         self.horizontalLayout_4.addWidget(self.force_feedback_ctrl_enable)
 
@@ -780,18 +1019,18 @@ class Ui_MainWindow(object):
 
         self.pressure_scrollbar_label = QLabel(self.verticalLayoutWidget_9)
         self.pressure_scrollbar_label.setObjectName(u"pressure_scrollbar_label")
-        self.pressure_scrollbar_label.setFont(font3)
+        self.pressure_scrollbar_label.setFont(font1)
         self.pressure_scrollbar_label.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_8.addWidget(self.pressure_scrollbar_label)
 
         self.pressure_scrollbar = QScrollBar(self.verticalLayoutWidget_9)
         self.pressure_scrollbar.setObjectName(u"pressure_scrollbar")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(1)
-        sizePolicy4.setHeightForWidth(self.pressure_scrollbar.sizePolicy().hasHeightForWidth())
-        self.pressure_scrollbar.setSizePolicy(sizePolicy4)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(1)
+        sizePolicy5.setHeightForWidth(self.pressure_scrollbar.sizePolicy().hasHeightForWidth())
+        self.pressure_scrollbar.setSizePolicy(sizePolicy5)
         self.pressure_scrollbar.setAutoFillBackground(False)
         self.pressure_scrollbar.setStyleSheet(u"background: #f8f8f8; /* Light gray background */\n"
 "    height: 15px;\n"
@@ -818,7 +1057,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
         self.pressure_type_input_label = QLabel(self.verticalLayoutWidget_9)
         self.pressure_type_input_label.setObjectName(u"pressure_type_input_label")
-        self.pressure_type_input_label.setFont(font3)
+        self.pressure_type_input_label.setFont(font1)
         self.pressure_type_input_label.setAlignment(Qt.AlignCenter)
         self.pressure_type_input_label.setWordWrap(True)
 
@@ -835,7 +1074,7 @@ class Ui_MainWindow(object):
 
         self.pressure_unit = QLabel(self.verticalLayoutWidget_9)
         self.pressure_unit.setObjectName(u"pressure_unit")
-        self.pressure_unit.setFont(font3)
+        self.pressure_unit.setFont(font1)
         self.pressure_unit.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_10.addWidget(self.pressure_unit)
@@ -849,7 +1088,7 @@ class Ui_MainWindow(object):
 
         self.coefficient_label = QLabel(self.verticalLayoutWidget_9)
         self.coefficient_label.setObjectName(u"coefficient_label")
-        self.coefficient_label.setFont(font3)
+        self.coefficient_label.setFont(font1)
         self.coefficient_label.setAlignment(Qt.AlignCenter)
         self.coefficient_label.setWordWrap(True)
 
@@ -894,10 +1133,14 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_5.addWidget(self.widget_3)
 
-        self.sofa_simulation_enable = QCheckBox(self.verticalLayoutWidget_9)
-        self.sofa_simulation_enable.setObjectName(u"sofa_simulation_enable")
+        self.sofa_simulation_button = QPushButton(self.verticalLayoutWidget_9)
+        self.sofa_simulation_button.setObjectName(u"sofa_simulation_button")
+        self.sofa_simulation_button.setStyleSheet(u"background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(255, 192, 192, 0.7), stop:1 rgba(179, 229, 252, 0.7));\n"
+"    border: none;\n"
+"    border-radius: 5px;\n"
+"    padding: 5px;")
 
-        self.horizontalLayout_5.addWidget(self.sofa_simulation_enable)
+        self.horizontalLayout_5.addWidget(self.sofa_simulation_button)
 
         self.line_5 = QFrame(self.verticalLayoutWidget_9)
         self.line_5.setObjectName(u"line_5")
@@ -915,14 +1158,32 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_5.addWidget(self.record_data_button)
 
+        self.line_25 = QFrame(self.verticalLayoutWidget_9)
+        self.line_25.setObjectName(u"line_25")
+        self.line_25.setFrameShape(QFrame.VLine)
+        self.line_25.setFrameShadow(QFrame.Sunken)
+
+        self.horizontalLayout_5.addWidget(self.line_25)
+
+        self.probing_button = QPushButton(self.verticalLayoutWidget_9)
+        self.probing_button.setObjectName(u"probing_button")
+        self.probing_button.setStyleSheet(u"background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(255, 192, 192, 0.7), stop:1 rgba(179, 229, 252, 0.7));\n"
+"    border: none;\n"
+"    border-radius: 5px;\n"
+"    padding: 5px;")
+
+        self.horizontalLayout_5.addWidget(self.probing_button)
+
         self.widget_13 = QWidget(self.verticalLayoutWidget_9)
         self.widget_13.setObjectName(u"widget_13")
 
         self.horizontalLayout_5.addWidget(self.widget_13)
 
-        self.horizontalLayout_5.setStretch(1, 8)
+        self.horizontalLayout_5.setStretch(1, 1)
         self.horizontalLayout_5.setStretch(2, 1)
-        self.horizontalLayout_5.setStretch(3, 8)
+        self.horizontalLayout_5.setStretch(3, 1)
+        self.horizontalLayout_5.setStretch(4, 1)
+        self.horizontalLayout_5.setStretch(5, 1)
 
         self.testing_control_panel_layout.addLayout(self.horizontalLayout_5)
 
@@ -933,7 +1194,7 @@ class Ui_MainWindow(object):
         self.testing_control_panel_layout.setStretch(4, 1)
         self.global_setting_panel = QGroupBox(self.centralwidget)
         self.global_setting_panel.setObjectName(u"global_setting_panel")
-        self.global_setting_panel.setGeometry(QRect(10, 420, 361, 71))
+        self.global_setting_panel.setGeometry(QRect(10, 442, 361, 71))
         self.horizontalLayoutWidget_3 = QWidget(self.global_setting_panel)
         self.horizontalLayoutWidget_3.setObjectName(u"horizontalLayoutWidget_3")
         self.horizontalLayoutWidget_3.setGeometry(QRect(10, 30, 341, 31))
@@ -954,7 +1215,7 @@ class Ui_MainWindow(object):
 
         self.max_pressure_label_2 = QLabel(self.horizontalLayoutWidget_3)
         self.max_pressure_label_2.setObjectName(u"max_pressure_label_2")
-        self.max_pressure_label_2.setFont(font3)
+        self.max_pressure_label_2.setFont(font1)
         self.max_pressure_label_2.setAlignment(Qt.AlignCenter)
         self.max_pressure_label_2.setWordWrap(True)
 
@@ -971,7 +1232,7 @@ class Ui_MainWindow(object):
 
         self.pressure_unit_3 = QLabel(self.horizontalLayoutWidget_3)
         self.pressure_unit_3.setObjectName(u"pressure_unit_3")
-        self.pressure_unit_3.setFont(font3)
+        self.pressure_unit_3.setFont(font1)
         self.pressure_unit_3.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_12.addWidget(self.pressure_unit_3)
@@ -981,96 +1242,198 @@ class Ui_MainWindow(object):
         self.horizontalLayout_12.setStretch(2, 1)
         self.horizontalLayout_12.setStretch(3, 1)
         self.horizontalLayout_12.setStretch(4, 1)
-        self.color_frame_sensing_signal_monitoring = QFrame(self.centralwidget)
-        self.color_frame_sensing_signal_monitoring.setObjectName(u"color_frame_sensing_signal_monitoring")
-        self.color_frame_sensing_signal_monitoring.setGeometry(QRect(640, 11, 921, 381))
-        self.color_frame_sensing_signal_monitoring.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(179, 229, 252, 0.35), stop:0.1 rgba(227, 242, 253, 0), stop:0.4 rgba(179, 229, 252, 0.35), stop:0.6 rgba(227, 242, 253, 0), stop:0.8 rgba(255, 192, 192, 0.35), stop:1 rgba(227, 242, 253, 0));")
-        self.color_frame_sensing_signal_monitoring.setFrameShape(QFrame.NoFrame)
-        self.color_frame_sensing_signal_monitoring.setFrameShadow(QFrame.Raised)
-        self.color_frame_status_monitoring_1 = QFrame(self.centralwidget)
-        self.color_frame_status_monitoring_1.setObjectName(u"color_frame_status_monitoring_1")
-        self.color_frame_status_monitoring_1.setGeometry(QRect(-1, 11, 621, 381))
-        self.color_frame_status_monitoring_1.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(255, 192, 192, 0.35), stop:0.1 rgba(227, 242, 253, 0), stop:0.4 rgba(179, 229, 252, 0.35), stop:0.6 rgba(227, 242, 253, 0), stop:0.8 rgba(255, 192, 192, 0.35), stop:1 rgba(227, 242, 253, 0));")
-        self.color_frame_status_monitoring_1.setFrameShape(QFrame.NoFrame)
-        self.color_frame_status_monitoring_1.setFrameShadow(QFrame.Raised)
+        self.color_frame_force_monitoring = QFrame(self.centralwidget)
+        self.color_frame_force_monitoring.setObjectName(u"color_frame_force_monitoring")
+        self.color_frame_force_monitoring.setGeometry(QRect(830, 11, 411, 411))
+        self.color_frame_force_monitoring.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(179, 229, 252, 0.35), stop:0.1 rgba(227, 242, 253, 0),stop:0.35 rgba(179, 229, 252, 0.35), stop:0.45 rgba(179, 229, 252, 0.35), stop:0.6 rgba(227, 242, 253, 0), stop:0.8 rgba(255, 192, 192, 0.35), stop:1 rgba(227, 242, 253, 0));")
+        self.color_frame_force_monitoring.setFrameShape(QFrame.NoFrame)
+        self.color_frame_force_monitoring.setFrameShadow(QFrame.Raised)
+        self.color_frame_tactile_monitoring_panel = QFrame(self.centralwidget)
+        self.color_frame_tactile_monitoring_panel.setObjectName(u"color_frame_tactile_monitoring_panel")
+        self.color_frame_tactile_monitoring_panel.setGeometry(QRect(-1, 11, 281, 411))
+        self.color_frame_tactile_monitoring_panel.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(179, 229, 252, 0.35), stop:0.1 rgba(227, 242, 253, 0), stop:0.35 rgba(179, 229, 252, 0.35), stop:0.45 rgba(179, 229, 252, 0.35), stop:0.6 rgba(227, 242, 253, 0), stop:0.8 rgba(255, 192, 192, 0.35), stop:1 rgba(227, 242, 253, 0));")
+        self.color_frame_tactile_monitoring_panel.setFrameShape(QFrame.NoFrame)
+        self.color_frame_tactile_monitoring_panel.setFrameShadow(QFrame.Raised)
         self.color_frame_automatic_control_panels = QFrame(self.centralwidget)
         self.color_frame_automatic_control_panels.setObjectName(u"color_frame_automatic_control_panels")
-        self.color_frame_automatic_control_panels.setGeometry(QRect(380, 410, 351, 441))
+        self.color_frame_automatic_control_panels.setGeometry(QRect(380, 430, 351, 431))
         self.color_frame_automatic_control_panels.setStyleSheet(u"background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:1, stop:0 rgba(179, 229, 252, 0.35), stop:1 rgba(179, 229, 252, 0));")
         self.color_frame_automatic_control_panels.setFrameShape(QFrame.NoFrame)
         self.color_frame_automatic_control_panels.setFrameShadow(QFrame.Plain)
         self.color_frame_automatic_control_panels.setLineWidth(0)
-        self.color_frame_other_signal_monitoring_panel = QFrame(self.centralwidget)
-        self.color_frame_other_signal_monitoring_panel.setObjectName(u"color_frame_other_signal_monitoring_panel")
-        self.color_frame_other_signal_monitoring_panel.setGeometry(QRect(730, 410, 831, 441))
-        self.color_frame_other_signal_monitoring_panel.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(255, 192, 192, 0.35), stop:0.35 rgba(179, 229, 252, 0.35), stop:0.6 rgba(227, 242, 253, 0), stop:0.8 rgba(255, 192, 192, 0.35), stop:1 rgba(227, 242, 253, 0));")
-        self.color_frame_other_signal_monitoring_panel.setFrameShape(QFrame.NoFrame)
-        self.color_frame_other_signal_monitoring_panel.setFrameShadow(QFrame.Raised)
+        self.color_frame_sensing_signal_monitoring_panel = QFrame(self.centralwidget)
+        self.color_frame_sensing_signal_monitoring_panel.setObjectName(u"color_frame_sensing_signal_monitoring_panel")
+        self.color_frame_sensing_signal_monitoring_panel.setGeometry(QRect(730, 430, 951, 431))
+        self.color_frame_sensing_signal_monitoring_panel.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(255, 192, 192, 0.35), stop:0.35 rgba(179, 229, 252, 0.35), stop:0.6 rgba(227, 242, 253, 0), stop:0.8 rgba(255, 192, 192, 0.35), stop:1 rgba(227, 242, 253, 0));")
+        self.color_frame_sensing_signal_monitoring_panel.setFrameShape(QFrame.NoFrame)
+        self.color_frame_sensing_signal_monitoring_panel.setFrameShadow(QFrame.Raised)
         self.frame_5 = QFrame(self.centralwidget)
         self.frame_5.setObjectName(u"frame_5")
-        self.frame_5.setGeometry(QRect(-1, 405, 381, 9))
+        self.frame_5.setGeometry(QRect(-1, 425, 381, 9))
         self.frame_5.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(255, 192, 192, 0.1),  stop:1 rgba(255, 192, 192, 0.35));")
         self.frame_5.setFrameShape(QFrame.NoFrame)
         self.frame_5.setFrameShadow(QFrame.Raised)
-        self.frame_7 = QFrame(self.centralwidget)
-        self.frame_7.setObjectName(u"frame_7")
-        self.frame_7.setGeometry(QRect(621, 10, 21, 401))
-        self.frame_7.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0.15 rgba(227, 242, 253, 0), stop:0.4 rgba(179, 229, 252, 0.35), stop:0.6 rgba(227, 242, 253, 0), stop:0.8 rgba(255, 192, 192, 0.35), stop:1 rgba(227, 242, 253, 0));")
-        self.frame_7.setFrameShape(QFrame.NoFrame)
-        self.frame_7.setFrameShadow(QFrame.Raised)
         self.frame_10 = QFrame(self.centralwidget)
         self.frame_10.setObjectName(u"frame_10")
-        self.frame_10.setGeometry(QRect(0, 6, 641, 8))
-        self.frame_10.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(227, 242, 253, 0), stop:0.1 rgba(255, 192, 192, 0.35));")
+        self.frame_10.setGeometry(QRect(0, 6, 281, 8))
+        self.frame_10.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(179, 229, 252, 0.1),  stop:1 rgba(179, 229, 252, 0.4));")
         self.frame_10.setFrameShape(QFrame.NoFrame)
         self.frame_10.setFrameShadow(QFrame.Raised)
         self.color_frame_testing_control_panel = QFrame(self.centralwidget)
         self.color_frame_testing_control_panel.setObjectName(u"color_frame_testing_control_panel")
-        self.color_frame_testing_control_panel.setGeometry(QRect(0, 410, 381, 441))
+        self.color_frame_testing_control_panel.setGeometry(QRect(0, 430, 381, 431))
         self.color_frame_testing_control_panel.setStyleSheet(u"background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:1, stop:0 rgba(255, 192, 192, 0.35), stop:1 rgba(179, 229, 252, 0));")
         self.color_frame_testing_control_panel.setFrameShape(QFrame.NoFrame)
         self.color_frame_testing_control_panel.setFrameShadow(QFrame.Plain)
         self.color_frame_testing_control_panel.setLineWidth(0)
         self.frame_6 = QFrame(self.centralwidget)
         self.frame_6.setObjectName(u"frame_6")
-        self.frame_6.setGeometry(QRect(380, 406, 351, 8))
+        self.frame_6.setGeometry(QRect(380, 426, 351, 8))
         self.frame_6.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(179, 229, 252, 0.1),  stop:1 rgba(179, 229, 252, 0.4));")
         self.frame_6.setFrameShape(QFrame.NoFrame)
         self.frame_6.setFrameShadow(QFrame.Raised)
         self.frame_8 = QFrame(self.centralwidget)
         self.frame_8.setObjectName(u"frame_8")
-        self.frame_8.setGeometry(QRect(730, 406, 831, 8))
+        self.frame_8.setGeometry(QRect(730, 426, 951, 8))
         self.frame_8.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(255, 192, 192, 0.1),  stop:1 rgba(255, 192, 192, 0.35));")
         self.frame_8.setFrameShape(QFrame.NoFrame)
         self.frame_8.setFrameShadow(QFrame.Raised)
         self.frame_11 = QFrame(self.centralwidget)
         self.frame_11.setObjectName(u"frame_11")
-        self.frame_11.setGeometry(QRect(620, 6, 941, 8))
+        self.frame_11.setGeometry(QRect(830, 6, 411, 8))
         self.frame_11.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(179, 229, 252, 0.1),  stop:1 rgba(179, 229, 252, 0.4));")
         self.frame_11.setFrameShape(QFrame.NoFrame)
         self.frame_11.setFrameShadow(QFrame.Raised)
+        self.sbrp_logo_label_1_1_39 = QLabel(self.centralwidget)
+        self.sbrp_logo_label_1_1_39.setObjectName(u"sbrp_logo_label_1_1_39")
+        self.sbrp_logo_label_1_1_39.setGeometry(QRect(1612, -1, 60, 43))
+        sizePolicy2.setHeightForWidth(self.sbrp_logo_label_1_1_39.sizePolicy().hasHeightForWidth())
+        self.sbrp_logo_label_1_1_39.setSizePolicy(sizePolicy2)
+        self.sbrp_logo_label_1_1_39.setStyleSheet(u"")
+        self.sbrp_logo_label_1_1_39.setPixmap(QPixmap(u"SBRPLogo1.png"))
+        self.sbrp_logo_label_1_1_39.setScaledContents(True)
+        self.sbrp_logo_label_1_1_39.setMargin(0)
+        self.camera_panel = QGroupBox(self.centralwidget)
+        self.camera_panel.setObjectName(u"camera_panel")
+        self.camera_panel.setGeometry(QRect(290, 20, 531, 401))
+        self.horizontalLayoutWidget_6 = QWidget(self.camera_panel)
+        self.horizontalLayoutWidget_6.setObjectName(u"horizontalLayoutWidget_6")
+        self.horizontalLayoutWidget_6.setGeometry(QRect(10, 30, 511, 361))
+        self.horizontalLayout_20 = QHBoxLayout(self.horizontalLayoutWidget_6)
+        self.horizontalLayout_20.setObjectName(u"horizontalLayout_20")
+        self.horizontalLayout_20.setContentsMargins(0, 0, 0, 0)
+        self.camera_openGLWidget = QOpenGLWidget(self.horizontalLayoutWidget_6)
+        self.camera_openGLWidget.setObjectName(u"camera_openGLWidget")
+
+        self.horizontalLayout_20.addWidget(self.camera_openGLWidget)
+
+        self.color_frame_camera = QFrame(self.centralwidget)
+        self.color_frame_camera.setObjectName(u"color_frame_camera")
+        self.color_frame_camera.setGeometry(QRect(281, 10, 551, 411))
+        self.color_frame_camera.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(255, 192, 192, 0.35), stop:0.1 rgba(227, 242, 253, 0),stop:0.35 rgba(179, 229, 252, 0.35), stop:0.45 rgba(179, 229, 252, 0.35), stop:0.6 rgba(227, 242, 253, 0), stop:0.8 rgba(255, 192, 192, 0.35), stop:1 rgba(227, 242, 253, 0));")
+        self.color_frame_camera.setFrameShape(QFrame.NoFrame)
+        self.color_frame_camera.setFrameShadow(QFrame.Raised)
+        self.frame_12 = QFrame(self.centralwidget)
+        self.frame_12.setObjectName(u"frame_12")
+        self.frame_12.setGeometry(QRect(281, 6, 551, 8))
+        self.frame_12.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(227, 242, 253, 0), stop:0.1 rgba(255, 192, 192, 0.35));")
+        self.frame_12.setFrameShape(QFrame.NoFrame)
+        self.frame_12.setFrameShadow(QFrame.Raised)
+        self.simulation_panel = QGroupBox(self.centralwidget)
+        self.simulation_panel.setObjectName(u"simulation_panel")
+        self.simulation_panel.setGeometry(QRect(1249, 20, 421, 401))
+        self.horizontalLayoutWidget_7 = QWidget(self.simulation_panel)
+        self.horizontalLayoutWidget_7.setObjectName(u"horizontalLayoutWidget_7")
+        self.horizontalLayoutWidget_7.setGeometry(QRect(10, 30, 401, 361))
+        self.horizontalLayout_21 = QHBoxLayout(self.horizontalLayoutWidget_7)
+        self.horizontalLayout_21.setObjectName(u"horizontalLayout_21")
+        self.horizontalLayout_21.setContentsMargins(0, 0, 0, 0)
+        self.sofa_openGLWidget = QOpenGLWidget(self.horizontalLayoutWidget_7)
+        self.sofa_openGLWidget.setObjectName(u"sofa_openGLWidget")
+        self.sofa_openGLWidget.setStyleSheet(u"background-color: rgba(0, 0, 0, 0); /* Fully transparent background */\n"
+"    border: none; /* No border */")
+
+        self.horizontalLayout_21.addWidget(self.sofa_openGLWidget)
+
+        self.color_frame_simulation_panel = QFrame(self.centralwidget)
+        self.color_frame_simulation_panel.setObjectName(u"color_frame_simulation_panel")
+        self.color_frame_simulation_panel.setGeometry(QRect(1240, 10, 441, 421))
+        self.color_frame_simulation_panel.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(255, 192, 192, 0.35), stop:0.1 rgba(227, 242, 253, 0),stop:0.35 rgba(179, 229, 252, 0.35), stop:0.45 rgba(179, 229, 252, 0.35), stop:0.6 rgba(227, 242, 253, 0), stop:0.8 rgba(255, 192, 192, 0.35), stop:1 rgba(227, 242, 253, 0));")
+        self.color_frame_simulation_panel.setFrameShape(QFrame.NoFrame)
+        self.color_frame_simulation_panel.setFrameShadow(QFrame.Raised)
+        self.line_20 = QFrame(self.color_frame_simulation_panel)
+        self.line_20.setObjectName(u"line_20")
+        self.line_20.setGeometry(QRect(0, 0, 2, 421))
+        self.line_20.setStyleSheet(u"    border: none;\n"
+"    background: qlineargradient(spread:pad, y1:0, y2:1,stop:0 rgba(0, 0, 0, 0), stop:0.25 rgba(179, 229, 252, 1), stop:0.5 rgba(0, 0, 0, 0), stop:0.75 rgba(255, 192, 192, 1), stop:1 rgba(0, 0, 0, 0));")
+        self.line_20.setFrameShape(QFrame.VLine)
+        self.line_20.setFrameShadow(QFrame.Sunken)
+        self.frame_13 = QFrame(self.centralwidget)
+        self.frame_13.setObjectName(u"frame_13")
+        self.frame_13.setGeometry(QRect(1240, 6, 361, 8))
+        self.frame_13.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(227, 242, 253, 0), stop:0.1 rgba(255, 192, 192, 0.35));")
+        self.frame_13.setFrameShape(QFrame.NoFrame)
+        self.frame_13.setFrameShadow(QFrame.Raised)
+        self.line_21 = QFrame(self.centralwidget)
+        self.line_21.setObjectName(u"line_21")
+        self.line_21.setGeometry(QRect(830, 10, 2, 421))
+        self.line_21.setStyleSheet(u"    border: none;\n"
+"    background: qlineargradient(spread:pad, y1:0, y2:1,stop:0 rgba(0, 0, 0, 0), stop:0.25 rgba(179, 229, 252, 1), stop:0.5 rgba(0, 0, 0, 0), stop:0.75 rgba(255, 192, 192, 1), stop:1 rgba(0, 0, 0, 0));")
+        self.line_21.setFrameShape(QFrame.VLine)
+        self.line_21.setFrameShadow(QFrame.Sunken)
+        self.line_22 = QFrame(self.centralwidget)
+        self.line_22.setObjectName(u"line_22")
+        self.line_22.setGeometry(QRect(280, 10, 2, 411))
+        self.line_22.setStyleSheet(u"    border: none;\n"
+"    background: qlineargradient(spread:pad, y1:0, y2:1,stop:0 rgba(0, 0, 0, 0), stop:0.25 rgba(179, 229, 252, 1), stop:0.5 rgba(0, 0, 0, 0), stop:0.75 rgba(255, 192, 192, 1), stop:1 rgba(0, 0, 0, 0));")
+        self.line_22.setFrameShape(QFrame.VLine)
+        self.line_22.setFrameShadow(QFrame.Sunken)
+        self.line_23 = QFrame(self.centralwidget)
+        self.line_23.setObjectName(u"line_23")
+        self.line_23.setGeometry(QRect(730, 460, 2, 391))
+        self.line_23.setStyleSheet(u"    border: none;\n"
+"    background: qlineargradient(spread:pad, y1:0, y2:1,stop:0 rgba(0, 0, 0, 0), stop:0.25 rgba(179, 229, 252, 1), stop:0.5 rgba(0, 0, 0, 0), stop:0.75 rgba(255, 192, 192, 1), stop:1 rgba(0, 0, 0, 0));")
+        self.line_23.setFrameShape(QFrame.VLine)
+        self.line_23.setFrameShadow(QFrame.Sunken)
+        self.line_24 = QFrame(self.centralwidget)
+        self.line_24.setObjectName(u"line_24")
+        self.line_24.setGeometry(QRect(380, 460, 2, 391))
+        self.line_24.setStyleSheet(u"    border: none;\n"
+"    background: qlineargradient(spread:pad, y1:0, y2:1,stop:0 rgba(0, 0, 0, 0), stop:0.25 rgba(179, 229, 252, 1), stop:0.5 rgba(0, 0, 0, 0), stop:0.75 rgba(255, 192, 192, 1), stop:1 rgba(0, 0, 0, 0));")
+        self.line_24.setFrameShape(QFrame.VLine)
+        self.line_24.setFrameShadow(QFrame.Sunken)
         MainWindow.setCentralWidget(self.centralwidget)
+        self.color_frame_tactile_monitoring_panel.raise_()
+        self.color_frame_simulation_panel.raise_()
+        self.frame_13.raise_()
+        self.color_frame_camera.raise_()
         self.frame_10.raise_()
-        self.color_frame_sensing_signal_monitoring.raise_()
-        self.color_frame_status_monitoring_1.raise_()
+        self.color_frame_force_monitoring.raise_()
         self.color_frame_automatic_control_panels.raise_()
         self.color_frame_testing_control_panel.raise_()
-        self.color_frame_other_signal_monitoring_panel.raise_()
+        self.color_frame_sensing_signal_monitoring_panel.raise_()
         self.sensing_signal_monitoring_panel.raise_()
-        self.status_monitoring_panel_1.raise_()
-        self.other_signal_monitoring_panel.raise_()
+        self.tactile_monitoring_panel.raise_()
+        self.force_monitoring_panel.raise_()
         self.automatic_grasping_control_panel.raise_()
         self.status_monitoring_panel_2.raise_()
         self.testing_control_panel.raise_()
         self.global_setting_panel.raise_()
         self.frame_5.raise_()
-        self.frame_7.raise_()
         self.frame_6.raise_()
         self.frame_8.raise_()
         self.frame_11.raise_()
+        self.camera_panel.raise_()
+        self.frame_12.raise_()
+        self.simulation_panel.raise_()
+        self.sbrp_logo_label_1_1_39.raise_()
+        self.line_21.raise_()
+        self.line_23.raise_()
+        self.line_24.raise_()
+        self.line_22.raise_()
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1573, 23))
+        self.menubar.setGeometry(QRect(0, 0, 1692, 23))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -1090,15 +1453,19 @@ class Ui_MainWindow(object):
         self.restart_button.setText(QCoreApplication.translate("MainWindow", u"Start", None))
         self.release_button.setText(QCoreApplication.translate("MainWindow", u"Release", None))
         self.stop_all_button.setText(QCoreApplication.translate("MainWindow", u"! STOP ALL !", None))
-        self.other_signal_monitoring_panel.setTitle(QCoreApplication.translate("MainWindow", u"  Other Signal Monitoring Panel", None))
-        self.status_monitoring_panel_1.setTitle(QCoreApplication.translate("MainWindow", u"  Status Monitoring Panel 1", None))
-        self.S1_tactile_info_label.setText(QCoreApplication.translate("MainWindow", u"S1 Tactile Info", None))
-        self.force_unit_1.setText(QCoreApplication.translate("MainWindow", u"N", None))
-        self.S2_tactile_info_label.setText(QCoreApplication.translate("MainWindow", u"S2 Tactile Info", None))
-        self.force_unit_2.setText(QCoreApplication.translate("MainWindow", u"N", None))
+        self.force_monitoring_panel.setTitle(QCoreApplication.translate("MainWindow", u"  Force Monitoring Panel", None))
+        self.tactile_monitoring_panel.setTitle(QCoreApplication.translate("MainWindow", u"  Tactile Monitoring Panel", None))
+        self.S1_tactile_monitoring_label.setText(QCoreApplication.translate("MainWindow", u"S1 Tactile Monitoring", None))
+        self.force_value_1_x.setText(QCoreApplication.translate("MainWindow", u"F<sub>X</sub> :", None))
+        self.force_value_1_y.setText(QCoreApplication.translate("MainWindow", u"F<sub>Y</sub> :", None))
+        self.force_value_1_z.setText(QCoreApplication.translate("MainWindow", u"F<sub>Z</sub> :", None))
+        self.S2_tactile_monitoring_label.setText(QCoreApplication.translate("MainWindow", u"S2 Tactile Monitoring", None))
+        self.force_value_2_x.setText(QCoreApplication.translate("MainWindow", u"F<sub>X</sub> :", None))
+        self.force_value_2_y.setText(QCoreApplication.translate("MainWindow", u"F<sub>Y</sub> :", None))
+        self.force_value_2_z.setText(QCoreApplication.translate("MainWindow", u"F<sub>Z</sub> :", None))
         self.sensing_signal_monitoring_panel.setTitle(QCoreApplication.translate("MainWindow", u"  Sensing Signal Monitoring Panel", None))
         self.status_monitoring_panel_2.setTitle(QCoreApplication.translate("MainWindow", u"Status Monitoring Panel 2", None))
-        self.motor_pos_reading_label.setText(QCoreApplication.translate("MainWindow", u"Motor Position", None))
+        self.motor_pos_reading_label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Pos<span style=\" vertical-align:sub;\">motor</span></p></body></html>", None))
         self.data_stable_flag_indicator.setText(QCoreApplication.translate("MainWindow", u"Data Processing", None))
         self.contact_detect_indicator.setText(QCoreApplication.translate("MainWindow", u"Contact Detect", None))
         self.grasp_stable_flag_indicator.setText(QCoreApplication.translate("MainWindow", u"Grasp Stable", None))
@@ -1106,7 +1473,7 @@ class Ui_MainWindow(object):
         self.elapsed_time_label.setText(QCoreApplication.translate("MainWindow", u"Elapse Time:", None))
         self.time_reset_button.setText(QCoreApplication.translate("MainWindow", u"Reset", None))
         self.testing_control_panel.setTitle(QCoreApplication.translate("MainWindow", u"Testing Control Panel", None))
-        self.motor_pos_ctrl_label.setText(QCoreApplication.translate("MainWindow", u"Motor Control", None))
+        self.motor_speed_ctrl_label.setText(QCoreApplication.translate("MainWindow", u"RPM<sub>motor", None))
         self.motor_zero_button.setText(QCoreApplication.translate("MainWindow", u"Motor At Zero", None))
         self.sensor_zero_button.setText(QCoreApplication.translate("MainWindow", u"Zero Sensor", None))
         self.pressure_control_module_label.setText(QCoreApplication.translate("MainWindow", u"Pressure Control", None))
@@ -1116,12 +1483,16 @@ class Ui_MainWindow(object):
         self.pressure_type_input.setSuffix("")
         self.pressure_unit.setText(QCoreApplication.translate("MainWindow", u"kPa", None))
         self.coefficient_label.setText(QCoreApplication.translate("MainWindow", u"P<sub>1</sub>/P<sub>2", None))
-        self.sofa_simulation_enable.setText(QCoreApplication.translate("MainWindow", u"SOFA Simulation", None))
-        self.record_data_button.setText(QCoreApplication.translate("MainWindow", u"Record Data", None))
+        self.sofa_simulation_button.setText(QCoreApplication.translate("MainWindow", u"Simulation", None))
+        self.record_data_button.setText(QCoreApplication.translate("MainWindow", u"Recording", None))
+        self.probing_button.setText(QCoreApplication.translate("MainWindow", u"Probing", None))
         self.global_setting_panel.setTitle(QCoreApplication.translate("MainWindow", u"  Global Setting Panel", None))
         self.max_pressure_label_2.setText(QCoreApplication.translate("MainWindow", u"P<sub>max", None))
         self.max_pressure_input.setSuffix("")
         self.pressure_unit_3.setText(QCoreApplication.translate("MainWindow", u"kPa", None))
+        self.sbrp_logo_label_1_1_39.setText("")
+        self.camera_panel.setTitle(QCoreApplication.translate("MainWindow", u"  Camera", None))
+        self.simulation_panel.setTitle(QCoreApplication.translate("MainWindow", u"  Simulation", None))
         self.toolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
     # retranslateUi
 

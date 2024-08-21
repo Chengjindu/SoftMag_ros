@@ -1,25 +1,20 @@
 #!/usr/bin/env python3
 # coding: utf8
 
-import os
 import rospy
 from std_msgs.msg import Float32MultiArray  # wrapper for ROS primitive types, see : https://github.com/ros2/common_interfaces/tree/master/std_msgs
-
 import Sofa
 import Sofa.Gui
 import SofaRuntime
-import math
 from controller import WholeGripperController
-# from splib3.loaders import loadPointListFromFile
 import sofaros
-
 import signal
 import sys
+import os
 
 
 # Get the directory of your script
 script_directory = os.path.dirname(os.path.abspath(__file__))
-
 
 # Fingers information
 youngModulusFingers = 70 #kPa
@@ -196,11 +191,13 @@ def createScene(rootNode):
 
     return rootNode
 
+shutdown_requested = False
 def signal_handler(sig, frame):
+    global shutdown_requested
     rospy.loginfo("SIGINT received. Shutting down gracefully...")
+    shutdown_requested = True
     Sofa.Gui.GUIManager.closeGUI()
     rospy.signal_shutdown("SIGINT received")
-    sys.exit(0)
 
 def main():
     # Initialize the ROS node
