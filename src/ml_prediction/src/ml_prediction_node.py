@@ -8,19 +8,31 @@ import logging
 logging.getLogger('tensorflow').setLevel(logging.ERROR)
 
 import rospy
-from std_msgs.msg import Float32MultiArray, Int32, Float32
+from std_msgs.msg import Float32MultiArray, Int32, Float32, String, Bool
 import json
 import numpy as np
 import pickle
+import joblib
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 from concurrent.futures import ThreadPoolExecutor
 from collections import Counter
+import subprocess
 import time
 
 # # Global counters and timestamps for measuring rates
 # subscription_count = {}
 # prediction_count = {}
 # start_time = time.time()
+
+def get_config_param(param):
+    # Adjust the path to locate start_config.json
+    config_file = os.path.join(os.path.dirname(__file__), '../../../start_config.json')
+    result = subprocess.run(['jq', '-r', f'.{param}', config_file], capture_output=True, text=True)
+    if result.returncode == 0:
+        return result.stdout.strip()
+    else:
+        raise Exception(f"Failed to get config param '{param}': {result.stderr}")
+
 
 class MLLearningNode:
     def __init__(self, sensor_id):
@@ -40,41 +52,33 @@ class MLLearningNode:
         self.deviation_fz = 0.0
         self.deviation_calculated = False
 
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        normalization_position_params_path = os.path.join(dir_path, 'Savings', 'normalization_position_params.pkl')
-        normalization_force_params_path = os.path.join(dir_path, 'Savings', 'normalization_force_params.pkl')
+        self.pressure_data = {'S1': np.array([]), 'S2': np.array([])}
+        self.parasitic_decoupling_enabled = False
+        self.actuation_decoup_models = {}
 
-        # Load normalization parameters for position prediction
-        with open(normalization_position_params_path, 'rb') as file:
-            self.norm_pos_params = pickle.load(file)
-
-        # Load normalization parameters for force prediction
-        with open(normalization_force_params_path, 'rb') as file:
-            self.norm_force_params = pickle.load(file)
-
-        # Use absolute paths for model files as well
-        lstm_classification_model_path = os.path.join(dir_path, 'Savings', 'lstm_classification_model.h5')
-        lstm_multiclassification_model_path = os.path.join(dir_path, 'Savings', 'lstm_multiclassification_model.h5')
-        mlp_classification_model_path = os.path.join(dir_path, 'Savings', 'mlp_classification_model.h5')
-        # normalforce_model_path = os.path.join(dir_path, 'Savings', 'normalforce_model.h5')
-        normalforce_model_path = os.path.join(dir_path, 'Savings', 'normalforce_model.h5')
-        shearforce_model_path = os.path.join(dir_path, 'Savings', 'shearforce_model.h5')
-
-        # Load machine learning models
-        self.lstm_classification_model = tf.keras.models.load_model(lstm_classification_model_path)
-        self.lstm_multiclassification_model = tf.keras.models.load_model(lstm_multiclassification_model_path)
-        self.mlp_classification_model = tf.keras.models.load_model(mlp_classification_model_path)
-        self.normalforce_model = tf.keras.models.load_model(normalforce_model_path)
-        self.shearforce_model = tf.keras.models.load_model(shearforce_model_path)
+        self.current_mode = get_config_param('default_pi_mode')  # Get the default mode
+        self.load_models(self.current_mode)  # Load models based on the default mode
 
         # Subscriber to processed sensor data
-        rospy.Subscriber(f'processed_sensor_data_{sensor_id}', Float32MultiArray, self.processed_data_callback)
+        rospy.Subscriber(f'processed_sensor_data_{sensor_id}', Float32MultiArray, self.processed_sensor_data_callback)
+        rospy.Subscriber('/parasitic_decoupling_state', Bool, self.parasitic_decoupling_state_callback)
+        rospy.Subscriber(f'pressure_filtered_P1', Float32, lambda msg: self.pressure_callback(msg, 'S1'))
+        rospy.Subscriber(f'pressure_filtered_P2', Float32, lambda msg: self.pressure_callback(msg, 'S2'))
+        rospy.Subscriber('/mode_change', String, self.mode_change_callback)
 
         # Publisher for prediction results
         self.position_publisher = rospy.Publisher(f'prediction_position_{sensor_id}', Int32, queue_size=10)
         self.fz_publisher = rospy.Publisher(f'prediction_fz_{sensor_id}', Float32, queue_size=10)
         self.fx_publisher = rospy.Publisher(f'prediction_fx_{sensor_id}', Float32, queue_size=10)
         self.fy_publisher = rospy.Publisher(f'prediction_fy_{sensor_id}', Float32, queue_size=10)
+
+        # Publishers for the predicted pressure effects
+        self.pressure_effect_publisher_S1 = rospy.Publisher(f'predicted_pressure_effect_S1', Float32MultiArray,
+                                                            queue_size=10)
+        self.pressure_effect_publisher_S2 = rospy.Publisher(f'predicted_pressure_effect_S2', Float32MultiArray,
+                                                            queue_size=10)
+        self.sensor_decoupled_publisher_S1 = rospy.Publisher(f'sensor_decoupled_S1', Float32MultiArray, queue_size=10)
+        self.sensor_decoupled_publisher_S2 = rospy.Publisher(f'sensor_decoupled_S2', Float32MultiArray, queue_size=10)
 
         # Publisher for diagnostics
         self.diag_pub = rospy.Publisher('/diagnostics', DiagnosticArray, queue_size=10)
@@ -87,6 +91,127 @@ class MLLearningNode:
 
         self.data_batch = []
         self.batch_size = 10
+
+    def load_models(self, mode):
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+
+        if mode == 'sensor':
+            model_suffix = 'sensor'
+        else:
+            model_suffix = 'gripper'
+            for sid in ['S1', 'S2']:
+                model_path = os.path.join(dir_path, 'Models', f'actuation_sensor_model_{sid}.pkl')
+                try:
+                    with open(model_path, 'rb') as file:
+                        self.actuation_decoup_models[sid] = joblib.load(file)
+                    rospy.loginfo(f"Model for {sid} loaded successfully.")
+                except Exception as e:
+                    rospy.logwarn(f"Failed to load model for {sid}: {e}")
+
+        normalforce_model_path = os.path.join(dir_path, 'Models', f'normalforce_model_{model_suffix}.h5')
+        shearforce_model_path = os.path.join(dir_path, 'Models', f'shearforce_model_{model_suffix}.h5')
+        normalization_force_params_path = os.path.join(dir_path, 'Models',
+                                                       f'normalization_force_params_{model_suffix}.pkl')
+
+        # Load normalization parameters for force prediction
+        with open(normalization_force_params_path, 'rb') as file:
+            self.norm_force_params = pickle.load(file)
+
+        lstm_classification_model_path = os.path.join(dir_path, 'Models', f'lstm_classification_model_{model_suffix}.h5')
+        normalization_position_params_path = os.path.join(dir_path, 'Models', f'normalization_position_params_{model_suffix}.pkl')
+
+        # Load normalization parameters for position prediction
+        with open(normalization_position_params_path, 'rb') as file:
+            self.norm_pos_params = pickle.load(file)
+
+        lstm_multiclassification_model_path = os.path.join(dir_path, 'Models', 'lstm_multiclassification_model.h5')
+        mlp_classification_model_path = os.path.join(dir_path, 'Models', 'mlp_classification_model.h5')
+
+        # Load machine learning models
+        self.lstm_classification_model = tf.keras.models.load_model(lstm_classification_model_path)
+        self.lstm_multiclassification_model = tf.keras.models.load_model(lstm_multiclassification_model_path)
+        self.mlp_classification_model = tf.keras.models.load_model(mlp_classification_model_path)
+        self.normalforce_model = tf.keras.models.load_model(normalforce_model_path)
+        self.shearforce_model = tf.keras.models.load_model(shearforce_model_path)
+
+        rospy.loginfo(f"Loaded models for {mode} mode.")
+
+    def mode_change_callback(self, msg):
+        new_mode = msg.data
+        if new_mode != self.current_mode:
+            self.current_mode = new_mode
+            self.load_models(self.current_mode)
+
+            # Reset deviation calculations
+            self.initial_fx_predictions = []
+            self.initial_fy_predictions = []
+            self.initial_fz_predictions = []
+            self.deviation_fx = 0.0
+            self.deviation_fy = 0.0
+            self.deviation_fz = 0.0
+            self.deviation_calculated = False
+
+            rospy.loginfo(f"Mode changed to {new_mode}. Models and deviations reset.")
+
+    def pressure_callback(self, msg, sensor_id):
+        self.pressure_data[sensor_id] = np.array([msg.data])
+
+    def parasitic_decoupling_state_callback(self, msg):     # Update the checkbox state based on the ROS message
+        self.parasitic_decoupling_enabled = msg.data
+        rospy.loginfo(f"Parasitic decoupling state received: {self.parasitic_decoupling_enabled}")
+
+    def processed_sensor_data_callback(self, msg):
+        global subscription_count, start_time
+
+        filtered_data = np.array(msg.data)
+
+        if self.current_mode != "sensor" and self.parasitic_decoupling_enabled:
+            sensor_id = self.sensor_id
+            if sensor_id in self.actuation_decoup_models and self.pressure_data[sensor_id].size > 0:
+                model = self.actuation_decoup_models[sensor_id]
+                predicted_pressure_effect = model.predict(self.pressure_data[sensor_id].reshape(-1, 1))
+                predicted_pressure_effect = predicted_pressure_effect.flatten()[:len(filtered_data)]
+                # predicted_pressure_effect = np.zeros_like(filtered_data)
+            else:
+                predicted_pressure_effect = np.zeros_like(filtered_data)
+        else:
+            sensor_id = self.sensor_id
+            predicted_pressure_effect = np.zeros_like(filtered_data)
+
+        self.publish_pressure_effect(predicted_pressure_effect, sensor_id)  # Publish the predicted pressure effect
+
+        # Decouple the sensor data from the predicted pressure effects
+        sensor_decoupled = filtered_data - predicted_pressure_effect
+
+        self.publish_sensor_decoupled(sensor_decoupled, sensor_id)  # Publish the decoupled sensors reading
+        self.prediction_data(self.sensor_id, *sensor_decoupled)
+
+        # elapsed_time = time.time() - start_time
+        # subscription_count[sensor_id] += 1  # Update subscription count
+
+    def publish_pressure_effect(self, effect, sensor_id):
+        # Choose the correct publisher based on the sensor ID
+        if sensor_id == 'S1':
+            self.pressure_effect_publisher_S1.publish(Float32MultiArray(data=effect))
+        elif sensor_id == 'S2':
+            self.pressure_effect_publisher_S2.publish(Float32MultiArray(data=effect))
+
+    def publish_sensor_decoupled(self, sensor_decoupled, sensor_id):
+        # Choose the correct publisher based on the sensor ID
+        if sensor_id == 'S1':
+            self.sensor_decoupled_publisher_S1.publish(Float32MultiArray(data=sensor_decoupled))
+        elif sensor_id == 'S2':
+            self.sensor_decoupled_publisher_S2.publish(Float32MultiArray(data=sensor_decoupled))
+
+    def normalize_batch(self, batch, params, force_type='normal'):
+        # Normalize the entire batch of data using provided parameters.
+        batch_norm = np.zeros_like(batch)
+        for i in range(batch.shape[0]):
+            batch_norm[i, 0] = self.normalize(batch[i, 0], params['Bx_min'], params['Bx_max'])
+            batch_norm[i, 1] = self.normalize(batch[i, 1], params['By_min'], params['By_max'])
+            if force_type == 'normal':
+                batch_norm[i, 2] = self.normalize(batch[i, 2], params['Bz_min'], params['Bz_max'])
+        return batch_norm
 
     def normalize(self, value, min_val, max_val):
         return 2 * ((value - min_val) / (max_val - min_val)) - 1
@@ -171,19 +296,19 @@ class MLLearningNode:
                 if self.deviation_calculated:
                     predicted_fx -= self.deviation_fx
                     predicted_fy -= self.deviation_fy
-                    predicted_fz -= self.deviation_fz
+                    predicted_fz = abs(predicted_fz - self.deviation_fz)
 
-                # Postprocessing
-                if predicted_fz > 8:
-                    predicted_fz *= 0.6
-                elif self.touch_mode == "single" and predicted_position_label == 1:
-                    predicted_fz *= 0.8
-                elif self.touch_mode == "single" and predicted_position_label == 2:
-                    predicted_fz *= 1.5
-                elif self.touch_mode == "single" and predicted_position_label == 3:
-                    predicted_fz *= 1.2
-                elif self.touch_mode == "single" and predicted_position_label == 4:
-                    predicted_fz *= 0.8
+                # # Postprocessing
+                # if predicted_fz > 8:
+                #     predicted_fz *= 0.6
+                # elif self.touch_mode == "single" and predicted_position_label == 1:
+                #     predicted_fz *= 0.8
+                # elif self.touch_mode == "single" and predicted_position_label == 2:
+                #     predicted_fz *= 1.5
+                # elif self.touch_mode == "single" and predicted_position_label == 3:
+                #     predicted_fz *= 1.2
+                # elif self.touch_mode == "single" and predicted_position_label == 4:
+                #     predicted_fz *= 0.8
 
                 # Publish the prediction results
                 if not rospy.is_shutdown():
@@ -200,25 +325,6 @@ class MLLearningNode:
                     f" Fz: {predicted_fz:.2f}N, Fx: {predicted_fx:.2f}N, Fy: {predicted_fy:.2f}N",
                     sensor_id, predicted_position_label, predicted_fz, predicted_fx, predicted_fy
                 )
-
-    def normalize_batch(self, batch, params, force_type='normal'):
-        # Normalize the entire batch of data using provided parameters.
-        batch_norm = np.zeros_like(batch)
-        for i in range(batch.shape[0]):
-            batch_norm[i, 0] = self.normalize(batch[i, 0], params['Bx_min'], params['Bx_max'])
-            batch_norm[i, 1] = self.normalize(batch[i, 1], params['By_min'], params['By_max'])
-            if force_type == 'normal':
-                batch_norm[i, 2] = self.normalize(batch[i, 2], params['Bz_min'], params['Bz_max'])
-        return batch_norm
-
-    def processed_data_callback(self, msg):
-        global subscription_count, start_time
-
-        filtered_data = list(msg.data)
-        self.prediction_data(self.sensor_id, *filtered_data)
-
-        # elapsed_time = time.time() - start_time
-        # subscription_count[sensor_id] += 1  # Update subscription count
 
     def publish_diagnostics(self, status, message, sensor_id=None, predicted_position=None, predicted_fz=0.0,
                             predicted_fx=0.0, predicted_fy=0.0):

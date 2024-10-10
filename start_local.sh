@@ -11,7 +11,7 @@ done
 
 # Launch rqt_graph and rqt_gui (in the background if desired)
 rqt &
-rqt_graph &
+# rqt_graph &
 
 roslaunch launch_project project_launch.launch
 

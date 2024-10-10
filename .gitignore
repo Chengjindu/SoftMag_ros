@@ -52,5 +52,4 @@ data_recording/src/recorded_data
 # Environment files
 .env
 
-data_recording/src/recorded_data/
-
+/src/data_recording/src/recorded_data/

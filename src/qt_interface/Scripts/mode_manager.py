@@ -79,7 +79,7 @@ class ModeManager:
     def switch_to_sensor(self, req):    # Service response when switched to "sensor" mode
         if self.current_mode != 'sensor':
             self.switch_sensor_node('sensor')
-            self.restart_data_processing_node()
+            self.restart_sensors_data_processing_node()
             self.publish_mode_change("sensor")
 
             self.switch_motor_mode('sensor')
@@ -93,7 +93,7 @@ class ModeManager:
         if self.current_mode != 'gripper_automatic':
             if self.current_mode == 'sensor':
                 self.switch_sensor_node('gripper')
-                self.restart_data_processing_node()
+                self.restart_sensors_data_processing_node()
             self.publish_mode_change("gripper_automatic")
 
             self.switch_motor_mode('gripper_automatic')
@@ -108,7 +108,7 @@ class ModeManager:
         if self.current_mode != 'gripper_testing':
             if self.current_mode == 'sensor':
                 self.switch_sensor_node('gripper')
-                self.restart_data_processing_node()
+                self.restart_sensors_data_processing_node()
             self.publish_mode_change("gripper_testing")
 
             self.switch_motor_mode('gripper_testing')
@@ -178,19 +178,19 @@ class ModeManager:
         self.current_motor_process = subprocess.Popen(command, shell=True)
         self.current_mode = mode
 
-    def restart_data_processing_node(self):     # Restart data_processing_node is necessary when sensor addresses change
-        kill_command = "rosnode kill data_processing_node"
+    def restart_sensors_data_processing_node(self):     # Restart sensors_data_processing_node is necessary when sensor addresses change
+        kill_command = "rosnode kill sensors_data_processing_node"
         rospy.loginfo(f"Executing kill command: {kill_command}")
         kill_result = subprocess.run(kill_command, shell=True, capture_output=True, text=True)
         if kill_result.returncode == 0:
-            rospy.loginfo(f"data_processing_node has been killed")
+            rospy.loginfo(f"sensors_data_processing_node has been killed")
         else:
-            rospy.logwarn(f"Failed to kill data_processing_node. It might not be running. Error: {kill_result.stderr}")
+            rospy.logwarn(f"Failed to kill sensors_data_processing_node. It might not be running. Error: {kill_result.stderr}")
 
-        command = f"bash -c 'roslaunch launch_project data_processing_launch.launch'"
+        command = f"bash -c 'roslaunch launch_project sensors_data_processing_launch.launch'"
 
         self.current_data_process = subprocess.Popen(command, shell=True)
-        rospy.loginfo("data_processing_node restarted successfully.")
+        rospy.loginfo("sensors_data_processing_node restarted successfully.")
 
     def publish_mode_change(self, mode):    # Publish the mode change event
         mode_msg = String(data=mode)

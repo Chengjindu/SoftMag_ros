@@ -1,7 +1,0 @@
-<launch>
-  <!-- Load diagnostic aggregator's analyzers configuration -->
-  <rosparam file="$(find data_processing)/config/diagnostics_analyzers.yaml" command="load" />
-
-  <!-- Run the diagnostic aggregator -->
-  <node pkg="diagnostic_aggregator" type="aggregator_node" name="diagnostic_aggregator" />
-</launch>

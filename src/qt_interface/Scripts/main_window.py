@@ -41,7 +41,7 @@ max_steps = int((full_stroke_angle / 360) * steps_per_rev)
 default_initial_ctrl_pressure = 0
 default_max_ctrl_pressure = 35       # Maximum scroll pressure for testing mode
 pressure_ctrl_resolution = 0.1
-default_ctrl_coefficient = 0.90
+default_ctrl_coefficient = 0.99
 
 sensor_plot_window_size = 1000      # sensor frequency ~50Hz
 force_plot_window_size = 500          # force prediction frequency 15Hz
@@ -600,19 +600,19 @@ class MainWindow(QMainWindow):
 
         # Create instances for the shear map plots
 
-        if self.current_mode == 'sensor':
+        if self.default_mode == 'sensor':
             self.shear_plot_s1 = ShearMapCanvas(self.ui.shear_map_1_1, color=(179 / 255, 229 / 255, 252 / 255, 1.0),
-                                                rotation_angle_degrees=90, size_factor=1.2)
+                                                rotation_angle_degrees=0, size_factor=1.5)
+            self.shear_plot_s2 = ShearMapCanvas(self.ui.shear_map_2_2, color=(255 / 255, 192 / 255, 192 / 255, 1.0),
+                                                rotation_angle_degrees=-215, size_factor=1.5)
         else:
             self.shear_plot_s1 = ShearMapCanvas(self.ui.shear_map_1_1, color=(179 / 255, 229 / 255, 252 / 255, 1.0),
-                                                rotation_angle_degrees=-215, size_factor=1.5)
+                                                rotation_angle_degrees=90, size_factor=1.5)
+            self.shear_plot_s2 = ShearMapCanvas(self.ui.shear_map_2_2, color=(255 / 255, 192 / 255, 192 / 255, 1.0),
+                                                rotation_angle_degrees=90, size_factor=1.5)
+
         self.ui.shear_map_1_1_layout = QVBoxLayout(self.ui.shear_map_1_1)
         self.ui.shear_map_1_1_layout.addWidget(self.shear_plot_s1)
-
-
-        self.shear_plot_s2 = ShearMapCanvas(self.ui.shear_map_2_2, color=(255 / 255, 192 / 255, 192 / 255, 1.0),
-                                                rotation_angle_degrees=-215, size_factor=1.5)
-
         self.ui.shear_map_2_2_layout = QVBoxLayout(self.ui.shear_map_2_2)
         self.ui.shear_map_2_2_layout.addWidget(self.shear_plot_s2)
 
@@ -643,6 +643,9 @@ class MainWindow(QMainWindow):
         self.ui.verticalLayout_9.insertWidget(1, self.ruler_scale)
 
         # Connect the existing checkboxes to the appropriate slots
+        self.ui.parasiticDecouplingCheckBox = self.findChild(QCheckBox, "parasitic_decoupling_enable")
+        self.ui.parasiticDecouplingCheckBox.stateChanged.connect(self.onParasiticDecouplingStateChanged)
+
         self.ui.forceControlCheckBox = self.findChild(QCheckBox, "force_feedback_ctrl_enable")
         self.ui.forceControlCheckBox.stateChanged.connect(self.onForceControlStateChanged)
 
@@ -680,13 +683,15 @@ class MainWindow(QMainWindow):
         self.restart_publisher = rospy.Publisher('/restart', Bool, queue_size=10)
 
         # Set up ROS publishers for testing mode
-        self.max_pressure_publisher = rospy.Publisher('/max_pressure', Float32, queue_size=10)
         self.motor_pos_ctrl_publisher = rospy.Publisher('/motor_pos_ctrl', Int32, queue_size=10)
         self.motor_speed_ctrl_publisher = rospy.Publisher('/motor_speed_ctrl', Int32, queue_size=10)
+        self.zero_sensor_publisher = rospy.Publisher('/zero_sensor', Bool, queue_size=10)
+
+        self.max_pressure_publisher = rospy.Publisher('/max_pressure', Float32, queue_size=10)
         self.pressure_ctrl_publisher = rospy.Publisher('/pressure_ctrl', Float32, queue_size=10)
+        self.parasitic_decoupling_publisher = rospy.Publisher('/parasitic_decoupling_state', Bool, queue_size=10)
         self.force_closure_publisher = rospy.Publisher('/force_closure', Bool, queue_size=10)
         self.zero_motor_publisher = rospy.Publisher('/zero_motor', Bool, queue_size=10)
-        self.zero_sensor_publisher = rospy.Publisher('/zero_sensor', Bool, queue_size=10)
         self.ctrl_coefficient_publisher = rospy.Publisher('/pressure_coefficient', Float32, queue_size=10)
 
         # Set up stop publishers for both modes
@@ -778,25 +783,25 @@ class MainWindow(QMainWindow):
         self.ui.record_data_button.style().polish(self.ui.record_data_button)
         self.ui.probing_button.clicked.connect(self.toggle_probing)
         self.ui.probing_button.setStyleSheet("""
-                        QPushButton {
-                            background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
-                                                        stop:0 rgba(179, 229, 252, 0.7), 
-                                                        stop:1 rgba(255, 192, 192, 0.7));
-                            border: none;
-                            border-radius: 5px;
-                            padding: 5px;
-                        }
-                        QPushButton:hover {
-                            background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
-                                                        stop:0 rgba(179, 229, 252, 0.9), 
-                                                        stop:1 rgba(255, 192, 192, 0.9));
-                        }
-                        QPushButton:pressed {
-                            background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
-                                                        stop:0 rgba(179, 229, 252, 0.5), 
-                                                        stop:1 rgba(255, 192, 192, 0.5));
-                        }
-                    """)
+                            QPushButton {
+                                background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                            stop:0 rgba(255, 192, 192, 0.7), 
+                                                            stop:1 rgba(179, 229, 252, 0.7));
+                                border: none;
+                                border-radius: 5px;
+                                padding: 5px;
+                            }
+                            QPushButton:hover {
+                                background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                            stop:0 rgba(255, 192, 192, 0.9), 
+                                                            stop:1 rgba(179, 229, 252, 0.9));
+                            }
+                            QPushButton:pressed {
+                                background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                                                            stop:0 rgba(255, 192, 192, 0.5), 
+                                                            stop:1 rgba(179, 229, 252, 0.5));
+                            }
+                        """)
         self.ui.probing_button.style().unpolish(self.ui.probing_button)
         self.ui.probing_button.style().polish(self.ui.probing_button)
 
@@ -808,6 +813,7 @@ class MainWindow(QMainWindow):
         self.probing_initial_pressure = 0  # To store the initial pressure be for probing
         self.probing_timer = QTimer(self)  # Timer for probing control
         self.current_probing_cycle = 0  # Track the current probing cycle
+        self.max_delta_fz = 0.0  # To store max delta_fz
 
         # Set initial and maximum value for the pressure control
         self.ui.pressure_type_input.setValue(default_initial_ctrl_pressure)
@@ -819,6 +825,7 @@ class MainWindow(QMainWindow):
 
         # Connect the time reset button
         self.ui.time_reset_button.clicked.connect(self.reset_elapsed_time)
+
 
     def set_default_comboBox(self, mode):
         if mode == 'sensor':
@@ -863,6 +870,18 @@ class MainWindow(QMainWindow):
     def on_mode_switched(self, mode, success):
         if success:
             rospy.loginfo(f"Successfully switched to {mode} mode")
+
+            # Update shear plot orientations based on the new mode
+            if mode == 'sensor':
+                self.shear_plot_s1.rotation_angle = np.radians(0)
+                self.shear_plot_s2.rotation_angle = np.radians(-90)
+            else:
+                self.shear_plot_s1.rotation_angle = np.radians(90)
+                self.shear_plot_s2.rotation_angle = np.radians(90)
+
+            # Redraw the shear plots with the updated rotation angles
+            self.shear_plot_s1.redraw_plot()
+            self.shear_plot_s2.redraw_plot()
         else:
             rospy.logerr(f"Failed to switch to {mode} mode")
 
@@ -944,11 +963,28 @@ class MainWindow(QMainWindow):
         self.ctrl_coefficient_publisher.publish(Float32(value))
 
     @Slot(int)
-    def onForceControlStateChanged(self, state):
+    def onParasiticDecouplingStateChanged(self, state):
+        # Debugging: print the state and integer value of Qt.Checked
+        print(f"Parasitic Decoupling Checkbox state: {state}, Checked State Value: {Qt.CheckState.Checked.value}")
+
         msg = Bool()
-        msg.data = (state == Qt.Checked)
+        msg.data = (state == Qt.CheckState.Checked.value)  # Compare state with the integer value of Qt.Checked
+
+        # Publish the state of the checkbox
+        self.parasitic_decoupling_publisher.publish(msg)
+        rospy.loginfo(f"Parasitic decoupling state changed: {msg.data}")
+
+    @Slot(int)
+    def onForceControlStateChanged(self, state):
+        # Debugging: print the state and Qt.Checked
+        print(f"Force Control Checkbox state: {state}, Qt.Checked: {Qt.Checked}")
+
+        msg = Bool()
+        msg.data = (state == 2)
+
+        # Publish the state of the checkbox
         self.force_closure_publisher.publish(msg)
-        rospy.loginfo(f"Force control set to: {state == Qt.Checked}")
+        rospy.loginfo(f"Force control state changed: {msg.data}")
 
     def enable_nodes(self, nodes):
         for node in nodes:
@@ -1110,16 +1146,24 @@ class MainWindow(QMainWindow):
             self.probing_initial_pressure = self.ui.pressure_type_input.value()
             self.current_probing_cycle = 0
 
-            rospy.wait_for_service('/record_data')  # Start data recording
-            try:
-                record_service = rospy.ServiceProxy('/record_data', Trigger)
-                response = record_service()
-                if response.success:
-                    rospy.loginfo("Data recording started.")
-                else:
-                    rospy.logerr("Failed to start data recording: " + response.message)
-            except rospy.ServiceException as e:
-                rospy.logerr("Service call failed: %s" % e)
+            # Capture initial_fz for both sensors when probing starts
+            self.initial_fz_s1 = self.get_current_fz("S1")
+            self.initial_fz_s2 = self.get_current_fz("S2")
+            # self.initial_fz_avg = (self.initial_fz_s1 + self.initial_fz_s2) / 2
+            self.initial_fz_avg = self.initial_fz_s2
+            self.max_delta_fz = 0.0  # Reset max_delta_fz
+            self.ui.firmness_value.display(0)  # Reset the firmness display
+
+            # rospy.wait_for_service('/record_data')  # Start data recording
+            # try:
+            #     record_service = rospy.ServiceProxy('/record_data', Trigger)
+            #     response = record_service()
+            #     if response.success:
+            #         rospy.loginfo("Data recording started.")
+            #     else:
+            #         rospy.logerr("Failed to start data recording: " + response.message)
+            # except rospy.ServiceException as e:
+            #     rospy.logerr("Service call failed: %s" % e)
 
             # Initialize the probing timer
             self.probing_timer = QTimer(self)
@@ -1135,14 +1179,29 @@ class MainWindow(QMainWindow):
                 # Increase pressure by a pre-defined value
                 new_pressure = self.probing_initial_pressure + self.probing_pressure_increment
             else:
-                new_pressure = self.probing_initial_pressure        # Decrease pressure back to initial
+                new_pressure = self.probing_initial_pressure  # Decrease pressure back to initial
 
             self.ui.pressure_type_input.setValue(new_pressure)
             self.pressure_ctrl_publisher.publish(Float32(new_pressure))
 
             self.current_probing_cycle += 1
         else:
+            self.ui.firmness_value.display(0)  # Reset the firmness display
             self.end_probing()
+
+        # Update delta_fz only during pressure increment (when new_pressure is increased)
+        if new_pressure == self.probing_initial_pressure + self.probing_pressure_increment:
+            current_fz_s1 = self.get_current_fz("S1")  # Get the current fz during probing for S1
+            current_fz_s2 = self.get_current_fz("S2")  # Get the current fz during probing for S2
+            # delta_fz = (abs(current_fz_s1 - self.initial_fz_avg) + abs(current_fz_s2 - self.initial_fz_avg)) / 2
+            delta_fz = abs(current_fz_s2 - self.initial_fz_avg)
+
+            if delta_fz > self.max_delta_fz:  # Update max delta_fz only during pressure increment
+                self.max_delta_fz = delta_fz
+
+        # Calculate and display firmness based on the max delta_fz
+        firmness = 100 * self.max_delta_fz / self.probing_pressure_increment
+        self.ui.firmness_value.display(firmness)
 
     def end_probing(self):
         self.is_probing = False     # Reset the probing state
@@ -1152,16 +1211,16 @@ class MainWindow(QMainWindow):
         self.ui.pressure_type_input.setValue(self.probing_initial_pressure)
         self.pressure_ctrl_publisher.publish(Float32(self.probing_initial_pressure))
 
-        rospy.wait_for_service('/record_data')       # Stop data recording
-        try:
-            record_service = rospy.ServiceProxy('/record_data', Trigger)
-            response = record_service()
-            if response.success:
-                rospy.loginfo("Data recording stopped.")
-            else:
-                rospy.logerr("Failed to stop data recording: " + response.message)
-        except rospy.ServiceException as e:
-            rospy.logerr("Service call failed: %s" % e)
+        # rospy.wait_for_service('/record_data')       # Stop data recording
+        # try:
+        #     record_service = rospy.ServiceProxy('/record_data', Trigger)
+        #     response = record_service()
+        #     if response.success:
+        #         rospy.loginfo("Data recording stopped.")
+        #     else:
+        #         rospy.logerr("Failed to stop data recording: " + response.message)
+        # except rospy.ServiceException as e:
+        #     rospy.logerr("Service call failed: %s" % e)
 
         if self.probing_timer.isActive():       # Stop the timer
             self.probing_timer.stop()

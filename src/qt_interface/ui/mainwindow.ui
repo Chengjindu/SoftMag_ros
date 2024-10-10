@@ -23,7 +23,7 @@
    <widget class="QGroupBox" name="automatic_grasping_control_panel">
     <property name="geometry">
      <rect>
-      <x>390</x>
+      <x>420</x>
       <y>442</y>
       <width>331</width>
       <height>121</height>
@@ -799,9 +799,9 @@ font-weight: bold;</string>
    <widget class="QGroupBox" name="sensing_signal_monitoring_panel">
     <property name="geometry">
      <rect>
-      <x>740</x>
+      <x>770</x>
       <y>442</y>
-      <width>931</width>
+      <width>901</width>
       <height>411</height>
      </rect>
     </property>
@@ -811,7 +811,7 @@ font-weight: bold;</string>
     <widget class="QWidget" name="horizontalLayoutWidget">
      <property name="geometry">
       <rect>
-       <x>510</x>
+       <x>480</x>
        <y>30</y>
        <width>411</width>
        <height>381</height>
@@ -839,7 +839,7 @@ font-weight: bold;</string>
       <rect>
        <x>10</x>
        <y>30</y>
-       <width>481</width>
+       <width>451</width>
        <height>191</height>
       </rect>
      </property>
@@ -868,7 +868,7 @@ font-weight: bold;</string>
       <rect>
        <x>10</x>
        <y>220</y>
-       <width>481</width>
+       <width>451</width>
        <height>191</height>
       </rect>
      </property>
@@ -909,7 +909,7 @@ font-weight: bold;</string>
     <widget class="Line" name="line_18">
      <property name="geometry">
       <rect>
-       <x>500</x>
+       <x>470</x>
        <y>30</y>
        <width>2</width>
        <height>371</height>
@@ -927,7 +927,7 @@ font-weight: bold;</string>
    <widget class="QGroupBox" name="status_monitoring_panel_2">
     <property name="geometry">
      <rect>
-      <x>390</x>
+      <x>420</x>
       <y>572</y>
       <width>331</width>
       <height>281</height>
@@ -1277,7 +1277,7 @@ text-align: center;</string>
      <rect>
       <x>10</x>
       <y>522</y>
-      <width>361</width>
+      <width>391</width>
       <height>331</height>
      </rect>
     </property>
@@ -1289,7 +1289,7 @@ text-align: center;</string>
       <rect>
        <x>10</x>
        <y>30</y>
-       <width>351</width>
+       <width>371</width>
        <height>291</height>
       </rect>
      </property>
@@ -1447,25 +1447,22 @@ text-align: center;</string>
          <widget class="QWidget" name="widget_5" native="true"/>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="7,1,7">
+         <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,1,7">
           <property name="sizeConstraint">
            <enum>QLayout::SetMinimumSize</enum>
           </property>
           <item>
-           <widget class="QLabel" name="pressure_control_module_label">
+           <widget class="QWidget" name="widget_13" native="true"/>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="parasitic_decoupling_enable">
             <property name="font">
              <font>
-              <pointsize>13</pointsize>
+              <pointsize>12</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Pressure Control</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
+             <string>Parasitic Decoupling</string>
             </property>
            </widget>
           </item>
@@ -1666,29 +1663,9 @@ text-align: center;</string>
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,1,1,1,1,1,0">
+       <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,2,0,2,0,1,0,0">
         <item>
-         <widget class="QWidget" name="widget_3" native="true"/>
-        </item>
-        <item>
-         <widget class="QPushButton" name="sofa_simulation_button">
-          <property name="styleSheet">
-           <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(255, 192, 192, 0.7), stop:1 rgba(179, 229, 252, 0.7));
-    border: none;
-    border-radius: 5px;
-    padding: 5px;</string>
-          </property>
-          <property name="text">
-           <string>Simulation</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="Line" name="line_5">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-         </widget>
+         <widget class="QWidget" name="widget" native="true"/>
         </item>
         <item>
          <widget class="QPushButton" name="record_data_button">
@@ -1704,7 +1681,7 @@ text-align: center;</string>
          </widget>
         </item>
         <item>
-         <widget class="Line" name="line_25">
+         <widget class="Line" name="line_5">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
@@ -1724,7 +1701,35 @@ text-align: center;</string>
          </widget>
         </item>
         <item>
-         <widget class="QWidget" name="widget_13" native="true"/>
+         <widget class="Line" name="line_25">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="firmness_value_label">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>F&lt;sub&gt;obj</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLCDNumber" name="firmness_value"/>
+        </item>
+        <item>
+         <widget class="QWidget" name="widget_3" native="true"/>
         </item>
        </layout>
       </item>
@@ -1736,7 +1741,7 @@ text-align: center;</string>
      <rect>
       <x>10</x>
       <y>442</y>
-      <width>361</width>
+      <width>391</width>
       <height>71</height>
      </rect>
     </property>
@@ -1748,7 +1753,7 @@ text-align: center;</string>
       <rect>
        <x>10</x>
        <y>30</y>
-       <width>341</width>
+       <width>371</width>
        <height>31</height>
       </rect>
      </property>
@@ -1859,7 +1864,7 @@ text-align: center;</string>
    <widget class="QFrame" name="color_frame_automatic_control_panels">
     <property name="geometry">
      <rect>
-      <x>380</x>
+      <x>410</x>
       <y>430</y>
       <width>351</width>
       <height>431</height>
@@ -1881,9 +1886,9 @@ text-align: center;</string>
    <widget class="QFrame" name="color_frame_sensing_signal_monitoring_panel">
     <property name="geometry">
      <rect>
-      <x>730</x>
+      <x>760</x>
       <y>430</y>
-      <width>951</width>
+      <width>921</width>
       <height>431</height>
      </rect>
     </property>
@@ -1902,8 +1907,8 @@ text-align: center;</string>
      <rect>
       <x>-1</x>
       <y>425</y>
-      <width>381</width>
-      <height>9</height>
+      <width>411</width>
+      <height>8</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -1940,7 +1945,7 @@ text-align: center;</string>
      <rect>
       <x>0</x>
       <y>430</y>
-      <width>381</width>
+      <width>411</width>
       <height>431</height>
      </rect>
     </property>
@@ -1960,7 +1965,7 @@ text-align: center;</string>
    <widget class="QFrame" name="frame_6">
     <property name="geometry">
      <rect>
-      <x>380</x>
+      <x>410</x>
       <y>426</y>
       <width>351</width>
       <height>8</height>
@@ -1979,9 +1984,9 @@ text-align: center;</string>
    <widget class="QFrame" name="frame_8">
     <property name="geometry">
      <rect>
-      <x>730</x>
+      <x>760</x>
       <y>426</y>
-      <width>951</width>
+      <width>921</width>
       <height>8</height>
      </rect>
     </property>
@@ -2121,27 +2126,40 @@ text-align: center;</string>
      </rect>
     </property>
     <property name="title">
-     <string>  Simulation</string>
+     <string/>
     </property>
-    <widget class="QWidget" name="horizontalLayoutWidget_7">
+    <widget class="QPushButton" name="sofa_simulation_button">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>30</y>
-       <width>401</width>
-       <height>361</height>
+       <y>10</y>
+       <width>102</width>
+       <height>31</height>
       </rect>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_21">
-      <item>
-       <widget class="QOpenGLWidget" name="sofa_openGLWidget">
-        <property name="styleSheet">
-         <string notr="true">background-color: rgba(0, 0, 0, 0); /* Fully transparent background */
+     <property name="styleSheet">
+      <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(255, 192, 192, 0.7), stop:1 rgba(179, 229, 252, 0.7));
+    border: none;
+    border-radius: 5px;
+    padding: 5px;</string>
+     </property>
+     <property name="text">
+      <string>Simulation</string>
+     </property>
+    </widget>
+    <widget class="QOpenGLWidget" name="sofa_openGLWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>46</y>
+       <width>399</width>
+       <height>349</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgba(0, 0, 0, 0); /* Fully transparent background */
     border: none; /* No border */</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     </property>
     </widget>
    </widget>
    <widget class="QFrame" name="color_frame_simulation_panel">
@@ -2236,7 +2254,7 @@ text-align: center;</string>
    <widget class="Line" name="line_23">
     <property name="geometry">
      <rect>
-      <x>730</x>
+      <x>759</x>
       <y>460</y>
       <width>2</width>
       <height>391</height>
@@ -2253,7 +2271,7 @@ text-align: center;</string>
    <widget class="Line" name="line_24">
     <property name="geometry">
      <rect>
-      <x>380</x>
+      <x>410</x>
       <y>460</y>
       <width>2</width>
       <height>391</height>
