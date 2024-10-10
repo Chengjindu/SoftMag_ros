@@ -47,6 +47,10 @@ build/
 logs/
 .catkin_tools
 .qtc_clangd/
+data_recording/src/recorded_data
 
 # Environment files
 .env
+
+data_recording/src/recorded_data/
+
