@@ -807,7 +807,7 @@ class MainWindow(QMainWindow):
 
         # Probing related variables
         self.probing_pressure_increment = 4  # Pressure increment P in kPa
-        self.probing_pressurize_duration = 3000  # Duration T in ms (milliseconds)
+        self.probing_pressurize_duration = 4000  # Duration T in ms (milliseconds)
         self.probing_repeat_times = 3  # Repeat times N
         self.is_probing = False  # Flag to track the probing state
         self.probing_initial_pressure = 0  # To store the initial pressure be for probing
@@ -1150,7 +1150,7 @@ class MainWindow(QMainWindow):
             self.initial_fz_s1 = self.get_current_fz("S1")
             self.initial_fz_s2 = self.get_current_fz("S2")
             # self.initial_fz_avg = (self.initial_fz_s1 + self.initial_fz_s2) / 2
-            self.initial_fz_avg = self.initial_fz_s2
+            self.initial_fz_avg = self.initial_fz_s1
             self.max_delta_fz = 0.0  # Reset max_delta_fz
             self.ui.firmness_value.display(0)  # Reset the firmness display
 
@@ -1174,27 +1174,37 @@ class MainWindow(QMainWindow):
             self.end_probing()
 
     def perform_probing_step(self):
+        new_pressure = self.probing_initial_pressure
+
         if self.current_probing_cycle < self.probing_repeat_times * 2:
             if self.current_probing_cycle % 2 == 0:
                 # Increase pressure by a pre-defined value
                 new_pressure = self.probing_initial_pressure + self.probing_pressure_increment
-            else:
-                new_pressure = self.probing_initial_pressure  # Decrease pressure back to initial
+                self.ui.pressure_type_input.setValue(new_pressure)
+                self.pressure_ctrl_publisher.publish(Float32(new_pressure))
 
-            self.ui.pressure_type_input.setValue(new_pressure)
-            self.pressure_ctrl_publisher.publish(Float32(new_pressure))
+                # Delay firmness calculation to allow pressure to stabilize
+                QTimer.singleShot(2000, lambda: self.calculate_firmness(new_pressure))
+
+            else:
+                # Decrease pressure back to initial value
+                new_pressure = self.probing_initial_pressure
+                self.ui.pressure_type_input.setValue(new_pressure)
+                self.pressure_ctrl_publisher.publish(Float32(new_pressure))
 
             self.current_probing_cycle += 1
+
+
         else:
             self.ui.firmness_value.display(0)  # Reset the firmness display
             self.end_probing()
 
-        # Update delta_fz only during pressure increment (when new_pressure is increased)
+    def calculate_firmness(self, new_pressure):
+        # Update delta_fz only during pressure increment
         if new_pressure == self.probing_initial_pressure + self.probing_pressure_increment:
             current_fz_s1 = self.get_current_fz("S1")  # Get the current fz during probing for S1
             current_fz_s2 = self.get_current_fz("S2")  # Get the current fz during probing for S2
-            # delta_fz = (abs(current_fz_s1 - self.initial_fz_avg) + abs(current_fz_s2 - self.initial_fz_avg)) / 2
-            delta_fz = abs(current_fz_s2 - self.initial_fz_avg)
+            delta_fz = abs(current_fz_s1 - self.initial_fz_avg)
 
             if delta_fz > self.max_delta_fz:  # Update max delta_fz only during pressure increment
                 self.max_delta_fz = delta_fz
@@ -1202,6 +1212,7 @@ class MainWindow(QMainWindow):
         # Calculate and display firmness based on the max delta_fz
         firmness = 100 * self.max_delta_fz / self.probing_pressure_increment
         self.ui.firmness_value.display(firmness)
+
 
     def end_probing(self):
         self.is_probing = False     # Reset the probing state
