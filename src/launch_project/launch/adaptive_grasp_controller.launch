@@ -1,0 +1,7 @@
+<launch>
+
+  <!-- Start adaptive grasping controller on the local machine -->
+  <node name="adaptive_grasp_controller_node" pkg="adaptive_grasp_controller" type="adaptive_grasp_controller_node.py" output="screen" />
+  
+
+</launch>
