@@ -298,17 +298,17 @@ class MLLearningNode:
                     predicted_fy -= self.deviation_fy
                     predicted_fz = abs(predicted_fz - self.deviation_fz)
 
-                # # Postprocessing
-                # if predicted_fz > 8:
-                #     predicted_fz *= 0.6
-                # elif self.touch_mode == "single" and predicted_position_label == 1:
-                #     predicted_fz *= 0.8
-                # elif self.touch_mode == "single" and predicted_position_label == 2:
-                #     predicted_fz *= 1.5
-                # elif self.touch_mode == "single" and predicted_position_label == 3:
-                #     predicted_fz *= 1.2
-                # elif self.touch_mode == "single" and predicted_position_label == 4:
-                #     predicted_fz *= 0.8
+                # Postprocessing
+                if predicted_fz > 8:
+                    predicted_fz *= 0.6
+                elif self.touch_mode == "single" and predicted_position_label == 1:
+                    predicted_fz *= 0.7
+                elif self.touch_mode == "single" and predicted_position_label == 2:
+                    predicted_fz *= 1.7
+                elif self.touch_mode == "single" and predicted_position_label == 3:
+                    predicted_fz *= 1.3
+                elif self.touch_mode == "single" and predicted_position_label == 4:
+                    predicted_fz *= 0.8
 
                 # Publish the prediction results
                 if not rospy.is_shutdown():

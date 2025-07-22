@@ -37,17 +37,32 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName(u"centralwidget")
         self.automatic_grasping_control_panel = QGroupBox(self.centralwidget)
         self.automatic_grasping_control_panel.setObjectName(u"automatic_grasping_control_panel")
-        self.automatic_grasping_control_panel.setGeometry(QRect(420, 442, 331, 121))
+        self.automatic_grasping_control_panel.setGeometry(QRect(420, 442, 331, 161))
         self.verticalLayoutWidget_2 = QWidget(self.automatic_grasping_control_panel)
         self.verticalLayoutWidget_2.setObjectName(u"verticalLayoutWidget_2")
-        self.verticalLayoutWidget_2.setGeometry(QRect(10, 30, 311, 89))
+        self.verticalLayoutWidget_2.setGeometry(QRect(10, 30, 317, 131))
         self.verticalLayout_2 = QVBoxLayout(self.verticalLayoutWidget_2)
+        self.verticalLayout_2.setSpacing(0)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_2.setContentsMargins(0, 0, 0, 5)
+        self.verticalLayout_6 = QVBoxLayout()
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
+        self.hline1_17 = QFrame(self.verticalLayoutWidget_2)
+        self.hline1_17.setObjectName(u"hline1_17")
+        self.hline1_17.setFrameShape(QFrame.HLine)
+        self.hline1_17.setFrameShadow(QFrame.Raised)
+
+        self.verticalLayout_6.addWidget(self.hline1_17)
+
+
+        self.verticalLayout_2.addLayout(self.verticalLayout_6)
+
+        self.verticalLayout_4 = QVBoxLayout()
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setSpacing(9)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.horizontalLayout_2.setContentsMargins(6, -1, 6, -1)
+        self.horizontalLayout_2.setContentsMargins(6, 9, 6, 9)
         self.restart_button = QPushButton(self.verticalLayoutWidget_2)
         self.restart_button.setObjectName(u"restart_button")
         self.restart_button.setStyleSheet(u"background-color: lightgray")
@@ -67,38 +82,179 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_2.addWidget(self.release_button)
 
+        self.horizontalLayout_2.setStretch(0, 1)
+        self.horizontalLayout_2.setStretch(2, 1)
 
-        self.verticalLayout_2.addLayout(self.horizontalLayout_2)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_2)
 
-        self.hline1_6 = QFrame(self.verticalLayoutWidget_2)
-        self.hline1_6.setObjectName(u"hline1_6")
-        self.hline1_6.setFrameShape(QFrame.HLine)
-        self.hline1_6.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_4.setStretch(0, 1)
 
-        self.verticalLayout_2.addWidget(self.hline1_6)
+        self.verticalLayout_2.addLayout(self.verticalLayout_4)
+
+        self.verticalLayout_15 = QVBoxLayout()
+        self.verticalLayout_15.setObjectName(u"verticalLayout_15")
+        self.hline1_18 = QFrame(self.verticalLayoutWidget_2)
+        self.hline1_18.setObjectName(u"hline1_18")
+        self.hline1_18.setFrameShape(QFrame.HLine)
+        self.hline1_18.setFrameShadow(QFrame.Raised)
+
+        self.verticalLayout_15.addWidget(self.hline1_18)
+
+
+        self.verticalLayout_2.addLayout(self.verticalLayout_15)
+
+        self.horizontalLayout_14 = QHBoxLayout()
+        self.horizontalLayout_14.setObjectName(u"horizontalLayout_14")
+        self.horizontalLayout_14.setContentsMargins(-1, 0, -1, 0)
+        self.widget_19 = QWidget(self.verticalLayoutWidget_2)
+        self.widget_19.setObjectName(u"widget_19")
+
+        self.horizontalLayout_14.addWidget(self.widget_19)
+
+        self.pid_setting_p_label = QLabel(self.verticalLayoutWidget_2)
+        self.pid_setting_p_label.setObjectName(u"pid_setting_p_label")
+        font = QFont()
+        font.setPointSize(12)
+        self.pid_setting_p_label.setFont(font)
+        self.pid_setting_p_label.setAlignment(Qt.AlignCenter)
+        self.pid_setting_p_label.setWordWrap(True)
+
+        self.horizontalLayout_14.addWidget(self.pid_setting_p_label)
+
+        self.pid_setting_p = QDoubleSpinBox(self.verticalLayoutWidget_2)
+        self.pid_setting_p.setObjectName(u"pid_setting_p")
+        self.pid_setting_p.setDecimals(1)
+        self.pid_setting_p.setMinimum(0.000000000000000)
+        self.pid_setting_p.setSingleStep(0.100000000000000)
+        self.pid_setting_p.setValue(1.000000000000000)
+
+        self.horizontalLayout_14.addWidget(self.pid_setting_p)
+
+        self.pid_setting_i_label = QLabel(self.verticalLayoutWidget_2)
+        self.pid_setting_i_label.setObjectName(u"pid_setting_i_label")
+        self.pid_setting_i_label.setFont(font)
+        self.pid_setting_i_label.setAlignment(Qt.AlignCenter)
+        self.pid_setting_i_label.setWordWrap(True)
+
+        self.horizontalLayout_14.addWidget(self.pid_setting_i_label)
+
+        self.pid_setting_i = QDoubleSpinBox(self.verticalLayoutWidget_2)
+        self.pid_setting_i.setObjectName(u"pid_setting_i")
+        self.pid_setting_i.setDecimals(1)
+        self.pid_setting_i.setMinimum(0.000000000000000)
+        self.pid_setting_i.setSingleStep(0.100000000000000)
+        self.pid_setting_i.setValue(2.000000000000000)
+
+        self.horizontalLayout_14.addWidget(self.pid_setting_i)
+
+        self.pid_setting_d_label = QLabel(self.verticalLayoutWidget_2)
+        self.pid_setting_d_label.setObjectName(u"pid_setting_d_label")
+        self.pid_setting_d_label.setFont(font)
+        self.pid_setting_d_label.setAlignment(Qt.AlignCenter)
+        self.pid_setting_d_label.setWordWrap(True)
+
+        self.horizontalLayout_14.addWidget(self.pid_setting_d_label)
+
+        self.pid_setting_d = QDoubleSpinBox(self.verticalLayoutWidget_2)
+        self.pid_setting_d.setObjectName(u"pid_setting_d")
+        self.pid_setting_d.setDecimals(1)
+        self.pid_setting_d.setMinimum(0.000000000000000)
+        self.pid_setting_d.setSingleStep(0.100000000000000)
+        self.pid_setting_d.setValue(1.000000000000000)
+
+        self.horizontalLayout_14.addWidget(self.pid_setting_d)
+
+        self.widget_20 = QWidget(self.verticalLayoutWidget_2)
+        self.widget_20.setObjectName(u"widget_20")
+
+        self.horizontalLayout_14.addWidget(self.widget_20)
+
+        self.horizontalLayout_14.setStretch(0, 1)
+        self.horizontalLayout_14.setStretch(1, 4)
+        self.horizontalLayout_14.setStretch(2, 4)
+        self.horizontalLayout_14.setStretch(3, 4)
+        self.horizontalLayout_14.setStretch(4, 4)
+        self.horizontalLayout_14.setStretch(5, 4)
+        self.horizontalLayout_14.setStretch(6, 4)
+        self.horizontalLayout_14.setStretch(7, 2)
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_14)
+
+        self.verticalLayout_16 = QVBoxLayout()
+        self.verticalLayout_16.setObjectName(u"verticalLayout_16")
+        self.verticalLayout_16.setContentsMargins(-1, 0, -1, 4)
+        self.hline1_19 = QFrame(self.verticalLayoutWidget_2)
+        self.hline1_19.setObjectName(u"hline1_19")
+        self.hline1_19.setFrameShape(QFrame.HLine)
+        self.hline1_19.setFrameShadow(QFrame.Raised)
+
+        self.verticalLayout_16.addWidget(self.hline1_19)
+
+
+        self.verticalLayout_2.addLayout(self.verticalLayout_16)
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.stop_all_button = QPushButton(self.verticalLayoutWidget_2)
-        self.stop_all_button.setObjectName(u"stop_all_button")
-        font = QFont()
-        font.setPointSize(12)
-        font.setBold(True)
-        self.stop_all_button.setFont(font)
-        self.stop_all_button.setStyleSheet(u"background-color: red;\n"
-"	color: white;\n"
-"    border: 2px solid darkred;\n"
-"    border-radius: 10px;\n"
-"    padding: 10px 20px;")
+        self.widget_21 = QWidget(self.verticalLayoutWidget_2)
+        self.widget_21.setObjectName(u"widget_21")
 
-        self.horizontalLayout_3.addWidget(self.stop_all_button)
+        self.horizontalLayout_3.addWidget(self.widget_21)
 
+        self.force_closure_enable = QCheckBox(self.verticalLayoutWidget_2)
+        self.force_closure_enable.setObjectName(u"force_closure_enable")
+        self.force_closure_enable.setFont(font)
+
+        self.horizontalLayout_3.addWidget(self.force_closure_enable)
+
+        self.widget_26 = QWidget(self.verticalLayoutWidget_2)
+        self.widget_26.setObjectName(u"widget_26")
+
+        self.horizontalLayout_3.addWidget(self.widget_26)
+
+        self.line_26 = QFrame(self.verticalLayoutWidget_2)
+        self.line_26.setObjectName(u"line_26")
+        self.line_26.setFrameShape(QFrame.VLine)
+        self.line_26.setFrameShadow(QFrame.Sunken)
+
+        self.horizontalLayout_3.addWidget(self.line_26)
+
+        self.widget_24 = QWidget(self.verticalLayoutWidget_2)
+        self.widget_24.setObjectName(u"widget_24")
+
+        self.horizontalLayout_3.addWidget(self.widget_24)
+
+        self.adaptive_ctrl_enable = QCheckBox(self.verticalLayoutWidget_2)
+        self.adaptive_ctrl_enable.setObjectName(u"adaptive_ctrl_enable")
+        self.adaptive_ctrl_enable.setFont(font)
+
+        self.horizontalLayout_3.addWidget(self.adaptive_ctrl_enable)
+
+        self.widget_23 = QWidget(self.verticalLayoutWidget_2)
+        self.widget_23.setObjectName(u"widget_23")
+
+        self.horizontalLayout_3.addWidget(self.widget_23)
+
+        self.horizontalLayout_3.setStretch(0, 1)
+        self.horizontalLayout_3.setStretch(1, 1)
+        self.horizontalLayout_3.setStretch(2, 1)
+        self.horizontalLayout_3.setStretch(3, 1)
+        self.horizontalLayout_3.setStretch(4, 1)
+        self.horizontalLayout_3.setStretch(5, 1)
+        self.horizontalLayout_3.setStretch(6, 1)
 
         self.verticalLayout_2.addLayout(self.horizontalLayout_3)
 
-        self.verticalLayout_2.setStretch(0, 4)
-        self.verticalLayout_2.setStretch(1, 1)
+        self.widget_25 = QWidget(self.verticalLayoutWidget_2)
+        self.widget_25.setObjectName(u"widget_25")
+
+        self.verticalLayout_2.addWidget(self.widget_25)
+
+        self.verticalLayout_2.setStretch(0, 1)
+        self.verticalLayout_2.setStretch(1, 3)
         self.verticalLayout_2.setStretch(2, 1)
+        self.verticalLayout_2.setStretch(3, 3)
+        self.verticalLayout_2.setStretch(4, 1)
+        self.verticalLayout_2.setStretch(5, 3)
         self.force_monitoring_panel = QGroupBox(self.centralwidget)
         self.force_monitoring_panel.setObjectName(u"force_monitoring_panel")
         self.force_monitoring_panel.setGeometry(QRect(840, 20, 391, 401))
@@ -106,7 +262,7 @@ class Ui_MainWindow(object):
         self.force_monitoring_panel.setCheckable(False)
         self.line_19 = QFrame(self.force_monitoring_panel)
         self.line_19.setObjectName(u"line_19")
-        self.line_19.setGeometry(QRect(60, 212, 291, 2))
+        self.line_19.setGeometry(QRect(49, 212, 298, 2))
         self.line_19.setStyleSheet(u"    border: none;\n"
 "    background: qlineargradient(spread:pad, x1:0, x2:1, stop:0 rgba(179, 229, 252, 1), stop:0.5 rgba(0, 0, 0, 0), stop:1 rgba(255, 192, 192, 1));")
         self.line_19.setFrameShape(QFrame.HLine)
@@ -162,21 +318,19 @@ class Ui_MainWindow(object):
 
         self.force_value_1_x = QLabel(self.layoutWidget)
         self.force_value_1_x.setObjectName(u"force_value_1_x")
-        font1 = QFont()
-        font1.setPointSize(12)
-        self.force_value_1_x.setFont(font1)
+        self.force_value_1_x.setFont(font)
         self.force_value_1_x.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_11.addWidget(self.force_value_1_x)
 
         self.force_val_1_x = QLCDNumber(self.layoutWidget)
         self.force_val_1_x.setObjectName(u"force_val_1_x")
-        font2 = QFont()
-        font2.setFamilies([u"Ubuntu"])
-        font2.setPointSize(11)
-        font2.setBold(True)
-        font2.setItalic(False)
-        self.force_val_1_x.setFont(font2)
+        font1 = QFont()
+        font1.setFamilies([u"Ubuntu"])
+        font1.setPointSize(11)
+        font1.setBold(True)
+        font1.setItalic(False)
+        self.force_val_1_x.setFont(font1)
         self.force_val_1_x.setAutoFillBackground(False)
         self.force_val_1_x.setStyleSheet(u"background-color: rgba(179, 229, 252, 0.35);\n"
 "color: rgba(0, 0, 139, 1); /* Dark blue color */\n"
@@ -199,14 +353,14 @@ class Ui_MainWindow(object):
 
         self.force_value_1_y = QLabel(self.layoutWidget)
         self.force_value_1_y.setObjectName(u"force_value_1_y")
-        self.force_value_1_y.setFont(font1)
+        self.force_value_1_y.setFont(font)
         self.force_value_1_y.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_11.addWidget(self.force_value_1_y)
 
         self.force_val_1_y = QLCDNumber(self.layoutWidget)
         self.force_val_1_y.setObjectName(u"force_val_1_y")
-        self.force_val_1_y.setFont(font2)
+        self.force_val_1_y.setFont(font1)
         self.force_val_1_y.setAutoFillBackground(False)
         self.force_val_1_y.setStyleSheet(u"background-color: rgba(179, 229, 252, 0.35);\n"
 "color: rgba(0, 0, 139, 1); /* Dark blue color */\n"
@@ -229,14 +383,14 @@ class Ui_MainWindow(object):
 
         self.force_value_1_z = QLabel(self.layoutWidget)
         self.force_value_1_z.setObjectName(u"force_value_1_z")
-        self.force_value_1_z.setFont(font1)
+        self.force_value_1_z.setFont(font)
         self.force_value_1_z.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_11.addWidget(self.force_value_1_z)
 
         self.force_val_1_z = QLCDNumber(self.layoutWidget)
         self.force_val_1_z.setObjectName(u"force_val_1_z")
-        self.force_val_1_z.setFont(font2)
+        self.force_val_1_z.setFont(font1)
         self.force_val_1_z.setAutoFillBackground(False)
         self.force_val_1_z.setStyleSheet(u"background-color: rgba(179, 229, 252, 0.35);\n"
 "color: rgba(0, 0, 139, 1); /* Dark blue color */\n"
@@ -342,14 +496,14 @@ class Ui_MainWindow(object):
 
         self.force_value_2_x = QLabel(self.layoutWidget)
         self.force_value_2_x.setObjectName(u"force_value_2_x")
-        self.force_value_2_x.setFont(font1)
+        self.force_value_2_x.setFont(font)
         self.force_value_2_x.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_13.addWidget(self.force_value_2_x)
 
         self.force_val_2_x = QLCDNumber(self.layoutWidget)
         self.force_val_2_x.setObjectName(u"force_val_2_x")
-        self.force_val_2_x.setFont(font2)
+        self.force_val_2_x.setFont(font1)
         self.force_val_2_x.setAutoFillBackground(False)
         self.force_val_2_x.setStyleSheet(u"background-color: rgba(255, 192, 192, 0.3);\n"
 "color: rgba(0, 0, 139, 1); /* Dark blue color */\n"
@@ -372,14 +526,14 @@ class Ui_MainWindow(object):
 
         self.force_value_2_y = QLabel(self.layoutWidget)
         self.force_value_2_y.setObjectName(u"force_value_2_y")
-        self.force_value_2_y.setFont(font1)
+        self.force_value_2_y.setFont(font)
         self.force_value_2_y.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_13.addWidget(self.force_value_2_y)
 
         self.force_val_2_y = QLCDNumber(self.layoutWidget)
         self.force_val_2_y.setObjectName(u"force_val_2_y")
-        self.force_val_2_y.setFont(font2)
+        self.force_val_2_y.setFont(font1)
         self.force_val_2_y.setAutoFillBackground(False)
         self.force_val_2_y.setStyleSheet(u"background-color: rgba(255, 192, 192, 0.3);\n"
 "color: rgba(0, 0, 139, 1); /* Dark blue color */\n"
@@ -402,19 +556,19 @@ class Ui_MainWindow(object):
 
         self.force_value_2_z = QLabel(self.layoutWidget)
         self.force_value_2_z.setObjectName(u"force_value_2_z")
-        self.force_value_2_z.setFont(font1)
+        self.force_value_2_z.setFont(font)
         self.force_value_2_z.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_13.addWidget(self.force_value_2_z)
 
         self.force_val_2_z = QLCDNumber(self.layoutWidget)
         self.force_val_2_z.setObjectName(u"force_val_2_z")
-        font3 = QFont()
-        font3.setFamilies([u"Ubuntu"])
-        font3.setPointSize(12)
-        font3.setBold(True)
-        font3.setItalic(False)
-        self.force_val_2_z.setFont(font3)
+        font2 = QFont()
+        font2.setFamilies([u"Ubuntu"])
+        font2.setPointSize(12)
+        font2.setBold(True)
+        font2.setItalic(False)
+        self.force_val_2_z.setFont(font2)
         self.force_val_2_z.setStyleSheet(u"background-color: rgba(255, 192, 192, 0.3);\n"
 "color: rgba(0, 0, 139, 1); /* Dark blue color */\n"
 "font-weight: bold;")
@@ -495,7 +649,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.setStretch(8, 3)
         self.sensing_signal_monitoring_panel = QGroupBox(self.centralwidget)
         self.sensing_signal_monitoring_panel.setObjectName(u"sensing_signal_monitoring_panel")
-        self.sensing_signal_monitoring_panel.setGeometry(QRect(770, 442, 901, 411))
+        self.sensing_signal_monitoring_panel.setGeometry(QRect(770, 440, 901, 441))
         self.horizontalLayoutWidget = QWidget(self.sensing_signal_monitoring_panel)
         self.horizontalLayoutWidget.setObjectName(u"horizontalLayoutWidget")
         self.horizontalLayoutWidget.setGeometry(QRect(480, 30, 411, 381))
@@ -524,6 +678,9 @@ class Ui_MainWindow(object):
         self.S1_graph.setFrameShape(QFrame.NoFrame)
         self.S1_graph.setFrameShadow(QFrame.Raised)
         self.S1_graph.setLineWidth(0)
+        self.widget_22 = QWidget(self.S1_graph)
+        self.widget_22.setObjectName(u"widget_22")
+        self.widget_22.setGeometry(QRect(110, 130, 0, 24))
 
         self.verticalLayout_10.addWidget(self.S1_graph)
 
@@ -544,24 +701,24 @@ class Ui_MainWindow(object):
 
         self.line_17 = QFrame(self.sensing_signal_monitoring_panel)
         self.line_17.setObjectName(u"line_17")
-        self.line_17.setGeometry(QRect(67, 220, 381, 2))
+        self.line_17.setGeometry(QRect(44, 220, 387, 2))
         self.line_17.setStyleSheet(u"    border: none;\n"
 "    background: qlineargradient(spread:pad, x1:0, x2:1, stop:0 rgba(179, 229, 252, 1), stop:0.5 rgba(0, 0, 0, 0), stop:1 rgba(255, 192, 192, 1));")
         self.line_17.setFrameShape(QFrame.HLine)
         self.line_17.setFrameShadow(QFrame.Sunken)
         self.line_18 = QFrame(self.sensing_signal_monitoring_panel)
         self.line_18.setObjectName(u"line_18")
-        self.line_18.setGeometry(QRect(470, 30, 2, 371))
+        self.line_18.setGeometry(QRect(470, 30, 2, 410))
         self.line_18.setStyleSheet(u"    border: none;\n"
 "    background: qlineargradient(spread:pad, y1:0, y2:1,stop:0 rgba(0, 0, 0, 0), stop:0.25 rgba(179, 229, 252, 1), stop:0.5 rgba(0, 0, 0, 0), stop:0.75 rgba(255, 192, 192, 1), stop:1 rgba(0, 0, 0, 0));")
         self.line_18.setFrameShape(QFrame.VLine)
         self.line_18.setFrameShadow(QFrame.Sunken)
         self.status_monitoring_panel_2 = QGroupBox(self.centralwidget)
         self.status_monitoring_panel_2.setObjectName(u"status_monitoring_panel_2")
-        self.status_monitoring_panel_2.setGeometry(QRect(420, 572, 331, 281))
+        self.status_monitoring_panel_2.setGeometry(QRect(420, 610, 331, 271))
         self.verticalLayoutWidget_6 = QWidget(self.status_monitoring_panel_2)
         self.verticalLayoutWidget_6.setObjectName(u"verticalLayoutWidget_6")
-        self.verticalLayoutWidget_6.setGeometry(QRect(10, 30, 311, 241))
+        self.verticalLayoutWidget_6.setGeometry(QRect(10, 30, 311, 231))
         self.verticalLayout_7 = QVBoxLayout(self.verticalLayoutWidget_6)
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
         self.verticalLayout_7.setContentsMargins(0, 0, 0, 0)
@@ -587,6 +744,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_16 = QHBoxLayout()
         self.horizontalLayout_16.setSpacing(9)
         self.horizontalLayout_16.setObjectName(u"horizontalLayout_16")
+        self.horizontalLayout_16.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.motor_pos_reading_bar_1 = QSlider(self.verticalLayoutWidget_6)
         self.motor_pos_reading_bar_1.setObjectName(u"motor_pos_reading_bar_1")
         self.motor_pos_reading_bar_1.setOrientation(Qt.Horizontal)
@@ -659,10 +817,15 @@ class Ui_MainWindow(object):
 
         self.data_stable_flag_indicator = QLabel(self.verticalLayoutWidget_6)
         self.data_stable_flag_indicator.setObjectName(u"data_stable_flag_indicator")
-        font4 = QFont()
-        font4.setPointSize(12)
-        font4.setBold(False)
-        self.data_stable_flag_indicator.setFont(font4)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.data_stable_flag_indicator.sizePolicy().hasHeightForWidth())
+        self.data_stable_flag_indicator.setSizePolicy(sizePolicy3)
+        font3 = QFont()
+        font3.setPointSize(12)
+        font3.setBold(False)
+        self.data_stable_flag_indicator.setFont(font3)
         self.data_stable_flag_indicator.setStyleSheet(u"background-color: lightgray; /* Light gray background */\n"
 "    color: black; /* Black text */\n"
 "    border: 2px solid gray; /* Gray border */\n"
@@ -690,7 +853,9 @@ class Ui_MainWindow(object):
 
         self.contact_detect_indicator = QLabel(self.verticalLayoutWidget_6)
         self.contact_detect_indicator.setObjectName(u"contact_detect_indicator")
-        self.contact_detect_indicator.setFont(font1)
+        sizePolicy3.setHeightForWidth(self.contact_detect_indicator.sizePolicy().hasHeightForWidth())
+        self.contact_detect_indicator.setSizePolicy(sizePolicy3)
+        self.contact_detect_indicator.setFont(font)
         self.contact_detect_indicator.setStyleSheet(u"background-color: lightgray; /* Light gray background */\n"
 "    color: black; /* Black text */\n"
 "    border: 2px solid gray; /* Gray border */\n"
@@ -735,6 +900,9 @@ class Ui_MainWindow(object):
 
         self.grasp_stable_flag_indicator = QLabel(self.verticalLayoutWidget_6)
         self.grasp_stable_flag_indicator.setObjectName(u"grasp_stable_flag_indicator")
+        font4 = QFont()
+        font4.setPointSize(13)
+        self.grasp_stable_flag_indicator.setFont(font4)
         self.grasp_stable_flag_indicator.setStyleSheet(u"background-color: lightgray; /* Light gray background */\n"
 "    color: black; /* Black text */\n"
 "    border: 2px solid gray; /* Gray border */\n"
@@ -762,6 +930,7 @@ class Ui_MainWindow(object):
 
         self.motor_stop_indicator = QLabel(self.verticalLayoutWidget_6)
         self.motor_stop_indicator.setObjectName(u"motor_stop_indicator")
+        self.motor_stop_indicator.setFont(font)
         self.motor_stop_indicator.setAutoFillBackground(False)
         self.motor_stop_indicator.setStyleSheet(u"background-color: lightcyan;\n"
 "color: black;\n"
@@ -800,6 +969,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
         self.elapsed_time_label = QLabel(self.verticalLayoutWidget_6)
         self.elapsed_time_label.setObjectName(u"elapsed_time_label")
+        self.elapsed_time_label.setFont(font)
         self.elapsed_time_label.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_6.addWidget(self.elapsed_time_label)
@@ -812,6 +982,7 @@ class Ui_MainWindow(object):
 
         self.time_reset_button = QPushButton(self.verticalLayoutWidget_6)
         self.time_reset_button.setObjectName(u"time_reset_button")
+        self.time_reset_button.setFont(font)
         self.time_reset_button.setStyleSheet(u"background-color: lightgray")
 
         self.horizontalLayout_6.addWidget(self.time_reset_button)
@@ -828,15 +999,15 @@ class Ui_MainWindow(object):
         self.verticalLayout_7.setStretch(3, 1)
         self.testing_control_panel = QGroupBox(self.centralwidget)
         self.testing_control_panel.setObjectName(u"testing_control_panel")
-        self.testing_control_panel.setGeometry(QRect(10, 522, 391, 331))
+        self.testing_control_panel.setGeometry(QRect(10, 530, 391, 351))
         self.verticalLayoutWidget_9 = QWidget(self.testing_control_panel)
         self.verticalLayoutWidget_9.setObjectName(u"verticalLayoutWidget_9")
-        self.verticalLayoutWidget_9.setGeometry(QRect(10, 30, 371, 291))
-        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.verticalLayoutWidget_9.sizePolicy().hasHeightForWidth())
-        self.verticalLayoutWidget_9.setSizePolicy(sizePolicy3)
+        self.verticalLayoutWidget_9.setGeometry(QRect(10, 30, 371, 311))
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.verticalLayoutWidget_9.sizePolicy().hasHeightForWidth())
+        self.verticalLayoutWidget_9.setSizePolicy(sizePolicy4)
         self.testing_control_panel_layout = QVBoxLayout(self.verticalLayoutWidget_9)
         self.testing_control_panel_layout.setObjectName(u"testing_control_panel_layout")
         self.testing_control_panel_layout.setContentsMargins(0, 0, 0, 0)
@@ -864,11 +1035,11 @@ class Ui_MainWindow(object):
         self.horizontalLayout_15.setObjectName(u"horizontalLayout_15")
         self.motor_pos_ctrl_bar_1 = QSlider(self.verticalLayoutWidget_9)
         self.motor_pos_ctrl_bar_1.setObjectName(u"motor_pos_ctrl_bar_1")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(1)
-        sizePolicy4.setHeightForWidth(self.motor_pos_ctrl_bar_1.sizePolicy().hasHeightForWidth())
-        self.motor_pos_ctrl_bar_1.setSizePolicy(sizePolicy4)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(1)
+        sizePolicy5.setHeightForWidth(self.motor_pos_ctrl_bar_1.sizePolicy().hasHeightForWidth())
+        self.motor_pos_ctrl_bar_1.setSizePolicy(sizePolicy5)
         self.motor_pos_ctrl_bar_1.setMaximum(44)
         self.motor_pos_ctrl_bar_1.setOrientation(Qt.Horizontal)
 
@@ -888,8 +1059,8 @@ class Ui_MainWindow(object):
 
         self.motor_pos_ctrl_bar_2 = QSlider(self.verticalLayoutWidget_9)
         self.motor_pos_ctrl_bar_2.setObjectName(u"motor_pos_ctrl_bar_2")
-        sizePolicy4.setHeightForWidth(self.motor_pos_ctrl_bar_2.sizePolicy().hasHeightForWidth())
-        self.motor_pos_ctrl_bar_2.setSizePolicy(sizePolicy4)
+        sizePolicy5.setHeightForWidth(self.motor_pos_ctrl_bar_2.sizePolicy().hasHeightForWidth())
+        self.motor_pos_ctrl_bar_2.setSizePolicy(sizePolicy5)
         self.motor_pos_ctrl_bar_2.setMaximum(44)
         self.motor_pos_ctrl_bar_2.setOrientation(Qt.Horizontal)
         self.motor_pos_ctrl_bar_2.setInvertedAppearance(True)
@@ -978,7 +1149,7 @@ class Ui_MainWindow(object):
 
         self.parasitic_decoupling_enable = QCheckBox(self.verticalLayoutWidget_9)
         self.parasitic_decoupling_enable.setObjectName(u"parasitic_decoupling_enable")
-        self.parasitic_decoupling_enable.setFont(font1)
+        self.parasitic_decoupling_enable.setFont(font)
 
         self.horizontalLayout_4.addWidget(self.parasitic_decoupling_enable)
 
@@ -987,14 +1158,22 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_4.addWidget(self.widget_4)
 
-        self.force_feedback_ctrl_enable = QCheckBox(self.verticalLayoutWidget_9)
-        self.force_feedback_ctrl_enable.setObjectName(u"force_feedback_ctrl_enable")
-        self.force_feedback_ctrl_enable.setFont(font1)
+        self.stop_all_button = QPushButton(self.verticalLayoutWidget_9)
+        self.stop_all_button.setObjectName(u"stop_all_button")
+        font5 = QFont()
+        font5.setPointSize(12)
+        font5.setBold(True)
+        self.stop_all_button.setFont(font5)
+        self.stop_all_button.setStyleSheet(u"background-color: red;\n"
+"	color: white;\n"
+"    border: 2px solid darkred;\n"
+"    border-radius: 10px;\n"
+"    padding: 10px 20px;")
 
-        self.horizontalLayout_4.addWidget(self.force_feedback_ctrl_enable)
+        self.horizontalLayout_4.addWidget(self.stop_all_button)
 
-        self.horizontalLayout_4.setStretch(2, 1)
-        self.horizontalLayout_4.setStretch(3, 7)
+        self.horizontalLayout_4.setStretch(1, 1)
+        self.horizontalLayout_4.setStretch(3, 1)
 
         self.verticalLayout_13.addLayout(self.horizontalLayout_4)
 
@@ -1019,18 +1198,18 @@ class Ui_MainWindow(object):
 
         self.pressure_scrollbar_label = QLabel(self.verticalLayoutWidget_9)
         self.pressure_scrollbar_label.setObjectName(u"pressure_scrollbar_label")
-        self.pressure_scrollbar_label.setFont(font1)
+        self.pressure_scrollbar_label.setFont(font)
         self.pressure_scrollbar_label.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_8.addWidget(self.pressure_scrollbar_label)
 
         self.pressure_scrollbar = QScrollBar(self.verticalLayoutWidget_9)
         self.pressure_scrollbar.setObjectName(u"pressure_scrollbar")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(1)
-        sizePolicy5.setHeightForWidth(self.pressure_scrollbar.sizePolicy().hasHeightForWidth())
-        self.pressure_scrollbar.setSizePolicy(sizePolicy5)
+        sizePolicy6 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred)
+        sizePolicy6.setHorizontalStretch(0)
+        sizePolicy6.setVerticalStretch(1)
+        sizePolicy6.setHeightForWidth(self.pressure_scrollbar.sizePolicy().hasHeightForWidth())
+        self.pressure_scrollbar.setSizePolicy(sizePolicy6)
         self.pressure_scrollbar.setAutoFillBackground(False)
         self.pressure_scrollbar.setStyleSheet(u"background: #f8f8f8; /* Light gray background */\n"
 "    height: 15px;\n"
@@ -1057,7 +1236,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
         self.pressure_type_input_label = QLabel(self.verticalLayoutWidget_9)
         self.pressure_type_input_label.setObjectName(u"pressure_type_input_label")
-        self.pressure_type_input_label.setFont(font1)
+        self.pressure_type_input_label.setFont(font)
         self.pressure_type_input_label.setAlignment(Qt.AlignCenter)
         self.pressure_type_input_label.setWordWrap(True)
 
@@ -1074,10 +1253,15 @@ class Ui_MainWindow(object):
 
         self.pressure_unit = QLabel(self.verticalLayoutWidget_9)
         self.pressure_unit.setObjectName(u"pressure_unit")
-        self.pressure_unit.setFont(font1)
+        self.pressure_unit.setFont(font)
         self.pressure_unit.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_10.addWidget(self.pressure_unit)
+
+        self.widget_29 = QWidget(self.verticalLayoutWidget_9)
+        self.widget_29.setObjectName(u"widget_29")
+
+        self.horizontalLayout_10.addWidget(self.widget_29)
 
         self.line = QFrame(self.verticalLayoutWidget_9)
         self.line.setObjectName(u"line")
@@ -1088,7 +1272,7 @@ class Ui_MainWindow(object):
 
         self.coefficient_label = QLabel(self.verticalLayoutWidget_9)
         self.coefficient_label.setObjectName(u"coefficient_label")
-        self.coefficient_label.setFont(font1)
+        self.coefficient_label.setFont(font)
         self.coefficient_label.setAlignment(Qt.AlignCenter)
         self.coefficient_label.setWordWrap(True)
 
@@ -1102,12 +1286,18 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_10.addWidget(self.ctrl_coefficient)
 
-        self.horizontalLayout_10.setStretch(0, 2)
-        self.horizontalLayout_10.setStretch(1, 1)
-        self.horizontalLayout_10.setStretch(2, 1)
-        self.horizontalLayout_10.setStretch(3, 1)
+        self.widget_28 = QWidget(self.verticalLayoutWidget_9)
+        self.widget_28.setObjectName(u"widget_28")
+
+        self.horizontalLayout_10.addWidget(self.widget_28)
+
+        self.horizontalLayout_10.setStretch(0, 4)
+        self.horizontalLayout_10.setStretch(1, 2)
+        self.horizontalLayout_10.setStretch(2, 2)
         self.horizontalLayout_10.setStretch(4, 2)
-        self.horizontalLayout_10.setStretch(5, 2)
+        self.horizontalLayout_10.setStretch(5, 4)
+        self.horizontalLayout_10.setStretch(6, 4)
+        self.horizontalLayout_10.setStretch(7, 1)
 
         self.verticalLayout_13.addLayout(self.horizontalLayout_10)
 
@@ -1167,7 +1357,7 @@ class Ui_MainWindow(object):
 
         self.firmness_value_label = QLabel(self.verticalLayoutWidget_9)
         self.firmness_value_label.setObjectName(u"firmness_value_label")
-        self.firmness_value_label.setFont(font1)
+        self.firmness_value_label.setFont(font)
         self.firmness_value_label.setAlignment(Qt.AlignCenter)
         self.firmness_value_label.setWordWrap(True)
 
@@ -1217,7 +1407,7 @@ class Ui_MainWindow(object):
 
         self.max_pressure_label_2 = QLabel(self.horizontalLayoutWidget_3)
         self.max_pressure_label_2.setObjectName(u"max_pressure_label_2")
-        self.max_pressure_label_2.setFont(font1)
+        self.max_pressure_label_2.setFont(font)
         self.max_pressure_label_2.setAlignment(Qt.AlignCenter)
         self.max_pressure_label_2.setWordWrap(True)
 
@@ -1234,7 +1424,7 @@ class Ui_MainWindow(object):
 
         self.pressure_unit_3 = QLabel(self.horizontalLayoutWidget_3)
         self.pressure_unit_3.setObjectName(u"pressure_unit_3")
-        self.pressure_unit_3.setFont(font1)
+        self.pressure_unit_3.setFont(font)
         self.pressure_unit_3.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_12.addWidget(self.pressure_unit_3)
@@ -1283,7 +1473,7 @@ class Ui_MainWindow(object):
         self.frame_10.setFrameShadow(QFrame.Raised)
         self.color_frame_testing_control_panel = QFrame(self.centralwidget)
         self.color_frame_testing_control_panel.setObjectName(u"color_frame_testing_control_panel")
-        self.color_frame_testing_control_panel.setGeometry(QRect(0, 430, 411, 431))
+        self.color_frame_testing_control_panel.setGeometry(QRect(0, 440, 411, 431))
         self.color_frame_testing_control_panel.setStyleSheet(u"background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:1, stop:0 rgba(255, 192, 192, 0.35), stop:1 rgba(179, 229, 252, 0));")
         self.color_frame_testing_control_panel.setFrameShape(QFrame.NoFrame)
         self.color_frame_testing_control_panel.setFrameShadow(QFrame.Plain)
@@ -1391,14 +1581,14 @@ class Ui_MainWindow(object):
         self.line_22.setFrameShadow(QFrame.Sunken)
         self.line_23 = QFrame(self.centralwidget)
         self.line_23.setObjectName(u"line_23")
-        self.line_23.setGeometry(QRect(759, 460, 2, 391))
+        self.line_23.setGeometry(QRect(759, 460, 2, 420))
         self.line_23.setStyleSheet(u"    border: none;\n"
 "    background: qlineargradient(spread:pad, y1:0, y2:1,stop:0 rgba(0, 0, 0, 0), stop:0.25 rgba(179, 229, 252, 1), stop:0.5 rgba(0, 0, 0, 0), stop:0.75 rgba(255, 192, 192, 1), stop:1 rgba(0, 0, 0, 0));")
         self.line_23.setFrameShape(QFrame.VLine)
         self.line_23.setFrameShadow(QFrame.Sunken)
         self.line_24 = QFrame(self.centralwidget)
         self.line_24.setObjectName(u"line_24")
-        self.line_24.setGeometry(QRect(410, 460, 2, 391))
+        self.line_24.setGeometry(QRect(410, 460, 2, 420))
         self.line_24.setStyleSheet(u"    border: none;\n"
 "    background: qlineargradient(spread:pad, y1:0, y2:1,stop:0 rgba(0, 0, 0, 0), stop:0.25 rgba(179, 229, 252, 1), stop:0.5 rgba(0, 0, 0, 0), stop:0.75 rgba(255, 192, 192, 1), stop:1 rgba(0, 0, 0, 0));")
         self.line_24.setFrameShape(QFrame.VLine)
@@ -1450,10 +1640,17 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
-        self.automatic_grasping_control_panel.setTitle(QCoreApplication.translate("MainWindow", u"  Grasping Control Panel", None))
+        self.automatic_grasping_control_panel.setTitle(QCoreApplication.translate("MainWindow", u" Automatic/Adaptive Grasping Control Panel", None))
         self.restart_button.setText(QCoreApplication.translate("MainWindow", u"Start", None))
         self.release_button.setText(QCoreApplication.translate("MainWindow", u"Release", None))
-        self.stop_all_button.setText(QCoreApplication.translate("MainWindow", u"! STOP ALL !", None))
+        self.pid_setting_p_label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>P</p></body></html>", None))
+        self.pid_setting_p.setSuffix("")
+        self.pid_setting_i_label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>I</p></body></html>", None))
+        self.pid_setting_i.setSuffix("")
+        self.pid_setting_d_label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>D</p></body></html>", None))
+        self.pid_setting_d.setSuffix("")
+        self.force_closure_enable.setText(QCoreApplication.translate("MainWindow", u"Force Closure", None))
+        self.adaptive_ctrl_enable.setText(QCoreApplication.translate("MainWindow", u"Adaptive Control", None))
         self.force_monitoring_panel.setTitle(QCoreApplication.translate("MainWindow", u"  Force Monitoring Panel", None))
         self.tactile_monitoring_panel.setTitle(QCoreApplication.translate("MainWindow", u"  Tactile Monitoring Panel", None))
         self.S1_tactile_monitoring_label.setText(QCoreApplication.translate("MainWindow", u"S1 Tactile Monitoring", None))
@@ -1478,7 +1675,7 @@ class Ui_MainWindow(object):
         self.motor_zero_button.setText(QCoreApplication.translate("MainWindow", u"Motor At Zero", None))
         self.sensor_zero_button.setText(QCoreApplication.translate("MainWindow", u"Zero Sensor", None))
         self.parasitic_decoupling_enable.setText(QCoreApplication.translate("MainWindow", u"Parasitic Decoupling", None))
-        self.force_feedback_ctrl_enable.setText(QCoreApplication.translate("MainWindow", u"Feedback Control", None))
+        self.stop_all_button.setText(QCoreApplication.translate("MainWindow", u"! STOP ALL !", None))
         self.pressure_scrollbar_label.setText(QCoreApplication.translate("MainWindow", u"P<sub>input", None))
         self.pressure_type_input_label.setText(QCoreApplication.translate("MainWindow", u"P<sub>input", None))
         self.pressure_type_input.setSuffix("")

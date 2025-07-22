@@ -70,11 +70,16 @@ class ModeManager:
             self.switch_serial_node('start')
             self.current_sensor_node_name = "gripper_reading_node"
             self.current_motor_node_name = "testing_motor_control_node"
+        # elif mode == 'gripper_adaptive':
+        #     self.switch_serial_node('start')
+        #     self.current_sensor_node_name = "gripper_reading_node"
+        #     self.current_motor_node_name = "testing_motor_control_node"
 
     def init_services(self):    # Initialize ROS services for mode switching
         rospy.Service('/switch_to_sensor', Trigger, self.switch_to_sensor)
         rospy.Service('/switch_to_gripper_automatic', Trigger, self.switch_to_gripper_automatic)
         rospy.Service('/switch_to_gripper_testing', Trigger, self.switch_to_gripper_testing)
+        # rospy.Service('/switch_to_gripper_adaptive', Trigger, self.switch_to_gripper_adaptive)
 
     def switch_to_sensor(self, req):    # Service response when switched to "sensor" mode
         if self.current_mode != 'sensor':
@@ -118,6 +123,21 @@ class ModeManager:
 
         else:
             return TriggerResponse(success=True, message="Already in gripper_testing mode")
+
+    # def switch_to_gripper_adaptive(self, req): # Service response when switched to "gripper_adaptive" mode
+    #     if self.current_mode != 'gripper_adaptive':
+    #         if self.current_mode == 'sensor':
+    #             self.switch_sensor_node('gripper')
+    #             self.restart_sensors_data_processing_node()
+    #         self.publish_mode_change("gripper_adaptive")
+    #
+    #         self.switch_motor_mode('gripper_adaptive')
+    #         self.switch_serial_node('start')
+    #         self.publish_diagnostics(True, "Switched to gripper_adaptive mode")
+    #         return TriggerResponse(success=True, message="Switched to gripper_adaptive mode")
+    #
+    #     else:
+    #         return TriggerResponse(success=True, message="Already in gripper_adaptive mode")
 
     def switch_sensor_node(self, node_type):        # Operation logic for the sensor node switching
         if self.current_sensor_node_name is not None:
@@ -173,6 +193,8 @@ class ModeManager:
             command = f"ssh {self.pi_user}@{self.pi_address} 'source {self.start_env_loader_pi_path} && roslaunch launch_console_pi automatic_motor_launch.launch'"
         elif mode == 'gripper_testing':
             command = f"ssh {self.pi_user}@{self.pi_address} 'source {self.start_env_loader_pi_path} && roslaunch launch_console_pi testing_motor_launch.launch'"
+        # elif mode == 'gripper_adaptive':
+        #     command = f"ssh {self.pi_user}@{self.pi_address} 'source {self.start_env_loader_pi_path} && roslaunch launch_console_pi testing_motor_launch.launch'"
 
         rospy.loginfo(f"Executing command: {command}")
         self.current_motor_process = subprocess.Popen(command, shell=True)

@@ -108,6 +108,7 @@ class SignalChangeDetector:
                     SignalChangeDetector.contact_trigger =True
                     for _ in range(5):
                         self.contact_trigger_publisher.publish(Bool(data=True))
+                        # rospy.sleep(0.1)
                 self.contact_detected = True    # Set status as contact detected
                 self.contact_detected_publisher.publish(Bool(data=True))
                 self.publish_diagnostics(True, f"Contact has been detected on {self.sensor_id}.")
@@ -123,6 +124,9 @@ class SignalChangeDetector:
                 self.contact_detected = False
                 self.contact_detected_publisher.publish(Bool(data=False))
                 self.publish_diagnostics(True, f"No contacts on {self.sensor_id}.")
+
+                self.reset_data_window()  # Optionally reset flags and data windows to avoid repeated triggers
+                self.reset_change_flags()
             else:
                 self.contact_detected = True
                 self.contact_detected_publisher.publish(Bool(data=True))
@@ -132,13 +136,14 @@ class SignalChangeDetector:
                 self.contact_detected = True
                 self.contact_detected_publisher.publish(Bool(data=True))
                 self.publish_diagnostics(True, f"Contact has been detected on {self.sensor_id}.")
+
+                self.reset_data_window()  # Optionally reset flags and data windows to avoid repeated triggers
+                self.reset_change_flags()
             else:
                 self.contact_detected = False
                 self.contact_detected_publisher.publish(Bool(data=False))
                 self.publish_diagnostics(True, "No significant changes detected.")
 
-        self.reset_data_window()  # Optionally reset flags and data windows to avoid repeated triggers
-        self.reset_change_flags()
 
     def analyze_change(self, data):
         change_flag = False
@@ -150,7 +155,7 @@ class SignalChangeDetector:
         if mean_data > self.mean_threshold or difference > self.diff_threshold:
             change_flag = True
 
-        return change_flag
+        return change_flag, mean_data, difference
 
     def reset_change_flags(self):
         self.change_flag = {'x': False, 'y': False, 'z': False}
