@@ -392,7 +392,7 @@ class ShearMapCanvas(FigureCanvas):
         self.blit(self.ax.bbox)  # Blit updated region
 
 
-pressure_plot_window_size = 500     # pressure monitoring frequency ~30Hz
+pressure_plot_window_size = 260     # pressure monitoring frequency ~30Hz
 # Create a Matplotlib canvas class that can update the pressure plot dynamically
 class PressureDataCanvas(FigureCanvas):
     def __init__(self, parent = None, window_size = 2000, title = ''):
@@ -634,7 +634,7 @@ class MainWindow(QMainWindow):
         self.ctrl_coefficient_publisher = rospy.Publisher('/pressure_coefficient', Float32, queue_size=10)
 
         self.parasitic_decoupling_publisher = rospy.Publisher('/parasitic_decoupling_state', Bool, queue_size=10)
-        self.adaptive_ctrl_flag_publisher = rospy.Publisher("adaptive_flag", Bool, queue_size=10)
+        self.adaptive_ctrl_flag_publisher = rospy.Publisher('/adaptive_flag', Bool, queue_size=10)
 
         # ROS publishers for automatic mode
         self.restart_publisher = rospy.Publisher('/restart', Bool, queue_size=10)
@@ -1297,10 +1297,10 @@ class MainWindow(QMainWindow):
         if flag:
             rospy.loginfo("Adaptive control enabled.")
             self.activate_adaptive_grasping()
-            self.launch_adaptive_grasp_node()
-        else:
-            rospy.loginfo("Adaptive control disabled.")
-            self.terminate_adaptive_grasp_node()
+          # self.launch_adaptive_grasp_node()
+        # else:
+        #     rospy.loginfo("Adaptive control disabled.")
+        #     self.terminate_adaptive_grasp_node()
 
     def launch_adaptive_grasp_node(self):
         try:
@@ -1639,7 +1639,7 @@ class MainWindow(QMainWindow):
             self.current_data_stable_flag = new_data_stable_flag
             if self.current_data_stable_flag:
                 self.ui.data_stable_flag_indicator.setProperty("class", "active")
-                self.ui.data_stable_flag_indicator.setText("Data Stable")
+                self.ui.data_stable_flag_indicator.setText("Signal Stable")
                 self.ui.data_stable_flag_indicator.setStyleSheet("""
                             QLabel#data_stable_flag_indicator {
                                 background-color: lightgray; /* Light gray background */
@@ -1728,7 +1728,7 @@ class MainWindow(QMainWindow):
             self.current_grasp_stable_status = new_grasp_stable_status
             if self.current_grasp_stable_status:
                 self.ui.grasp_stable_flag_indicator.setProperty("class", "active")
-                self.ui.grasp_stable_flag_indicator.setText("Data Stable")
+                self.ui.grasp_stable_flag_indicator.setText("Grasp Stable")
                 self.ui.grasp_stable_flag_indicator.setStyleSheet("""
                     QLabel#grasp_stable_flag_indicator {
                         background-color: lightgray; /* Light gray background */

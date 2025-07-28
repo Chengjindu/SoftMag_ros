@@ -11,8 +11,8 @@ class AdaptiveGraspController:
         rospy.init_node('adaptive_grasp_controller_node')
 
         # Parameters
-        self.continuous_delta_threshold = 0.5
-        self.abrupt_slope_threshold = 1.0
+        self.continuous_delta_threshold = 0.065
+        self.abrupt_slope_threshold = 0.005
         self.mu = 1.2
         self.pressure_max = 26.0
         self.pid_pressure = 0.0
@@ -48,7 +48,7 @@ class AdaptiveGraspController:
         self.last_time = time.time()
 
         # Subscribers
-        rospy.Subscriber('/start_adaptive_grasp', Bool, self.start_callback)
+        rospy.Subscriber('/adaptive_flag', Bool, self.start_callback)
         rospy.Subscriber('/adaptive_grasp/pid_kp', Float32, self.kp_callback)
         rospy.Subscriber('/adaptive_grasp/pid_ki', Float32, self.ki_callback)
         rospy.Subscriber('/adaptive_grasp/pid_kd', Float32, self.kd_callback)
@@ -116,7 +116,7 @@ class AdaptiveGraspController:
             avg_fx_fy = (avg_fx_fy_s1 + avg_fx_fy_s2) / 2.0
             desired_z = avg_fx_fy / (2.0 * self.mu)
             current_z = (self.fz_s1 + self.fz_s2) / 2.0
-            error = desired_z - current_z
+            error = abs(desired_z - current_z) * 2.0
 
             self.integral_error += error * dt
             derivative = (error - self.prev_error) / dt if dt > 0 else 0.0

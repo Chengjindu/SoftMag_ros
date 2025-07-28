@@ -3,5 +3,5 @@
   "local_ip": "10.255.32.48",
   "pi_user": "chengjindu",
   "pi_ip": "10.255.32.100",
-  "default_pi_mode": "gripper_testing"
+  "default_pi_mode": "gripper_automatic"
 }

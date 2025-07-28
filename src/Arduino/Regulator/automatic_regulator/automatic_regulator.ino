@@ -15,10 +15,10 @@ ros::NodeHandle nh;
 
 float desiredPressure1 = 0.0;
 float desiredPressure2 = 0.0;
-float initialPressure = 21.0;
+float initialPressure =17.5;
 float adaptivePressureDelta = 0.0;
 float adaptiveTargetPressure = 0.0;
-float maxPressure = 26.0;
+float maxPressure = 25.0;
 float pressureCoefficient = 1.10;
 float defaultPressureStep = 1.0;
 float adaptivelPressureStep = 0.2;
@@ -191,6 +191,7 @@ void loop() {
       graspStableMsg.data = true;
       graspStablePub.publish(&graspStableMsg);
     }
+
   }
 
   // --- Adaptive phase: stepwise control with delta ---
@@ -204,9 +205,21 @@ void loop() {
         desiredPressure1 = pressureCoefficient * adaptiveTargetPressure;
         newAdaptiveDeltaReceived = false;  // Delta complete
       }
+
+      if (desiredPressure1 > maxPressure || desiredPressure2 > maxPressure) {
+        desiredPressure1 = pressureCoefficient * maxPressure;
+        desiredPressure2 = maxPressure;
+      }
+
     } else {
       newAdaptiveDeltaReceived = false;  // Already reached target
     }
+
+    if (desiredPressure1 > maxPressure || desiredPressure2 > maxPressure) {
+      desiredPressure1 = pressureCoefficient * maxPressure;
+      desiredPressure2 = maxPressure;
+    }
+
   }
 
 

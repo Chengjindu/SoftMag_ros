@@ -19,7 +19,10 @@
   <node name="mode_manager" pkg="qt_interface" type="mode_manager.py" output="screen" />
   <node name="main_interface" pkg="qt_interface" type="main_window.py" output="screen" />
 
-  
+  <!-- Start adaptive grasp controller node on the local machine -->
+  <!--<node name="adaptive_grasp_controller_node" pkg="adaptive_grasp_controller" type="adaptive_grasp_controller_node.py" output="screen" />-->
+
+
   <!-- Start data recording node on the local machine -->
   <node name="data_recording_node" pkg="data_recording" type="data_recording_node.py" output="screen" />
 
